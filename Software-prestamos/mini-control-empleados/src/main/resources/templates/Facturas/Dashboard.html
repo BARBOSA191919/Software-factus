@@ -1483,6 +1483,9 @@
                 url: '/api/clientes',
                 method: 'GET',
                 success: function(clientes) {
+                    // Guardar la lista de clientes en la variable global
+                    clientesList = clientes;
+
                     const select = $('#factura-cliente');
                     select.empty();
                     select.append('<option value="">Seleccionar cliente...</option>');
@@ -1508,12 +1511,10 @@
             });
         }
 
-// Función para manejar la selección de cliente
         function onClienteSelected() {
             const clienteId = $('#factura-cliente').val();
 
             if (!clienteId) {
-                // Limpiar campos si no hay cliente seleccionado
                 clearClienteInfo();
                 return;
             }
@@ -2129,7 +2130,7 @@
 
 // Modificar la función que muestra el modal
         $('#facturaModal').on('show.bs.modal', function (e) {
-            // Only reset if it's a new invoice (not an edit)
+            // Limpiar el formulario si es una nueva factura
             if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-factura')) {
                 $('#facturaModalLabel').text('Nueva Factura');
                 $('#factura-form').trigger('reset');
@@ -2142,13 +2143,13 @@
                 // Limpiar información del cliente
                 clearClienteInfo();
 
-                // Establecer valores predeterminados
-                $('#factura-status').text('PENDIENTE');
-                $('#factura-document-name').val('Factus');
-                $('#factura-document-display').text('Factura electrónica de venta');
-
                 // Cargar clientes
-                loadClientesFactura();
+                loadClientesFactura(function() {
+                    // Configurar el evento de selección del cliente
+                    $('#factura-cliente').off('change').on('change', function() {
+                        onClienteSelected();
+                    });
+                });
 
                 // Establecer fecha actual
                 const today = new Date();
