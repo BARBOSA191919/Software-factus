@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Facturación</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="shortcut icon" href="https://i.ibb.co/r21Tj1nF/icon-halltec.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        .content {
+            padding: 20px;
+        }
+        .nav-link {
+            color: #495057;
+        }
+        .nav-link:hover {
+            background-color: #e9ecef;
+        }
+        .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-0">
+            <div class="d-flex flex-column p-3">
+                <h4 class="mb-4 text-center">Sistema de Facturación</h4>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-link active" id="dashboard-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-link" id="productos-link">
+                            <i class="fas fa-box me-2"></i>Productos
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-link" id="clientes-link">
+                            <i class="fas fa-users me-2"></i>Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-link" id="facturas-link">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>Facturas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-10 content">
+            <!-- Dashboard -->
+            <div id="dashboard-content" class="content-section">
+                <div class="d-flex justify-content-between mb-4">
+                    <h2>Dashboard</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Clientes</h5>
+                                <p class="card-text h3" id="total-clientes">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Productos</h5>
+                                <p class="card-text h3" id="total-productos">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Facturas</h5>
+                                <p class="card-text h3" id="total-facturas">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Productos -->
+            <div id="productos-content" class="content-section" style="display:none;">
+                <div class="d-flex justify-content-between mb-4">
+                    <h2>Gestión de Productos</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productoModal">
+                        <i class="fas fa-plus"></i> Nuevo Producto
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Unidad Medida</th>
+                            <th>Tasa IVA</th>
+                            <th>Codigo estandar</th>
+                            <th>Codigo medida</th>
+
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="productos-table-body">
+                        <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección Clientes -->
+            <div id="clientes-content" class="content-section" style="display:none;">
+                <div class="d-flex justify-content-between mb-4">
+                    <h2>Gestión de Clientes</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clienteModal">
+                        <i class="fas fa-plus"></i> Nuevo Cliente
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo de cliente</th>
+                            <th>Identificación</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Id legal</th>
+                            <th>Id tributo</th>
+                            <th>Aplica iva</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="clientes-table-body">
+                        <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección Facturas -->
+            <div id="facturas-content" class="content-section" style="display:none;">
+                <div class="d-flex justify-content-between mb-4">
+                    <h2>Gestión de Facturas</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#facturaModal">
+                        <i class="fas fa-plus"></i> Nueva Factura
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Número</th>
+                            <th>Cliente</th>
+                            <th>ID</th>
+                            <th>Pago</th>
+                            <th>Metodo</th>
+                            <th>Creación factura</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+
+
+                        </tr>
+                        </thead>
+                        <tbody id="facturas-table-body">
+                        <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Producto actualizado con los nuevos campos -->
+<div class="modal fade" id="productoModal" tabindex="-1" aria-labelledby="productoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="productoModalLabel"><i class="fas fa-box"></i> Nuevo Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="producto-form">
+                    <input type="hidden" id="producto-id">
+                    <input type="hidden" id="producto-standardCodeId">
+                    <input type="hidden" id="producto-unitMeasureId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="producto-nombre" class="form-label"><i class="fas fa-tag"></i> Nombre</label>
+                                <input type="text" class="form-control" id="producto-nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="producto-precio" class="form-label"><i class="fas fa-dollar-sign"></i> Precio</label>
+                                <input type="number" step="0.01" class="form-control" id="producto-precio" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="producto-excluido">
+                                <label class="form-check-label" for="producto-excluido"><i class="fas fa-ban"></i> Excluido de impuestos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="producto-medida" class="form-label"><i class="fas fa-ruler"></i> Unidad de Medida</label>
+                                <select class="form-select" id="producto-medida" required>
+                                    <option value="unidad">Unidad</option>
+                                    <option value="kg">Kilogramo</option>
+                                    <option value="lt">Litro</option>
+                                    <option value="mt">Metro</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="producto-tasa-iva" class="form-label"><i class="fas fa-percent"></i> Tasa IVA (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="producto-tasa-iva" value="19">
+                            </div>
+                            <div class="mb-3">
+                                <label for="producto-retencion" class="form-label"><i class="fas fa-hand-holding-usd"></i> Tasa Retención</label>
+                                <input type="text" class="form-control" id="producto-retencion">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Información sobre campos automáticos -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <small><i class="fas fa-info-circle"></i> Los campos de Código Estándar y Unidad de Medida se generarán automáticamente.</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                <button type="button" class="btn btn-primary" id="guardar-producto"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cliente Actualizado -->
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="clienteModalLabel"><i class="fas fa-user"></i> Nuevo Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cliente-form">
+                    <input type="hidden" id="cliente-id">
+                    <input type="hidden" id="cliente-legalOrganizationId">
+                    <input type="hidden" id="cliente-tributeId">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cliente-tipo" class="form-label"><i class="fas fa-id-badge"></i> Tipo Cliente</label>
+                                <select class="form-select" id="cliente-tipo" required>
+                                    <option value="Persona Natural">Persona Natural</option>
+                                    <option value="Persona Jurídica">Persona Jurídica</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-tipo-identificacion" class="form-label"><i class="fas fa-id-card"></i> Tipo Identificación</label>
+                                <select class="form-select" id="cliente-tipo-identificacion" required>
+                                    <option value="Cédula">Cédula de Ciudadanía</option>
+                                    <option value="NIT">NIT</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-identificacion" class="form-label"><i class="fas fa-fingerprint"></i> Identificación</label>
+                                <input type="text" class="form-control" id="cliente-identificacion" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-nombre" class="form-label"><i class="fas fa-user-tag"></i> Nombre</label>
+                                <input type="text" class="form-control" id="cliente-nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cliente-telefono" class="form-label"><i class="fas fa-phone"></i> Teléfono</label>
+                                <input type="text" class="form-control" id="cliente-telefono">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cliente-correo" class="form-label"><i class="fas fa-envelope"></i> Correo</label>
+                                <input type="email" class="form-control" id="cliente-correo">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-municipio" class="form-label"><i class="fas fa-city"></i> Municipio</label>
+                                <input type="text" class="form-control" id="cliente-municipio">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-direccion" class="form-label"><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                                <input type="text" class="form-control" id="cliente-direccion">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cliente-aplica-iva" class="form-label"><i class="fas fa-receipt"></i> Aplica IVA</label>
+                                <select class="form-select" id="cliente-aplica-iva" required>
+                                    <option value="Sí">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campos específicos para Persona Jurídica -->
+                    <div id="campos-juridica" class="row mt-3" style="display: none;">
+                        <div class="col-12">
+                            <h6 class="mb-3 border-bottom pb-2"><i class="fas fa-building"></i> Información Comercial</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cliente-company" class="form-label"><i class="fas fa-building"></i> Razón Social</label>
+                                <input type="text" class="form-control" id="cliente-company">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cliente-tradeName" class="form-label"><i class="fas fa-store"></i> Nombre Comercial</label>
+                                <input type="text" class="form-control" id="cliente-tradeName">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cliente-verificationDigit" class="form-label"><i class="fas fa-check-circle"></i> Dígito de Verificación</label>
+                                <input type="text" class="form-control" id="cliente-verificationDigit" maxlength="1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cliente-idOrg" class="form-label"><i class="fas fa-id-badge"></i> ID Organización</label>
+                                <input type="text" class="form-control" id="cliente-idOrg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información sobre campos automáticos -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <small><i class="fas fa-info-circle"></i> Los campos de ID Organización Legal y ID Tributo se generarán automáticamente según el tipo de cliente.</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                <button type="button" class="btn btn-success" id="guardar-cliente"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actualización del Modal Factura con campos automáticos adicionales -->
+<div class="modal fade" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="facturaModalLabel"><i class="fas fa-file-invoice-dollar"></i> Nueva Factura</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="factura-form">
+                    <input type="hidden" id="factura-id">
+                    <!-- Campos automáticos ocultos -->
+                    <input type="hidden" id="factura-document" value="Factura electrónica de venta">
+                    <input type="hidden" id="factura-numbering-range-id">
+                    <input type="hidden" id="factura-reference-code">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="factura-cliente" class="form-label"><i class="fas fa-user-circle"></i> Cliente</label>
+                                <select class="form-select" id="factura-cliente" required>
+                                    <!-- Se llenará con JavaScript -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="factura-forma-pago" class="form-label"><i class="fas fa-money-check"></i> Forma de Pago</label>
+                                <select class="form-select" id="factura-forma-pago" required>
+                                    <option value="Contado">Contado</option>
+                                    <option value="Crédito">Crédito</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="factura-metodo-pago" class="form-label"><i class="fas fa-credit-card"></i> Método de Pago</label>
+                                <select class="form-select" id="factura-metodo-pago" required>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+                                    <option value="Tarjeta Débito">Tarjeta Débito</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="factura-fecha" class="form-label"><i class="fas fa-calendar-alt"></i> Fecha</label>
+                                <input type="date" class="form-control" id="factura-fecha" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="factura-identification" class="form-label"><i class="fas fa-id-card"></i> Identificación</label>
+                                <input type="text" class="form-control" id="factura-identification" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="factura-api-client-name" class="form-label"><i class="fas fa-user-tag"></i> Nombre API Cliente</label>
+                                <input type="text" class="form-control" id="factura-api-client-name" readonly>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="factura-document-name" class="form-label"><i class="fas fa-file-alt"></i> Nombre Documento</label>
+                                <input type="text" class="form-control" id="factura-document-name" value="Factus" >
+                            </div>
+                            <div class="mb-3">
+                                <label for="factura-graphic-representation" class="form-label"><i class="fas fa-file-image"></i> Representación Gráfica</label>
+                                <input type="text" class="form-control" id="factura-graphic-representation" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional del cliente -->
+                    <div class="row mt-2 mb-3">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-address-card"></i> Información del Cliente</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Nombre:</strong> <span id="cliente-nombres">-</span></p>
+                                            <p><strong>Tipo Cliente:</strong> <span id="cliente-tipos">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Correo:</strong> <span id="cliente-correos">-</span></p>
+                                            <p><strong>Teléfono:</strong> <span id="cliente-telefonos">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Dirección:</strong> <span id="cliente-direcciones">-</span></p>
+                                            <p><strong>Municipio:</strong> <span id="cliente-municipios">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campos automáticos visibles -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-cogs"></i> Información Automática</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Estado:</strong> <span id="factura-status">PENDIENTE</span></p>
+                                            <p><strong>Número:</strong> <span id="factura-numero">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Documento:</strong> <span id="factura-document-display">Factura electrónica de venta</span></p>
+                                            <p><strong>Código de Referencia:</strong> <span id="factura-reference-code-display">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="factura-observation" class="form-label"><i class="fas fa-comment" ></i> Observación</label>
+                                                <textarea class="form-control" id="factura-observation" rows="2" placeholder="Cliente capacitado"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h4><i class="fas fa-shopping-cart"></i> Productos</h4>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-success" id="agregar-item">
+                            <i class="fas fa-plus"></i> Agregar Producto
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-box"></i> Producto</th>
+                                <th><i class="fas fa-hashtag"></i> Cantidad</th>
+                                <th><i class="fas fa-dollar-sign"></i> Precio</th>
+                                <th><i class="fas fa-percentage"></i> Descuento %</th>
+                                <th><i class="fas fa-calculator"></i> Subtotal</th>
+                                <th><i class="fas fa-receipt"></i> IVA</th>
+                                <th><i class="fas fa-money-bill-wave"></i> Total</th>
+                                <th><i class="fas fa-cogs"></i> Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="factura-items">
+                            <!-- Se llenará con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row justify-content-end">
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="mb-0"><i class="fas fa-file-invoice"></i> Resumen</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6><i class="fas fa-calculator"></i> Subtotal:</h6>
+                                        <span id="factura-subtotal">$0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6><i class="fas fa-receipt"></i> IVA:</h6>
+                                        <span id="factura-iva-total">$0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6><i class="fas fa-percent"></i> Descuento:</h6>
+                                        <span id="factura-descuento-total">$0.00</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <h5><i class="fas fa-money-bill-wave"></i> TOTAL:</h5>
+                                        <h5 id="factura-total">$0.00</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal para seleccionar productos -->
+            <div class="modal fade" id="seleccionarProductoModal" tabindex="-1" aria-labelledby="seleccionarProductoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="seleccionarProductoModalLabel">Seleccionar Producto</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="buscar-producto" placeholder="Buscar producto...">
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Unidad Medida</th>
+                                        <th>Tasa IVA</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="seleccionar-producto-body">
+                                    <!-- Se llenará con JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                <button type="button" class="btn btn-info text-white" id="guardar-factura"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts de Bootstrap y jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script principal -->
+<script>
+
+    $(document).ready(function() {
+
+        let clientesList = []; // Lista de clientes para acceso global
+        // Navegación
+        $('#dashboard-link').click(function(e) {
+            e.preventDefault();
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+            $('.content-section').hide();
+            $('#dashboard-content').show();
+            loadDashboardStats();
+        });
+
+        $('#productos-link').click(function(e) {
+            e.preventDefault();
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+            $('.content-section').hide();
+            $('#productos-content').show();
+            loadProductos();
+        });
+
+        $('#clientes-link').click(function(e) {
+            e.preventDefault();
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+            $('.content-section').hide();
+            $('#clientes-content').show();
+            loadClientes();
+        });
+
+        $('#facturas-link').click(function(e) {
+            e.preventDefault();
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+            $('.content-section').hide();
+            $('#facturas-content').show();
+            loadFacturas();
+        });
+
+        // Funciones de carga de datos
+        function loadDashboardStats() {
+            $.ajax({
+                url: '/api/clientes',
+                method: 'GET',
+                success: function(data) {
+                    $('#total-clientes').text(data.length);
+                }
+            });
+
+
+            $.ajax({
+                url: '/api/productos',
+                method: 'GET',
+                success: function(data) {
+                    $('#total-productos').text(data.length);
+                }
+            });
+
+            $.ajax({
+                url: '/api/facturas/listar',
+                method: 'GET',
+                success: function(data) {
+                    $('#total-facturas').text(data.length);
+                }
+            });
+        }
+
+        function loadProductos() {
+            $.ajax({
+                url: '/api/productos',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#productos-table-body');
+                    tbody.empty();
+
+                    data.forEach(function(producto) {
+                        tbody.append(`
+                <tr>
+                    <td>${producto.id}</td>
+                    <td>${producto.name}</td>
+                    <td>$${producto.price}</td>
+                    <td>${producto.measureId || 'N/A'}</td>
+                    <td>${producto.taxRate || '0'}%</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-producto" data-id="${producto.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+                    });
+
+                    // Agregar eventos a los botones
+                    $('.edit-producto').click(function() {
+                        const id = $(this).data('id');
+                        // Add console log for debugging
+                        console.log("Edit button clicked for product ID:", id);
+                        editProducto(id);
+                    });
+
+                    $('.delete-producto').click(function() {
+                        const id = $(this).data('id');
+                        openDeleteModal('producto', id);
+                    });
+                }
+            });
+        }
+
+
+        function loadClientes() {
+            $.ajax({
+                url: '/api/clientes',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#clientes-table-body');
+                    tbody.empty();
+
+                    data.forEach(function(cliente) {
+                        tbody.append(`
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${cliente.nombre}</td>
+                        <td>${cliente.tipoCliente}</td>
+                        <td>${cliente.identificacion}</td>
+                        <td>${cliente.telefono || 'N/A'}</td>
+                        <td>${cliente.correo || 'N/A'}</td>
+                        <td>${cliente.legalOrganizationId || 'N/A'}</td>
+                        <td>${cliente.tributeId || 'N/A'}</td>
+                        <td>${cliente.aplicaIVA || 'No'}</td> <!-- Mostrar Sí o No -->
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-cliente" data-id="${cliente.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-cliente" data-id="${cliente.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+                    });
+
+                    // Agregar eventos a los botones con console.log para depuración
+                    $('.edit-cliente').click(function() {
+                        const id = $(this).data('id');
+                        console.log("Edit button clicked for client ID:", id);
+                        editCliente(id);
+                    });
+
+                    $('.delete-cliente').click(function() {
+                        const id = $(this).data('id');
+                        openDeleteModal('cliente', id);
+                    });
+                }
+            });
+        }
+
+        function loadFacturas() {
+            $.ajax({
+                url: '/api/facturas/listar',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#facturas-table-body');
+                    tbody.empty();
+
+                    data.forEach(function(factura) {
+                        const clienteNombre = factura.cliente ? factura.cliente.nombre : 'N/A';
+                        const fecha = factura.createdAt ? new Date(factura.createdAt).toLocaleDateString() : 'N/A';
+
+                        tbody.append(`
+                    <tr>
+                        <td>${factura.numero || 'N/A'}</td>  <!-- Asegúrate de que este campo esté correctamente mapeado -->
+                        <td>${clienteNombre}</td>
+                        <td>${factura.identification || 'N/A'}</td>
+                        <td>${factura.pagos || 'N/A'}</td>
+                          <td>${factura.metodopago || 'N/A'}</td>
+                        <td>${factura.createdAt || 'N/A'}</td>
+                        <td>${factura.status || 'N/A'}</td>
+                        <td>${fecha}</td>
+                        <td>$${factura.total || '0.00'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-factura" data-id="${factura.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info view-factura" data-id="${factura.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-secondary download-factura" data-id="${factura.id}" onclick="descargarFactura(${factura.id})">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-factura" data-id="${factura.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success validate-factura" data-id="${factura.id}">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+                    });
+
+                    // Eventos existentes
+                    $('.edit-factura').click(function() {
+                        const id = $(this).data('id');
+                        console.log("Edit button clicked for invoice ID:", id);
+                        editFactura(id);
+                    });
+
+                    $('.delete-factura').click(function() {
+                        const id = $(this).data('id');
+                        openDeleteModal('factura', id);
+                    });
+
+                    $('.validate-factura').click(function() {
+                        const id = $(this).data('id');
+                        validateFactura(id);
+                    });
+
+                    // Nuevos eventos para ver y descargar
+                    $('.view-factura').click(function() {
+                        const id = $(this).data('id');
+                        viewFactura(id);
+                    });
+
+                    $('.download-factura').click(function() {
+                        const id = $(this).data('id');
+                        descargarFactura(id);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error cargando facturas:", error);
+                    console.error("Respuesta:", xhr.responseText);
+                    $('#facturas-table-body').html('<tr><td colspan="7" class="text-center text-danger">Error al cargar facturas</td></tr>');
+                }
+            });
+        }
+
+
+        function viewFactura(id) {
+            console.log("Visualizando factura ID:", id);
+
+            // Mostrar un indicador de carga
+            Swal.fire({
+                title: 'Cargando detalles',
+                text: 'Espere por favor...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: `/api/facturas/ver/${id}`,
+                method: 'GET',
+                success: function(data) {
+                    console.log("Detalles de factura recibidos:", data);
+                    Swal.close();
+
+                    // Verificar si hay un error en la respuesta
+                    if (data.error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error,
+                            confirmButtonColor: '#3085d6'
+                        });
+                        return;
+                    }
+
+                    // Crear el contenido HTML para la factura
+                    let customerInfo = '';
+                    if (data.cliente) { // Asegúrate de que estás accediendo a "cliente"
+                        customerInfo = `
+                        <div class="mb-3">
+                            <strong>Cliente:</strong> ${data.cliente.nombre || 'N/A'}<br>
+                            <strong>Identificación:</strong> ${data.cliente.identificacion || 'N/A'}<br>
+                            <strong>Correo:</strong> ${data.cliente.correo || 'N/A'}<br>
+                            <strong>Dirección:</strong> ${data.cliente.direccion || 'N/A'}
+                        </div>
+                    `;
+                    }
+
+                    let itemsHTML = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Producto</th><th>Cantidad' +
+                        '</th><th>Precio</th><th>Iva</th><th>Dto %</th><th>Subtotal</th><th>Total</th></tr></thead><tbody>';
+
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(item => {
+                            itemsHTML += `
+                        <tr>
+                            <td>${item.producto || 'N/A'}</td>
+                            <td>${item.cantidad || '0'}</td>
+                            <td>$${item.precio ? item.precio.toFixed(0) : '0.00'}</td>
+                             <td>$${item.iva ? item.iva.toFixed(0) : '0.00'}</td>
+                             <td>${item.porcentajeDescuento ? item.porcentajeDescuento.toFixed(1) : '0.00'}</td>
+                            <td>$${item.subtotal ? item.subtotal.toFixed(0) : '0.00'}</td>
+                            <td>$${item.total ? item.total.toFixed(0) : '0.00'}</td>
+                        </tr>
+                    `;
+                        });
+                    } else {
+                        itemsHTML += '<tr><td colspan="4" class="text-center">No hay items disponibles</td></tr>';
+                    }
+
+                    itemsHTML += '</tbody></table></div>';
+
+                    let totalsHTML = '';
+                    if (data.totals) {
+                        totalsHTML = `
+                    <div class="card mt-3">
+                        <div class="card-header bg-info text-white"><strong>Totales</strong></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Subtotal:</strong> $${data.totals.grossTotal ? data.totals.grossTotal.toFixed(2) : '0.00'}</p>
+                                    <p><strong>Descuentos:</strong> $${data.totals.discounts ? data.totals.discounts.toFixed(2) : '0.00'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Impuestos:</strong> $${data.totals.taxes ? data.totals.taxes.toFixed(2) : '0.00'}</p>
+                                    <p><strong>Total:</strong> $${data.totals.total ? data.totals.total.toFixed(2) : '0.00'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                    }
+
+// Mostrar el modal con los detalles
+                    Swal.fire({
+                        title: `Factura #${data.referenceCode || id}`,
+                        html: `
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <strong>Información General</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Estado:</strong> ${data.status || 'N/A'}<br>
+                                <strong>Fecha:</strong> ${data.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A'}<br>
+                            </div>
+                            ${customerInfo}
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-primary text-white"><strong>Items</strong></div>
+                        <div class="card-body">
+                            ${itemsHTML}
+                        </div>
+                    </div>
+
+                    ${totalsHTML}
+                </div>
+            </div>
+        </div>
+    `,
+                        width: '800px',
+                        showCloseButton: true,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Cerrar',
+                        confirmButtonColor: '#3085d6',
+                        footer: `<button id="download-btn-modal" class="btn btn-secondary" data-id="${id}"><i class="fas fa-download"></i> Descargar PDF</button>`
+                    });
+                    // Evento para el botón de descarga dentro del modal
+                    $('#download-btn-modal').click(function() {
+                        const invoiceId = $(this).data('id');
+                        downloadFactura(invoiceId);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error obteniendo detalles de factura:", error);
+                    console.error("Respuesta:", xhr.responseText);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudieron cargar los detalles de la factura',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+            });
+        }
+
+        function descargarFactura(id) {
+            console.log("Descargando factura ID:", id);
+
+            // Mostrar un indicador de carga
+            Swal.fire({
+                title: 'Generando PDF',
+                text: 'Espere por favor...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Hacer una solicitud para verificar el estado de la factura primero
+            fetch(`/api/facturas/estado-procesamiento/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.listaParaDescargar) {
+                        // Si está lista para descargar, usamos el método de descarga directa
+                        iniciarDescargaDirecta(id);
+                    } else {
+                        // Si no está lista, intentamos validar y luego descargar
+                        return fetch(`/api/facturas/validar-y-descargar/${id}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                            }
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    if (response.headers.get('Content-Type').includes('application/pdf')) {
+                                        return response.blob().then(blob => {
+                                            descargarBlob(blob, `factura-${id}.pdf`);
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Descarga Completada',
+                                                text: 'El PDF de la factura se ha descargado correctamente',
+                                                confirmButtonColor: '#3085d6',
+                                                timer: 2000
+                                            });
+                                        });
+                                    } else {
+                                        return response.json().then(errorData => {
+                                            if (response.status === 202 && errorData.retry) {
+                                                // La factura está en procesamiento, mostramos mensaje y programamos reintento
+                                                Swal.fire({
+                                                    icon: 'info',
+                                                    title: 'Procesando factura',
+                                                    text: errorData.message || 'La factura está siendo procesada. Por favor espere.',
+                                                    confirmButtonText: 'Reintentar',
+                                                    timer: 5000,
+                                                    timerProgressBar: true
+                                                }).then((result) => {
+                                                    if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                                                        descargarFactura(id); // Reintentar
+                                                    }
+                                                });
+                                            } else {
+                                                mostrarError(errorData.error || 'Error al procesar la factura');
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    throw new Error('Error en la solicitud');
+                                }
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al verificar estado de la factura:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo verificar el estado de la factura. Intente nuevamente.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                });
+        }
+
+        function iniciarDescargaDirecta(id) {
+            // Crear un enlace para la descarga en lugar de un iframe
+            const downloadUrl = `/api/facturas/descargar/${id}?forceValidate=true`;
+
+            fetch(downloadUrl, {
+                method: 'GET',
+            })
+                .then(response => {
+                    Swal.close();
+
+                    if (response.ok && response.headers.get('Content-Type').includes('application/pdf')) {
+                        return response.blob().then(blob => {
+                            descargarBlob(blob, `factura-${id}.pdf`);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Descarga Completada',
+                                text: 'El PDF de la factura se ha descargado correctamente',
+                                confirmButtonColor: '#3085d6',
+                                timer: 2000
+                            });
+                        });
+                    } else {
+                        return response.json().then(errorData => {
+                            if (response.status === 202 && errorData.retry) {
+                                // Programar un reintento automático después de unos segundos
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Procesando factura',
+                                    text: errorData.message || 'La factura está siendo procesada. Reintentando en unos segundos...',
+                                    timer: 5000,
+                                    timerProgressBar: true
+                                }).then(() => {
+                                    setTimeout(() => descargarFactura(id), 3000);
+                                });
+                            } else {
+                                mostrarError(errorData.error || 'Error al descargar la factura');
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al descargar la factura:", error);
+                    Swal.close();
+                    mostrarError('Error al descargar la factura. Intente nuevamente.');
+                });
+        }
+
+        function descargarBlob(blob, fileName) {
+            // Crea un enlace para descargar el blob
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpia después de la descarga
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        function mostrarError(mensaje) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: mensaje,
+                confirmButtonColor: '#3085d6'
+            });
+        }
+// Función para validar una factura
+        function validateFactura(id) {
+            console.log("Validando factura ID:", id);
+
+            Swal.fire({
+                title: '¿Está seguro?',
+                text: "Va a validar esta factura en Factus",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, validar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Mostrar indicador de carga
+                    Swal.fire({
+                        title: 'Validando',
+                        text: 'Espere por favor...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        url: `/api/facturas/validar/${id}`,
+                        method: 'GET',
+                        success: function(data) {
+                            console.log("Factura validada:", data);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: 'La factura ha sido validada correctamente',
+                                confirmButtonColor: '#28a745'
+                            }).then(() => {
+                                // Recargar la lista de facturas
+                                loadFacturas();
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error validando factura:", error);
+                            console.error("Respuesta:", xhr.responseText);
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo validar la factura',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Función actualizada para guardar producto
+        $('#guardar-producto').click(function() {
+            const id = $('#producto-id').val();
+            const measureId = $('#producto-medida').val();
+
+            // Generar standardCodeId automáticamente (basado en el nombre del producto + timestamp)
+            const currentTime = new Date().getTime();
+            const nameSanitized = $('#producto-nombre').val().replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+            const standardCodeId = `STD-${nameSanitized}-${currentTime}`;
+
+            // Generar unitMeasureId automáticamente (basado en la unidad de medida seleccionada)
+            const unitMeasureId = `UM-${measureId.toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+
+            const producto = {
+                name: $('#producto-nombre').val(),
+                price: parseFloat($('#producto-precio').val()),
+                measureId: measureId,
+                excluded: $('#producto-excluido').is(':checked'),
+                withholdingTaxRate: $('#producto-retencion').val(),
+                taxRate: parseFloat($('#producto-tasa-iva').val()),
+                // Campos automáticos nuevos
+                standardCodeId: standardCodeId,
+                unitMeasureId: unitMeasureId
+            };
+
+            if (id) {
+                $.ajax({
+                    url: `/api/productos/${id}`,
+                    method: 'PUT',
+                    data: JSON.stringify(producto),
+                    contentType: 'application/json',
+                    success: function() {
+                        $('#productoModal').modal('hide');
+                        loadProductos();
+                        alert('Producto actualizado correctamente');
+                    },
+                    error: function(error) {
+                        alert('Error al actualizar producto: ' + error.responseJSON.message);
+                    }
+                });
+            } else {
+                // Crear nuevo producto
+                $.ajax({
+                    url: '/api/productos',
+                    method: 'POST',
+                    data: JSON.stringify(producto),
+                    contentType: 'application/json',
+                    success: function() {
+                        $('#productoModal').modal('hide');
+                        loadProductos();
+                        alert('Producto creado correctamente');
+                    },
+                    error: function(error) {
+                        alert('Error al crear producto: ' + error.responseJSON.message);
+                    }
+                });
+            }
+        });
+
+        // Mostrar/ocultar campos según tipo de cliente
+        $('#cliente-tipo').change(function() {
+            if ($(this).val() === 'Persona Jurídica') {
+                $('#campos-juridica').show();
+                // Si cambia a persona jurídica, cambiamos automáticamente a NIT
+                $('#cliente-tipo-identificacion').val('NIT');
+            } else {
+                $('#campos-juridica').hide();
+            }
+        });
+
+// Inicializar también al abrir el modal
+        $('#clienteModal').on('show.bs.modal', function() {
+            if ($('#cliente-tipo').val() === 'Persona Jurídica') {
+                $('#campos-juridica').show();
+            } else {
+                $('#campos-juridica').hide();
+            }
+        });
+
+        $('#guardar-cliente').click(function() {
+            const id = $('#cliente-id').val();
+            const tipoCliente = $('#cliente-tipo').val();
+            const tipoIdentificacion = $('#cliente-tipo-identificacion').val();
+            const identificacion = $('#cliente-identificacion').val();
+
+            // Generar legalOrganizationId automáticamente
+            let legalOrganizationId;
+            if (tipoCliente === 'Persona Jurídica') {
+                const companyName = $('#cliente-company').val() || $('#cliente-nombre').val();
+                const companyPrefix = companyName.substring(0, 3).toUpperCase();
+                legalOrganizationId = `ORG-${companyPrefix}-${new Date().getTime().toString().substring(5)}`;
+            } else {
+                // Para persona natural
+                const namePrefix = $('#cliente-nombre').val().substring(0, 3).toUpperCase();
+                legalOrganizationId = `NAT-${namePrefix}-${new Date().getTime().toString().substring(5)}`;
+            }
+
+            // Generar tributeId automáticamente
+            const tributePrefix = tipoIdentificacion === 'NIT' ? 'TRIB-NIT' : 'TRIB-CC';
+            const tributeId = `${tributePrefix}-${identificacion.replace(/[^0-9]/g, '').substring(0, 6)}-${Math.floor(Math.random() * 1000)}`;
+
+            // Crear objeto cliente con todos los campos
+            const cliente = {
+                nombre: $('#cliente-nombre').val(),
+                tipoCliente: tipoCliente,
+                tipoIdentificacion: tipoIdentificacion,
+                identificacion: identificacion,
+                telefono: $('#cliente-telefono').val(),
+                correo: $('#cliente-correo').val(),
+                municipio: $('#cliente-municipio').val(),
+                direccion: $('#cliente-direccion').val(),
+                aplicaIVA: $('#cliente-aplica-iva').val(), // Asegúrate de que este campo se esté asignando correctamente
+                // Campos automáticos
+                legalOrganizationId: id ? $('#cliente-legalOrganizationId').val() : legalOrganizationId,
+                tributeId: id ? $('#cliente-tributeId').val() : tributeId
+            };
+
+            // Agregar campos específicos para persona jurídica si aplica
+            if (tipoCliente === 'Persona Jurídica') {
+                cliente.company = $('#cliente-company').val();
+                cliente.tradeName = $('#cliente-tradeName').val();
+                cliente.verificationDigit = $('#cliente-verificationDigit').val();
+                cliente.idOrg = $('#cliente-idOrg').val();
+            }
+
+            if (id) {
+                // Actualizar cliente
+                $.ajax({
+                    url: `/api/clientes/${id}`,
+                    method: 'PUT',
+                    data: JSON.stringify(cliente),
+                    contentType: 'application/json',
+                    success: function() {
+                        $('#clienteModal').modal('hide');
+                        loadClientes();
+                        alert('Cliente actualizado correctamente');
+                    },
+                    error: function(error) {
+                        alert('Error al actualizar cliente: ' + error.responseJSON.message);
+                    }
+                });
+            } else {
+                // Crear nuevo cliente
+                $.ajax({
+                    url: '/api/clientes',
+                    method: 'POST',
+                    data: JSON.stringify(cliente),
+                    contentType: 'application/json',
+                    success: function() {
+                        $('#clienteModal').modal('hide');
+                        loadClientes();
+                        alert('Cliente creado correctamente');
+                    },
+                    error: function(error) {
+                        alert('Error al crear cliente: ' + error.responseJSON.message);
+                    }
+                });
+            }
+        });
+
+
+        function editProducto(id) {
+            console.log("Fetching product data for ID:", id);
+
+            $.ajax({
+                url: `/api/productos/${id}`,
+                method: 'GET',
+                success: function(producto) {
+                    $('#producto-id').val(producto.id);
+                    $('#producto-nombre').val(producto.name);
+                    $('#producto-precio').val(producto.price);
+                    $('#producto-medida').val(producto.measureId);
+                    $('#producto-excluido').prop('checked', producto.excluded);
+                    $('#producto-retencion').val(producto.withholdingTaxRate);
+                    $('#producto-tasa-iva').val(producto.taxRate);
+
+                    // Almacenar los valores existentes para los campos automáticos
+                    $('#producto-standardCodeId').val(producto.standardCodeId);
+                    $('#producto-unitMeasureId').val(producto.unitMeasureId);
+
+                    $('#productoModalLabel').text('Editar Producto');
+                    // Now show the modal
+                    $('#productoModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading product data:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+
+                    let errorMsg = 'Error al cargar el producto';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg += ': ' + xhr.responseJSON.message;
+                    } else if (xhr.statusText) {
+                        errorMsg += ': ' + xhr.statusText;
+                    }
+
+                    alert(errorMsg);
+                }
+            });
+        }
+
+        // Función para editar cliente actualizada
+        function editCliente(id) {
+            console.log("Fetching client data for ID:", id);
+
+            $.ajax({
+                url: `/api/clientes/${id}`,
+                method: 'GET',
+                success: function(cliente) {
+                    console.log("Client data received:", cliente);
+                    console.log("aplicaIva value:", cliente.aplicaIva, "type:", typeof cliente.aplicaIva);
+
+                    // First clear the form to remove any previous data
+                    $('#cliente-form').trigger('reset');
+
+                    // Set the modal title and client ID
+                    $('#clienteModalLabel').text('Editar Cliente');
+                    $('#cliente-id').val(cliente.id);
+
+                    // Fill in the form fields with client data
+                    $('#cliente-tipo').val(cliente.tipoCliente);
+                    $('#cliente-tipo-identificacion').val(cliente.tipoIdentificacion);
+                    $('#cliente-identificacion').val(cliente.identificacion);
+                    $('#cliente-nombre').val(cliente.nombre);
+                    $('#cliente-telefono').val(cliente.telefono);
+                    $('#cliente-correo').val(cliente.correo);
+                    $('#cliente-municipio').val(cliente.municipio);
+                    $('#cliente-direccion').val(cliente.direccion);
+                    $('#cliente-aplica-iva').val(cliente.aplicaIVA);
+
+                    // Campos automáticos
+                    $('#cliente-legalOrganizationId').val(cliente.legalOrganizationId);
+                    $('#cliente-tributeId').val(cliente.tributeId);
+
+                    // Campos específicos de persona jurídica
+                    if (cliente.tipoCliente === 'Persona Jurídica') {
+                        $('#cliente-company').val(cliente.company || '');
+                        $('#cliente-tradeName').val(cliente.tradeName || '');
+                        $('#cliente-verificationDigit').val(cliente.verificationDigit || '');
+                        $('#cliente-idOrg').val(cliente.idOrg || '');
+                        $('#campos-juridica').show();
+                    } else {
+                        $('#campos-juridica').hide();
+                    }
+
+                    // Now show the modal
+                    $('#clienteModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading client data:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+
+                    let errorMsg = 'Error al cargar el cliente';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg += ': ' + xhr.responseJSON.message;
+                    } else if (xhr.statusText) {
+                        errorMsg += ': ' + xhr.statusText;
+                    }
+
+                    alert(errorMsg);
+                }
+            });
+        }
+        // Manejo de facturas
+        var itemCount = 0;
+        var facturaItems = [];
+
+        function loadClientesFactura(callback) {
+            $.ajax({
+                url: '/api/clientes',
+                method: 'GET',
+                success: function(clientes) {
+                    const select = $('#factura-cliente');
+                    select.empty();
+                    select.append('<option value="">Seleccionar cliente...</option>');
+
+                    clientes.forEach(function(cliente) {
+                        select.append(`<option value="${cliente.id}">${cliente.nombre}</option>`);
+                    });
+
+                    // Ejecutar el callback si existe
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading clientes:", error);
+                    alert('Error al cargar la lista de clientes');
+
+                    // Ejecutar el callback incluso en caso de error
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                }
+            });
+        }
+
+// Función para manejar la selección de cliente
+        function onClienteSelected() {
+            const clienteId = $('#factura-cliente').val();
+
+            if (!clienteId) {
+                // Limpiar campos si no hay cliente seleccionado
+                clearClienteInfo();
+                return;
+            }
+
+            // Buscar el cliente seleccionado en la lista global
+            const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
+
+            if (clienteSeleccionado) {
+                // Rellenar campos de información del cliente
+                $('#cliente-nombres').text(clienteSeleccionado.nombre || '-');
+                $('#cliente-tipos').text(clienteSeleccionado.tipoCliente || '-');
+                $('#cliente-correos').text(clienteSeleccionado.correo || '-');
+                $('#cliente-telefonos').text(clienteSeleccionado.telefono || '-');
+                $('#cliente-direcciones').text(clienteSeleccionado.direccion || '-');
+                $('#cliente-municipios').text(clienteSeleccionado.municipio || '-');
+
+                // Rellenar campos automáticos de la factura
+                $('#factura-identification').val(clienteSeleccionado.identificacion || '');
+                $('#factura-api-client-name').val(clienteSeleccionado.nombre || '');
+                $('#factura-graphic-representation').val('PDF');
+
+                // Generar campos automáticos
+                generateAutoFields();
+            } else {
+                console.error('Cliente no encontrado en la lista');
+                clearClienteInfo();
+            }
+        }
+
+// Limpiar información del cliente
+        function clearClienteInfo() {
+            $('#cliente-nombre, #cliente-tipo, #cliente-correo, #cliente-telefono, #cliente-direccion, #cliente-municipio').text('-');
+            $('#factura-identification, #factura-api-client-name, #factura-graphic-representation').val('');
+        }
+
+        // Generar campos automáticos
+        function generateAutoFields() {
+            // Generar número de factura (prefijo + números aleatorios)
+            const facturaNumero = "FAC" + Math.random().toString(36).substring(2, 10).toUpperCase();
+            $('#factura-numero').text(facturaNumero);
+
+            // Generar código de referencia único
+            const referenceCode = "REF-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+            $('#factura-reference-code').val(referenceCode);
+            $('#factura-reference-code-display').text(referenceCode);
+
+            // Generar ID de rango de numeración (número aleatorio)
+            const numberingRangeId = Math.floor(Math.random() * 10000) + 1;
+            $('#factura-numbering-range-id').val(numberingRangeId);
+        }
+
+        function loadProductos() {
+            $.ajax({
+                url: '/api/productos',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#productos-table-body');
+                    tbody.empty();
+
+                    data.forEach(function(producto) {
+                        tbody.append(`
+                    <tr>
+                        <td>${producto.id}</td>
+                        <td>${producto.name}</td>
+                        <td>$${producto.price}</td>
+                        <td>${producto.measureId || 'N/A'}</td>
+                        <td>${producto.taxRate || '0'}%</td>
+                        <td>${producto.standardCodeId || 'Auto'}</td>
+                        <td>${producto.unitMeasureId || 'Auto'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-producto" data-id="${producto.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+                    });
+
+                    // Agregar eventos a los botones
+                    $('.edit-producto').click(function() {
+                        const id = $(this).data('id');
+                        // Add console log for debugging
+                        console.log("Edit button clicked for product ID:", id);
+                        editProducto(id);
+                    });
+
+                    $('.delete-producto').click(function() {
+                        const id = $(this).data('id');
+                        openDeleteModal('producto', id);
+                    });
+                }
+            });
+        }
+
+        function loadProductosSeleccion() {
+            $.ajax({
+                url: '/api/productos',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#seleccionar-producto-body');
+                    tbody.empty();
+
+                    data.forEach(function(producto) {
+                        tbody.append(`
+                    <tr>
+                        <td>${producto.id}</td>
+                        <td>${producto.name}</td>
+                        <td>$${producto.price}</td>
+                        <td>${producto.measureId || 'N/A'}</td>
+                        <td>${producto.taxRate || '0'}%</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary seleccionar-producto"
+                                    data-id="${producto.id}"
+                                    data-name="${producto.name}"
+                                    data-price="${producto.price}"
+                                    data-tax-rate="${producto.taxRate || 0}">
+                                <i class="fas fa-check"></i> Seleccionar
+                            </button>
+                        </td>
+                    </tr>
+                `);
+                    });
+
+                    // Agregar evento de selección
+                    $('.seleccionar-producto').click(function() {
+                        const id = $(this).data('id');
+                        const name = $(this).data('name');
+                        const price = $(this).data('price');
+                        const taxRate = $(this).data('tax-rate');
+
+                        addItemToFactura(id, name, price, taxRate);
+                        $('#seleccionarProductoModal').modal('hide');
+                    });
+                },
+                error: function(error) {
+                    console.error("Error cargando productos:", error);
+                    alert("Error al cargar los productos. Inténtalo de nuevo.");
+                }
+            });
+        }
+
+        function addItemToFactura(id, name, price, taxRate) {
+            const item = {
+                id: id,
+                name: name,
+                price: parseFloat(price),
+                quantity: 1,
+                taxRate: parseFloat(taxRate),
+                discount: 0
+            };
+
+            itemCount++;
+            facturaItems.push(item);
+
+            const subtotal = item.price * item.quantity;
+            const discount = subtotal * (item.discount / 100);
+            const taxValue = (subtotal - discount) * (item.taxRate / 100);
+            const total = subtotal - discount + taxValue;
+
+            $('#factura-items').append(`
+        <tr id="item-${itemCount}">
+            <td>${item.name}</td>
+            <td>
+                <input type="number" class="form-control item-quantity" data-index="${facturaItems.length - 1}" value="${item.quantity}" min="1">
+            </td>
+            <td>$${item.price.toFixed(2)}</td>
+            <td>
+                <input type="number" class="form-control item-discount" data-index="${facturaItems.length - 1}" value="${item.discount}" min="0" max="100">
+            </td>
+            <td class="item-subtotal">$${subtotal.toFixed(2)}</td>
+            <td class="item-tax">$${taxValue.toFixed(2)}</td>
+            <td class="item-total">$${total.toFixed(2)}</td>
+            <td>
+                <button class="btn btn-sm btn-danger remove-item" data-index="${facturaItems.length - 1}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `);
+
+            updateFacturaTotals();
+
+            // Agregar eventos a los controles
+            $('.item-quantity, .item-discount').on('change', function() {
+                const index = $(this).data('index');
+                updateItemCalculations(index);
+            });
+
+            $('.remove-item').click(function() {
+                const index = $(this).data('index');
+                removeFacturaItem(index);
+            });
+        }
+
+        function updateItemCalculations(index) {
+            const item = facturaItems[index];
+            item.quantity = parseFloat($('.item-quantity[data-index="' + index + '"]').val()) || 1;
+            item.discount = parseFloat($('.item-discount[data-index="' + index + '"]').val()) || 0;
+
+            const subtotal = item.price * item.quantity;
+            const discount = subtotal * (item.discount / 100);
+            const taxValue = (subtotal - discount) * (item.taxRate / 100);
+            const total = subtotal - discount + taxValue;
+
+            const row = $('#factura-items tr').eq(index);
+            row.find('.item-subtotal').text('$' + subtotal.toFixed(2));
+            row.find('.item-tax').text('$' + taxValue.toFixed(2));
+            row.find('.item-total').text('$' + total.toFixed(2));
+
+            updateFacturaTotals();
+        }
+
+        function removeFacturaItem(index) {
+            facturaItems.splice(index, 1);
+            $('#factura-items tr').eq(index).remove();
+
+            // Actualizar los índices de los elementos restantes
+            $('#factura-items tr').each(function(i) {
+                $(this).find('.item-quantity').data('index', i);
+                $(this).find('.item-discount').data('index', i);
+                $(this).find('.remove-item').data('index', i);
+            });
+
+            updateFacturaTotals();
+        }
+
+        function updateFacturaTotals() {
+            let subtotal = 0;
+            let totalIva = 0;
+            let totalDescuento = 0;
+            let total = 0;
+
+            facturaItems.forEach(function(item) {
+                const itemSubtotal = item.price * item.quantity;
+                const itemDiscount = itemSubtotal * (item.discount / 100);
+                const itemTax = (itemSubtotal - itemDiscount) * (item.taxRate / 100);
+
+                subtotal += itemSubtotal;
+                totalDescuento += itemDiscount;
+                totalIva += itemTax;
+                total += itemSubtotal - itemDiscount + itemTax;
+            });
+
+            $('#factura-subtotal').text('$' + subtotal.toFixed(2));
+            $('#factura-iva-total').text('$' + totalIva.toFixed(2));
+            $('#factura-descuento-total').text('$' + totalDescuento.toFixed(2));
+            $('#factura-total').text('$' + total.toFixed(2));
+        }
+        // Modificación de la función guardar factura
+        $('#guardar-factura').click(function() {
+            if (facturaItems.length === 0) {
+                alert('Debe agregar al menos un producto a la factura');
+                return;
+            }
+
+            const clienteId = $('#factura-cliente').val();
+
+            if (!clienteId) {
+                alert('Debe seleccionar un cliente');
+                return;
+            }
+
+            // Get the factura ID from your hidden field
+            const id = $('#factura-id').val();
+
+            // Obtener los totales - obtenemos el texto de los elementos, no el valor
+            const subtotal = $('#factura-subtotal').text().replace('$', '').trim();
+            const totalIva = $('#factura-iva-total').text().replace('$', '').trim();
+            const totalDescuento = $('#factura-descuento-total').text().replace('$', '').trim();
+            const total = $('#factura-total').text().replace('$', '').trim();
+
+            const startDate = new Date().toISOString();
+            const endDate = new Date(new Date().setDate(new Date().getDate() + 30)).toISOString();
+
+            // Obtener cliente seleccionado
+            const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
+
+            const factura = {
+                cliente: {
+                    id: clienteId,
+                    nombre: clienteSeleccionado?.nombre,
+                    correo: clienteSeleccionado?.correo,
+                    direccion: clienteSeleccionado?.direccion,
+                    tipoCliente: clienteSeleccionado?.tipoCliente
+                },
+                apiClientName: $('#factura-api-client-name').val(),
+                documentName: $('#factura-document-name').val(),
+                graphicRepresentationName: $('#factura-graphic-representation').val(),
+                identification: $('#factura-identification').val(),
+                formaPago: $('#factura-forma-pago').val(),
+                Pagos: $('#factura-metodo-pago').val(),
+                fecha: $('#factura-fecha').val(),
+                status: $('#factura-status').text(),
+                numero: $('#factura-numero').text(),
+                createdAt: new Date().toISOString(),
+
+                // Campos automáticos nuevos
+                document: $('#factura-document').val(),
+                numberingRangeId: $('#factura-numbering-range-id').val(),
+                referenceCode: $('#factura-reference-code').val(),
+                observation: $('#factura-observation').val(),
+
+                billingPeriod: {
+                    startDate: startDate,
+                    endDate: endDate
+                },
+                subtotal: parseFloat(subtotal),
+                totalIva: parseFloat(totalIva),
+                totalDescuento: parseFloat(totalDescuento),
+                total: parseFloat(total),
+                items: facturaItems.map(item => ({
+                    producto: {
+                        id: item.id
+                    },
+                    cantidad: item.quantity,
+                    precio: item.price,
+                    porcentajeDescuento: item.discount,
+                    subtotal: item.price * item.quantity,
+                    iva: (item.price * item.quantity) * (item.taxRate / 100),
+                    total: (item.price * item.quantity) * (1 + item.taxRate / 100)
+                }))
+            };
+
+            console.log("Enviando factura:", JSON.stringify(factura));
+
+            if (id) {
+                // Actualizar factura
+                $.ajax({
+                    url: `/api/facturas/${id}`,
+                    method: 'PUT',
+                    data: JSON.stringify(factura),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#facturaModal').modal('hide');
+                        loadFacturas();
+                        alert('Factura actualizada correctamente');
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Error al actualizar factura';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg += ': ' + xhr.responseJSON.message;
+                        }
+                        alert(errorMsg);
+                        console.error("Error completo:", xhr.responseText);
+                    }
+                });
+            } else {
+                // Crear nueva factura
+                $.ajax({
+                    url: '/api/facturas/crear',
+                    method: 'POST',
+                    data: JSON.stringify(factura),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        $('#facturaModal').modal('hide');
+                        loadFacturas();
+                        alert('Factura creada correctamente');
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Error al crear factura';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg += ': ' + xhr.responseJSON.message;
+                        }
+                        alert(errorMsg);
+                        console.error("Error completo:", xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        function editFactura(id) {
+            console.log("Fetching invoice data for ID:", id);
+
+            // Primero, obtener la factura
+            $.ajax({
+                url: `/api/facturas/${id}`,
+                method: 'GET',
+                success: function(factura) {
+                    console.log("Invoice data received:", factura);
+
+                    // Actualizar título y ID
+                    $('#facturaModalLabel').text('Editar Factura');
+                    $('#factura-id').val(factura.id);
+
+                    // Cargar todos los clientes primero
+                    $.ajax({
+                        url: '/api/clientes',
+                        method: 'GET',
+                        success: function(clientes) {
+                            // Llenar el dropdown de clientes
+                            const select = $('#factura-cliente');
+                            select.empty();
+                            select.append('<option value="">Seleccionar cliente...</option>');
+
+                            clientes.forEach(function(cliente) {
+                                select.append(`<option value="${cliente.id}">${cliente.nombre}</option>`);
+                            });
+
+                            // Ahora seleccionar el cliente de la factura
+                            const clientId = factura.clienteId || (factura.cliente ? factura.cliente.id : null);
+
+                            if (clientId) {
+                                console.log("Setting client ID:", clientId);
+                                $('#factura-cliente').val(clientId);
+
+                                // Si no se seleccionó correctamente, intentar buscar por nombre
+                                if ($('#factura-cliente').val() != clientId && factura.cliente) {
+                                    $('#factura-cliente option').each(function() {
+                                        if ($(this).text().includes(factura.cliente.nombre)) {
+                                            $(this).prop('selected', true);
+                                            return false; // Salir del bucle
+                                        }
+                                    });
+                                }
+                            }
+
+                            // Activar el evento de selección del cliente para actualizar la información
+                            $('#factura-cliente').trigger('change');
+
+                            // Actualizar información del cliente visible directamente
+                            if (factura.cliente) {
+                                $('#cliente-nombres').text(factura.cliente.nombre || '-');
+                                $('#cliente-tipos').text(factura.cliente.tipoCliente || '-');
+                                $('#cliente-correos').text(factura.cliente.correo || '-');
+                                $('#cliente-telefonos').text(factura.cliente.telefono || '-');
+                                $('#cliente-direcciones').text(factura.cliente.direccion || '-');
+                                $('#cliente-municipios').text(factura.cliente.municipio || '-');
+                            }
+
+                            // Establecer los demás campos de la factura
+                            // Forma de pago y método de pago
+                            $('#factura-forma-pago').val(factura.formaPago);
+                            $('#factura-metodo-pago').val(factura.metodoPago || factura.Pagos);
+
+                            // Fecha principal de la factura
+                            if (factura.fecha) {
+                                const fechaStr = factura.fecha.split('T')[0];
+                                $('#factura-fecha').val(fechaStr);
+                            }
+
+                            // Establecer campos automáticos
+                            $('#factura-status').text(factura.status || 'PENDIENTE');
+                            $('#factura-numero').text(factura.number || 'N/A');
+                            $('#factura-reference-code').val(factura.referenceCode || '');
+                            $('#factura-reference-code-display').text(factura.referenceCode || '-');
+                            $('#factura-numbering-range-id').val(factura.numberingRangeId || '');
+                            $('#factura-observation').val(factura.observation || '');
+                            $('#factura-document').val(factura.document || '');
+                            $('#factura-document-display').text(factura.document || 'Factura electrónica de venta');
+
+                            // Establecer campos de identificación
+                            $('#factura-identification').val(factura.identification || '');
+                            $('#factura-api-client-name').val(factura.apiClientName || '');
+                            $('#factura-graphic-representation').val(factura.graphicRepresentationName || '');
+                            $('#factura-document-name').val(factura.documentName || 'Factus');
+
+                            // Establecer valores numéricos totales
+                            $('#factura-subtotal').text(factura.subtotal ? formatCurrency(factura.subtotal) : '$0.00');
+                            $('#factura-iva-total').text(factura.totalIva ? formatCurrency(factura.totalIva) : '$0.00');
+                            $('#factura-descuento-total').text(factura.totalDescuento ? formatCurrency(factura.totalDescuento) : '$0.00');
+                            $('#factura-total').text(factura.total ? formatCurrency(factura.total) : '$0.00');
+
+                            // Limpiar items existentes
+                            $('#factura-items').empty();
+                            facturaItems = [];
+                            itemCount = 0;
+
+                            // Cargar items de la factura
+                            console.log("Loading invoice items:", factura.items);
+
+                            if (factura.items && factura.items.length > 0) {
+                                factura.items.forEach(function(item) {
+                                    if (item.producto) {
+                                        addItemToFactura(
+                                            item.producto.id,
+                                            item.producto.name,
+                                            item.precio,
+                                            item.producto.taxRate || 0
+                                        );
+
+                                        // Actualizar cantidad y descuento
+                                        const index = facturaItems.length - 1;
+                                        facturaItems[index].quantity = item.cantidad;
+                                        facturaItems[index].discount = item.porcentajeDescuento || 0;
+
+                                        $('.item-quantity[data-index="' + index + '"]').val(item.cantidad);
+                                        $('.item-discount[data-index="' + index + '"]').val(item.porcentajeDescuento || 0);
+
+                                        updateItemCalculations(index);
+                                    } else {
+                                        console.error("Item missing product data:", item);
+                                    }
+                                });
+                            } else {
+                                console.warn("No items found in invoice or items array is empty");
+                            }
+
+                            // Mostrar el modal
+                            $('#facturaModal').modal('show');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error loading clientes:", error);
+                            alert('Error al cargar la lista de clientes');
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading invoice data:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+
+                    let errorMsg = 'Error al cargar la factura';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg += ': ' + xhr.responseJSON.message;
+                    } else if (xhr.statusText) {
+                        errorMsg += ': ' + xhr.statusText;
+                    }
+
+                    alert(errorMsg);
+                }
+            });
+        }
+// Helper function to format currency values
+        function formatCurrency(value) {
+            return '$' + Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+
+        function obtenerItems() {
+            var items = [];
+            $('#factura-items tr').each(function() {
+                var item = {
+                    producto: {
+                        id: $(this).data('producto-id')
+                    },
+                    cantidad: parseFloat($(this).find('.item-cantidad').text()),
+                    precio: parseFloat($(this).find('.item-precio').text()),
+                    porcentajeDescuento: parseFloat($(this).find('.item-descuento').text()),
+                    subtotal: parseFloat($(this).find('.item-subtotal').text()),
+                    iva: parseFloat($(this).find('.item-iva').text()),
+                    total: parseFloat($(this).find('.item-total').text())
+                };
+                items.push(item);
+            });
+            return items;
+        }
+
+        // Eliminar elementos
+        function openDeleteModal(type, id) {
+            $('#delete-type').val(type);
+            $('#delete-id').val(id);
+            $('#confirmDeleteModal').modal('show');
+        }
+
+        $('#confirmar-eliminacion').click(function() {
+            const type = $('#delete-type').val();
+            const id = $('#delete-id').val();
+
+            let url = '';
+            let refreshFunction = null;
+
+            switch(type) {
+                case 'producto':
+                    url = `/api/productos/${id}`;
+                    refreshFunction = loadProductos;
+                    break;
+                case 'cliente':
+                    url = `/api/clientes/${id}`;
+                    refreshFunction = loadClientes;
+                    break;
+                case 'factura':
+                    url = `/api/facturas/${id}`;
+                    refreshFunction = loadFacturas;
+                    break;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'DELETE',
+                success: function() {
+                    $('#confirmDeleteModal').modal('hide');
+                    refreshFunction();
+                    alert(`${type.charAt(0).toUpperCase() + type.slice(1)} eliminado correctamente`);
+                },
+                error: function(error) {
+                    alert(`Error al eliminar ${type}: ${error.responseJSON.message}`);
+                }
+            });
+        });
+
+        // Inicialización de modales
+        $('#productoModal').on('show.bs.modal', function(e) {
+            // Only reset the form if it's a new product (not an edit operation)
+            if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-producto')) {
+                $('#productoModalLabel').text('Nuevo Producto');
+                $('#producto-form').trigger('reset');
+                $('#producto-id').val('');
+            }
+        });
+
+        // Update modal initialization
+        $('#clienteModal').on('show.bs.modal', function(e) {
+            // Only reset the form if it's a new client (not an edit operation)
+            if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-cliente')) {
+                $('#clienteModalLabel').text('Nuevo Cliente');
+                $('#cliente-form').trigger('reset');
+                $('#cliente-id').val('');
+            }
+        });
+
+// Modificar la función que muestra el modal
+        $('#facturaModal').on('show.bs.modal', function (e) {
+            // Only reset if it's a new invoice (not an edit)
+            if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-factura')) {
+                $('#facturaModalLabel').text('Nueva Factura');
+                $('#factura-form').trigger('reset');
+                $('#factura-id').val('');
+                $('#factura-items').empty();
+                facturaItems = [];
+                itemCount = 0;
+                updateFacturaTotals();
+
+                // Limpiar información del cliente
+                clearClienteInfo();
+
+                // Establecer valores predeterminados
+                $('#factura-status').text('PENDIENTE');
+                $('#factura-document-name').val('Factus');
+                $('#factura-document-display').text('Factura electrónica de venta');
+
+                // Cargar clientes
+                loadClientesFactura();
+
+                // Establecer fecha actual
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1;
+                let dd = today.getDate();
+
+                if (dd < 10) dd = '0' + dd;
+                if (mm < 10) mm = '0' + mm;
+
+                $('#factura-fecha').val(yyyy + '-' + mm + '-' + dd);
+            }
+        });
+        // Agregar producto a factura
+        $('#agregar-item').click(function() {
+            loadProductosSeleccion();
+            $('#seleccionarProductoModal').modal('show');
+        });
+
+        $('#buscar-producto').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            let found = false;
+
+            $('#seleccionar-producto-body tr').each(function() {
+                const name = $(this).find('td:eq(1)').text().toLowerCase();
+                const id = $(this).find('td:eq(0)').text().toLowerCase();
+
+                if (name.includes(searchTerm) || id.includes(searchTerm)) {
+                    $(this).show();
+                    found = true;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Mostrar mensaje si no hay resultados
+            if (!found) {
+                $('#seleccionar-producto-body').append(`
+            <tr id="no-results">
+                <td colspan="6" class="text-center text-muted">No se encontraron productos</td>
+            </tr>
+        `);
+            } else {
+                $('#no-results').remove();
+            }
+        });
+
+        // Cargar dashboard al inicio
+        loadDashboardStats();
+    });
+</script>

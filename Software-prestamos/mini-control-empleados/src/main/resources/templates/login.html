@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/128/1077/1077874.png" type="image/x-icon">
+	<title>Préstamos</title>
+
+	<style>
+		/* CSS styles from the provided code */
+
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+			background-color: #f5f5f5;
+			font-family: "Poppins", sans-serif;
+			overflow: hidden;
+		}
+
+
+		@media (width >= 500px) {
+			body {
+				padding: 0;
+			}
+
+			.card {
+				margin: 0;
+				width: 300px;
+			}
+
+		}
+
+
+		.background {
+			position: fixed;
+			top: -50vmin;
+			left: -50vmin;
+			width: 120vmin;
+			height: 100vmin;
+			border-radius: 47% 53% 61% 39% / 45% 51% 49% 55%;
+			background: #65c8ff;
+		}
+
+		.background::before {
+			content: "";
+			position: fixed;
+			top: 110vmin;
+			right: -50vmin;
+			width: 120vmin;
+			height: 100vmin;
+			border-radius: 47% 53% 61% 39% / 45% 51% 49% 55%;
+			background: #012a40;
+		}
+
+		@media (width >= 500px) {
+			.background::before {
+				top: 60vmin;
+			}
+		}
+
+		.card {
+			overflow: hidden;
+			position: relative;
+			z-index: 3;
+			width: 260px;
+			margin: 0 auto ;
+			padding: 115px 30px 54px;
+			border-radius: 24px;
+			background: #ffffff;
+			text-align: center;
+			box-shadow: 0 100px 100px rgb(0 0 0 / 10%);
+
+		}
+
+		.card::before {
+			content: "";
+			position: absolute;
+			top: -880px;
+			left: 50%;
+			translate: -50% 0;
+			width: 1000px;
+			height: 100px;
+			border-radius: 50%;
+			background-color: #216ce7;
+		}
+
+		.card::after {
+			content: "";
+			position: inherit;
+			right: -50vmin;
+			bottom: -55vmin;
+			width: inherit;
+			height: inherit;
+			border-radius: inherit;
+			background: #143d81;
+		}
+
+		.logo {
+			position: absolute;
+			top: 30px;
+			left: 50%;
+			translate: -50%;
+			width: 64px;
+			height: 64px;
+		}
+
+		h2 {
+			font-size: 22px;
+			font-weight: 400;
+			margin: 0 0 30px;
+			color: rgb(0 0 0 / 90%);
+		}
+
+		.form {
+			margin: 0 0 25px;
+			display: grid;
+			place-items: center;
+			gap: 12px;
+		}
+
+		input, button {
+			width: 87%;
+			height: 40px;
+			border-radius: 28px;
+			font-size: 16px;
+			font-family: inherit;
+		}
+
+		button{
+			margin-top: 5px;
+		}
+		input {
+			border: 0;
+			padding: 0 24px;
+			color: #222222;
+			background: #ededed;
+			margin-bottom: -1px;
+		}
+
+		input::placeholder {
+			color: rgb(0 0 0 / 50%);
+		}
+
+		.form > button {
+			border: 0;
+			color: #f9f9f9;
+			background: #226ce7;
+			display: grid;
+			place-items: center;
+			font-weight: 500;
+			cursor: pointer;
+		}
+
+		.card > footer {
+			color: #504e4e;
+		}
+
+		.card > footer > a {
+			color: #216ce7;
+
+		}
+	</style>
+</head>
+<body>
+
+<!-- Contenedor del fondo que variará -->
+<div class="background"></div>
+<div class="card">
+	<img class="logo" src="https://cdn-icons-png.flaticon.com/128/1077/1077874.png" alt="imagen logo">
+	<H2>Software Prestamos</H2>
+
+	<form class="form" th:action="@{/login}" method="post">
+
+		<!-- Mensajes de error -->
+		<div th:if="${param.error}">
+			<div class="alert alert-danger" role="alert">
+				Usuario o contraseña inválidos
+			</div>
+		</div>
+		<div th:if="${param.logout}">
+			<div class="alert alert-success" role="alert">
+				Has cerrado sesión exitosamente
+			</div>
+		</div>
+
+		<label for="username"></label>
+		<input type="text" id="username" name="username" placeholder="Usuario" required >
+
+		<label for="password"></label>
+		<input type="password" id="password" name="password" placeholder="Contraseña" required>
+
+		<button type="submit">Iniciar Sesión</button>
+	</form>
+
+
+</div>
+
+</body>
+</html>

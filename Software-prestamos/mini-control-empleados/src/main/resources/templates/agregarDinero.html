@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${titulo}">Agregar Dinero a la Caja</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      margin-top: 50px;
+      max-width: 600px;
+    }
+    .card {
+      border-radius: 10px;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header text-center">
+      <h4 th:text="${titulo}">Agregar Dinero a la Caja</h4>
+    </div>
+    <div class="card-body">
+      <form id="agregarDineroForm" action="#" th:action="@{/caja/agregarDinero}" method="post" onsubmit="return validateMonto();">
+        <div class="form-group">
+          <label for="monto">Monto a agregar:</label>
+          <input type="text" id="monto" name="monto" class="form-control" required placeholder="Ingrese el monto" oninput="formatMonto(this)" />
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary">Agregar</button>
+          <a th:href="@{/listar}" class="btn btn-warning">Atrás</a>
+          <a th:href="@{/caja/editar}" class="btn btn-info btn-sm">Editar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  function formatMonto(input) {
+    // Remover caracteres que no sean dígitos
+    let value = input.value.replace(/\D/g, '');
+
+    // Formatear con separadores de miles
+    if (value) {
+      input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    } else {
+      input.value = '';
+    }
+  }
+
+  function validateMonto() {
+    const montoInput = document.getElementById('monto');
+    // Remover comas y convertir a número
+    let monto = montoInput.value.replace(/,/g, '');
+
+    // Validar que el monto es un número positivo
+    if (parseFloat(monto) <= 0 || isNaN(monto)) {
+      alert('El monto debe ser mayor que cero.');
+      return false;
+    }
+
+    // Actualizar el valor del input
+    montoInput.value = monto;
+    return true; // Permitir el envío del formulario
+  }
+</script>
+</body>
+</html>

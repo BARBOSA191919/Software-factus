@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/128/1077/1077874.png" type="image/x-icon">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<title>Préstamos</title>
+
+	<style>
+		body {
+			background-color: #f4f6f9;
+			font-family: Arial, sans-serif;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
+		.card {
+			background-color: white;
+			border-radius: 10px;
+			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			padding: 30px;
+		}
+		.form-group {
+			margin-bottom: 20px;
+		}
+		.form-group label {
+			font-weight: bold;
+			margin-bottom: 8px;
+			color: #333;
+		}
+		.form-control {
+			padding: 10px;
+			border-radius: 5px;
+			border: 1px solid #ddd;
+			transition: border-color 0.3s ease;
+		}
+		.form-control:focus {
+			border-color: #007bff;
+			outline: none;
+			box-shadow: 0 0 5px rgba(0,123,255,0.3);
+		}
+		.btn {
+			margin-right: 10px;
+			padding: 10px 15px;
+			border-radius: 5px;
+		}
+		.money-display {
+			background-color: #e9ecef;
+			padding: 15px;
+			border-radius: 5px;
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		.checkbox-container {
+			display: flex;
+			align-items: center;
+			margin-top: 15px;
+			margin-bottom: 15px;
+		}
+		.checkbox-container input {
+			margin-right: 10px;
+		}
+	</style>
+
+</head>
+<body>
+
+<script>
+	window.onload = function() {
+		Swal.fire({
+			icon: 'warning',
+			title: 'Advertencia',
+			text: 'Asegúrate de agregar dinero a la caja antes de iniciar el préstamo para evitar inconvenientes.',
+			confirmButtonText: 'Aceptar'
+		});
+	};
+</script>
+<br>
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-12 container justify-content-center card">
+			<h1 class="text-center" th:text="${titulo}"></h1>
+			<div class="card-body">
+				<form th:action="@{/form}" th:object="${prestamo}" method="post" onsubmit="return validateForm()">
+					<input type="hidden" th:field="*{id}"/>
+					<div>
+						<h4 style="color: green;">
+							DINERO EN CAJA:
+							<span th:text="${#numbers.formatDecimal(caja.cantidadActual, 0, 'POINT', 0, 'POINT')}"></span>
+						</h4>
+					</div>
+
+					<!-- Primera columna -->
+					<div class="row">
+						<div class="form-group col-md-4">
+							<label>Nombre del solicitante:</label>
+							<input type="text" th:field="*{nombre}" class="form-control" required/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Dirección:</label>
+							<input type="text" th:field="*{direccion}" class="form-control" required/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Teléfono:</label>
+							<input type="text" id="telefono" th:field="*{telefono}" class="form-control" required
+								   pattern="\d{10}" maxlength="10" title="El teléfono debe tener exactamente 10 dígitos"/>
+						</div>
+					</div>
+
+					<!-- Segunda columna -->
+					<div class="row">
+						<div class="form-group col-md-4">
+							<label>Tasa de interés (%):</label>
+							<input type="number" th:field="*{tasaInteres}" class="form-control" id="tasaInteres" min="0" step="0.01" oninput="updateSeguro()" required/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Fecha del préstamo:</label>
+							<input type="date" th:field="*{fechaPrestamo}" class="form-control" id="fechaPrestamo" onchange="updateSeguro()" required/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Fecha de pago:</label>
+							<input type="date" th:field="*{fechaPago}" class="form-control" id="fechaPago" onchange="updateSeguro()" required/>
+						</div>
+					</div>
+
+					<!-- Tercera columna -->
+					<div class="row">
+						<div class="form-group col-md-4">
+							<label>Monto del préstamo:</label>
+							<input type="text" id="montoPrestamoFormatted" class="form-control" oninput="formatNumberInput(this, 'montoPrestamo')" required/>
+							<input type="hidden" th:field="*{montoPrestamo}" id="montoPrestamo"/>
+							<div id="montoPrestamoError" style="color: red;"></div>
+						</div>
+
+
+						<!-- En el formulario -->
+						<div class="form-group col-md-4">
+							<label>Tipo de pago:</label>
+							<select id="tipoPago" class="form-control" onchange="mostrarPagoFormulario()">
+								<option value="diario">Pago Diario</option>
+								<option value="semanal">Pago Semanal</option>
+								<option value="quincenal">Pago Quincenal</option>
+								<option value="mensual">Pago Mensual</option>
+							</select>
+						</div>
+
+						<div class="form-group col-md-4">
+							<label>Valor:</label>
+							<input type="text" class="form-control" id="valorPago" oninput="handleValorChange(this)"/>
+						</div>
+						<div class="hidden-fields">
+							<input type="hidden" th:field="*{pagoDiario}" id="pagoDiario"/>
+							<input type="hidden" th:field="*{pago_semanal}" id="pagoSemanal"/>
+							<input type="hidden" th:field="*{pago_quincenal}" id="pagoQuincenal"/>
+							<input type="hidden" th:field="*{pago_mensual}" id="pagoMensual"/>
+						</div>
+					</div>
+					<!-- Cuarta fila -->
+					<div class="row">
+						<div class="form-group col-md-4">
+							<label>Total a pagar:</label>
+							<input type="text" th:field="*{total}" class="form-control" id="total" oninput="formatNumberInput(this, 'total')" readonly/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Seguro:</label>
+							<input type="number" th:field="*{seguro}" class="form-control" id="seguro"/>
+						</div>
+						<div class="form-group col-md-4">
+							<label>Ganancia del prestamista:</label>
+							<input type="text" th:field="*{gananciasPrestamista}" class="form-control" id="gananciasPrestamista" oninput="formatNumberInput(this, 'gananciasPrestamista')" readonly/>
+						</div>
+					</div>
+
+
+					<input type="hidden" name="montoOriginal" th:value="${montoOriginal}" />
+
+					<input type="hidden" id="valorModificadoManualmente" name="valorModificadoManualmente" value="false"/>
+
+					<input type="hidden" id="valorPagoModificado" name="valorPagoModificado"/>
+
+
+					<input type="hidden" id="tipoPagoSeleccionado" name="tipoPago" th:field="*{tipoPago}"/>
+
+
+					<label>
+						<input type="checkbox" id="incluirSeguro" th:field="*{incluirSeguro}" onchange="updateSeguro()"> Incluir Seguro
+					</label>
+					<center><footer>
+						<p>&copy; 2024 Software Préstamos. Todos los derechos reservados.</p>
+					</footer></center>
+					<div class="box-footer">
+						<input type="submit" value="Guardar" class="btn btn-primary"/>
+						<a th:href="@{/listar}" class="btn btn-warning">Atrás</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+
+	function mostrarPagoFormulario() {
+		const tipoPago = document.getElementById('tipoPago').value;
+		let valor = '';
+		switch (tipoPago) {
+			case 'diario':
+				valor = document.getElementById('pagoDiario').value;
+				break;
+			case 'semanal':
+				valor = document.getElementById('pagoSemanal').value;
+				break;
+			case 'quincenal':
+				valor = document.getElementById('pagoQuincenal').value;
+				break;
+			case 'mensual':
+				valor = document.getElementById('pagoMensual').value;
+				break;
+		}
+
+		document.getElementById('valorPago').value = valor;
+		document.getElementById('tipoPagoSeleccionado').value = tipoPago; // Guardar el tipo seleccionado
+	}
+
+	// Llamar a la función cuando cambia el tipo de pago
+	document.getElementById('tipoPago').addEventListener('change', mostrarPagoFormulario);
+
+	// Llamar inicialmente para establecer el valor por defecto
+	mostrarPagoFormulario();
+
+
+	function updateSeguro() {
+		const montoPrestamo = parseFloat(document.getElementById('montoPrestamo').value.replace(/[^\d]/g, '')) || 0;
+		const incluirSeguro = document.getElementById('incluirSeguro').checked;
+
+		let seguroCalculado = 0;
+		if (incluirSeguro && montoPrestamo >= 100000) {
+			// Aquí puedes ajustar el cálculo si el seguro depende del monto.
+			seguroCalculado = (montoPrestamo / 100000) * 4000;
+		}
+
+		document.getElementById('seguro').value = seguroCalculado.toFixed(2);
+		calculateAll();
+	}
+
+	function formatNumberInput(input, fieldId) {
+		// Remove non-numeric characters
+		const cleanValue = input.value.replace(/[^\d]/g, '');
+
+		// Format the number with thousands separator
+		if (cleanValue) {
+			input.value = new Intl.NumberFormat('es-CO').format(cleanValue);
+		} else {
+			input.value = '';
+		}
+
+		// Update the hidden field with the clean numeric value
+		const hiddenField = document.getElementById(fieldId);
+		if (hiddenField) {
+			hiddenField.value = cleanValue;
+		}
+
+		calculateAll();
+	}
+
+	function calculateDaysBetweenDates() {
+		const fechaPrestamo = new Date(document.getElementById('fechaPrestamo').value);
+		const fechaPago = new Date(document.getElementById('fechaPago').value);
+
+		if (!fechaPrestamo || !fechaPago) return 0;
+
+		const diffTime = fechaPago - fechaPrestamo;
+		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+	}
+
+	function mostrarPago() {
+		const tipoPago = document.getElementById('tipoPago').value;
+		let valorMostrar = "";
+
+		switch(tipoPago) {
+			case 'diario':
+				valorMostrar = document.getElementById('pagoDiario').value;
+				break;
+			case 'semanal':
+				valorMostrar = document.getElementById('pagoSemanal').value;
+				break;
+			case 'quincenal':
+				valorMostrar = document.getElementById('pagoQuincenal').value;
+				break;
+			case 'mensual':
+				valorMostrar = document.getElementById('pagoMensual').value;
+				break;
+		}
+
+		document.getElementById('valorPago').value = valorMostrar;
+	}
+
+
+	function validateForm() {
+		const montoPrestamo = parseFloat(document.getElementById('montoPrestamo').value) || 0;
+		const errorDiv = document.getElementById('montoPrestamoError');
+		const cantidadCaja = parseFloat(document.querySelector('[data-caja-actual]').dataset.cajaActual) || 0;
+
+		if (montoPrestamo < 100000) {
+			errorDiv.textContent = "El monto del préstamo debe ser de al menos $100,000.";
+			return false;
+		}
+
+		if (montoPrestamo > cantidadCaja) {
+			errorDiv.textContent = "Saldo insuficiente en la caja.";
+			return false;
+		}
+
+		const diasDelPrestamo = calculateDaysBetweenDates();
+		if (diasDelPrestamo <= 0) {
+			errorDiv.textContent = "La fecha de pago debe ser posterior a la fecha del préstamo.";
+			return false;
+		}
+
+		errorDiv.textContent = "";
+		return true;
+	}
+
+	// Initialize calculations when the page loads
+	document.addEventListener('DOMContentLoaded', calculateAll);
+
+	function calculateAll() {
+		// Obtener valores del formulario
+		const montoPrestamo = parseFloat(document.getElementById('montoPrestamo').value.replace(/[^\d]/g, '')) || 0;
+		const tasaInteres = parseFloat(document.getElementById('tasaInteres').value) || 0;
+		const incluirSeguro = document.getElementById('incluirSeguro').checked;
+
+		// Calcular fechas y meses
+		const fechaPrestamo = new Date(document.getElementById('fechaPrestamo').value);
+		const fechaPago = new Date(document.getElementById('fechaPago').value);
+
+		if (!fechaPrestamo || !fechaPago) return;
+
+		// Calcular meses (como en el controlador)
+		let mesesDelPrestamo = Math.max(
+				Math.ceil(
+						(fechaPago.getFullYear() - fechaPrestamo.getFullYear()) * 12 +
+						(fechaPago.getMonth() - fechaPrestamo.getMonth())
+				),
+				1
+		);
+
+		// Calcular días
+		const diasDelPrestamo = calculateDaysBetweenDates();
+
+		// Calcular interés (20% del monto)
+		const interes = Math.round((montoPrestamo * tasaInteres) / 100);
+
+		// Calcular seguro
+		let seguro = 0;
+		if (incluirSeguro && montoPrestamo >= 100000) {
+			seguro = Math.round((montoPrestamo / 100000) * 4000);
+		}
+
+		// Calcular total a pagar
+		const totalAPagar = montoPrestamo + interes + seguro;
+
+		// Obtener tipo de pago
+		const tipoPago = document.getElementById('tipoPago').value;
+
+		// Calcular valor de pago según tipo
+		let valorPago;
+		const pagoDiario = Math.round(totalAPagar / diasDelPrestamo);
+
+		switch (tipoPago) {
+			case 'diario':
+				valorPago = pagoDiario;
+				break;
+			case 'semanal':
+				// 4 semanas por mes
+				valorPago = Math.round(totalAPagar / (4 * mesesDelPrestamo));
+				break;
+			case 'quincenal':
+				// 2 quincenas por mes
+				valorPago = Math.round(totalAPagar / (2 * mesesDelPrestamo));
+				break;
+			case 'mensual':
+				valorPago = Math.round(totalAPagar / mesesDelPrestamo);
+				break;
+			default:
+				valorPago = 0;
+		}
+
+		// Actualizar campos del formulario
+		document.getElementById('seguro').value = seguro;
+		document.getElementById('total').value = totalAPagar;
+		document.getElementById('gananciasPrestamista').value = interes;
+		document.getElementById('valorPago').value = valorPago;
+
+		// Actualizar campos de diferentes tipos de pago
+		document.getElementById('pagoDiario').value = pagoDiario;
+		document.getElementById('pagoSemanal').value = Math.round(totalAPagar / (4 * mesesDelPrestamo));
+		document.getElementById('pagoQuincenal').value = Math.round(totalAPagar / (2 * mesesDelPrestamo));
+		document.getElementById('pagoMensual').value = Math.round(totalAPagar / mesesDelPrestamo);
+	}
+
+	function calculateDaysBetweenDates() {
+		const fechaPrestamo = new Date(document.getElementById('fechaPrestamo').value);
+		const fechaPago = new Date(document.getElementById('fechaPago').value);
+
+		if (!fechaPrestamo || !fechaPago) return 0;
+
+		const diffTime = fechaPago - fechaPrestamo;
+		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+	}
+
+	function handleValorChange(input) {
+		const cleanValue = input.value.replace(/[^\d]/g, '');
+		input.value = cleanValue;
+
+		const valor = parseFloat(cleanValue);
+		const montoPrestamo = parseFloat(document.getElementById('montoPrestamo').value.replace(/[^\d]/g, '')) || 0;
+		const fechaPrestamo = new Date(document.getElementById('fechaPrestamo').value);
+		const fechaPago = new Date(document.getElementById('fechaPago').value);
+		const incluirSeguro = document.getElementById('incluirSeguro').checked;
+
+		if (!fechaPrestamo || !fechaPago || !valor || !montoPrestamo) return;
+
+		// Marcar como modificado manualmente
+		document.getElementById('valorModificadoManualmente').value = 'true';
+		document.getElementById('valorPagoModificado').value = cleanValue;
+
+		// Calcular meses
+		const mesesDelPrestamo = Math.max(
+				Math.ceil(
+						(fechaPago.getFullYear() - fechaPrestamo.getFullYear()) * 12 +
+						(fechaPago.getMonth() - fechaPrestamo.getMonth())
+				),
+				1
+		);
+
+		// Calcular total según tipo de pago
+		const tipoPago = document.getElementById('tipoPago').value;
+		let totalAPagar;
+
+		switch(tipoPago) {
+			case 'diario':
+				totalAPagar = valor * calculateDaysBetweenDates();
+				break;
+			case 'semanal':
+				totalAPagar = valor * (4 * mesesDelPrestamo);
+				break;
+			case 'quincenal':
+				totalAPagar = valor * (2 * mesesDelPrestamo);
+				break;
+			case 'mensual':
+				totalAPagar = valor * mesesDelPrestamo;
+				break;
+		}
+
+		// Calcular seguro
+		let seguro = 0;
+		if (incluirSeguro && montoPrestamo >= 100000) {
+			seguro = Math.round((montoPrestamo / 100000) * 4000);
+		}
+
+		// Calcular ganancias
+		const ganancias = Math.round(totalAPagar - montoPrestamo - seguro);
+
+		// Actualizar campos
+		document.getElementById('seguro').value = seguro;
+		document.getElementById('total').value = Math.round(totalAPagar);
+		document.getElementById('gananciasPrestamista').value = ganancias;
+		document.getElementById('valorPago').value = valor;
+	}
+
+</script>
+</body>
+</html>

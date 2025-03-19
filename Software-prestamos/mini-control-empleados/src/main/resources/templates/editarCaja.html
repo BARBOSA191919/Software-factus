@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${titulo}">Editar Dinero en Caja</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 50px; max-width: 600px; }
+    .card { border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header text-center">
+      <h4 th:text="${titulo}">Editar Dinero en Caja</h4>
+    </div>
+    <div class="card-body">
+      <form id="editarCajaForm" action="#" th:action="@{/caja/editarMonto}" method="post" onsubmit="return validateMonto();">
+        <div class="form-group">
+          <label for="cantidadActual">Monto Actual:</label>
+          <input type="text" id="cantidadActual" name="cantidadActual" class="form-control"
+                 th:value="${#numbers.formatDecimal(caja.cantidadActual, 1, 'COMMA', 2, 'POINT')}"
+                 required oninput="formatMonto(this)" />
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <a th:href="@{/listar}" class="btn btn-warning">Atrás</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function formatMonto(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value) {
+      input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    } else {
+      input.value = '';
+    }
+  }
+
+  function validateMonto() {
+    const montoInput = document.getElementById('cantidadActual');
+    let monto = montoInput.value.replace(/,/g, '');
+    if (parseFloat(monto) <= 0 || isNaN(monto)) {
+      alert('El monto debe ser mayor que cero.');
+      return false;
+    }
+    montoInput.value = monto;
+    return true; // Permitir el envío del formulario
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+package com.gestion.prestamos.controlador;
+
+import com.gestion.prestamos.entidades.Factura;
+import com.gestion.prestamos.entidades.Item;
+import com.gestion.prestamos.repositorios.FacturaRepository;
+import com.gestion.prestamos.servicio.FactusApiClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Controller
+@RequestMapping("/api/facturas")
+public class FacturaController {
+
+    @Autowired
+    private FactusApiClient factusApiClient;
+    @Autowired
+    private FacturaRepository facturaRepository;
+
+    @GetMapping("/listar")
+    @ResponseBody
+    public ResponseEntity<?> listarFacturas() {
+        try {
+            List<Map<String, Object>> simplifiedFacturas = new ArrayList<>();
+
+            List<Factura> facturas = factusApiClient.obtenerFacturas();
+
+            for (Factura f : facturas) {
+                Map<String, Object> facturaMap = new HashMap<>();
+                facturaMap.put("id", f.getId());
+                facturaMap.put("numero", f.getNumber());
+                facturaMap.put("pagos", f.getFormaPago());
+                facturaMap.put("metodopago", f.getMetodoPago());
+                facturaMap.put("apiClientName", f.getApiClientName());
+                facturaMap.put("identification", f.getIdentification());
+                facturaMap.put("documentName", f.getDocumentName());
+                facturaMap.put("graphicRepresentationName", f.getGraphicRepresentationName());
+                facturaMap.put("status", f.getStatus());
+                facturaMap.put("createdAt", f.getCreatedAt());
+                facturaMap.put("total", f.getTotal());
+
+                // Handle BillingPeriod safely
+                if (f.getBillingPeriod() != null) {
+                    facturaMap.put("startDate", f.getBillingPeriod().getStartDate());
+                    facturaMap.put("endDate", f.getBillingPeriod().getEndDate());
+                }
+
+                // Handle Cliente safely
+                if (f.getCliente() != null) {
+                    Map<String, Object> clienteMap = new HashMap<>();
+                    clienteMap.put("id", f.getCliente().getId());
+                    clienteMap.put("nombre", f.getCliente().getNombre());
+                    facturaMap.put("cliente", clienteMap);
+                }
+
+                simplifiedFacturas.add(facturaMap);
+            }
+
+            return ResponseEntity.ok(simplifiedFacturas);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al listar facturas: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/crear")
+    public String mostrarFormularioCreacion(Model model) {
+        model.addAttribute("factura", new Factura());
+        return "/Facturas/Dashboard";
+    }
+
+    @PostMapping("/crear")
+    @ResponseBody
+    public ResponseEntity<?> crearFactura(@RequestBody Factura factura) {
+        try {
+            // Validar que la factura tenga un cliente
+            if (factura.getCliente() == null || factura.getCliente().getId() == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Debe seleccionar un cliente");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+
+            // Validar que la factura tenga ítems
+            if (factura.getItems() == null || factura.getItems().isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Debe agregar al menos un producto a la factura");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+
+            // Asignar valores adicionales
+            factura.setNumber("SETP" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()); // Número de referencia único
+            factura.setCreatedAt(new Date()); // Fecha actual
+            factura.setStatus("PENDIENTE"); // Estado inicial
+
+            // Guardar la factura en la base de datos
+            factura = facturaRepository.save(factura);
+
+            // Asociar los ítems a la factura
+            for (Item item : factura.getItems()) {
+                item.setFactura(factura);
+            }
+
+            // Guardar los ítems
+            facturaRepository.save(factura);
+
+            // Devolver la respuesta exitosa
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Factura creada exitosamente");
+            response.put("id", factura.getId());
+            response.put("referenceCode", factura.getNumber());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear la factura: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Factura> getFacturaById(@PathVariable Long id) {
+        try {
+            // Replace with your actual repository or service method
+            Optional<Factura> facturaOptional = facturaRepository.findById(id);
+
+            if (facturaOptional.isPresent()) {
+                return ResponseEntity.ok(facturaOptional.get());
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarFacturaRest(@PathVariable Long id, @RequestBody Map<String, Object> facturaData) {
+        try {
+            // Find existing factura
+            Optional<Factura> facturaOptional = facturaRepository.findById(id);
+            if (!facturaOptional.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Factura factura = facturaOptional.get();
+
+            // Update fields from request data
+            // You can access raw JSON fields directly from the Map
+            if (facturaData.containsKey("apiClientName")) {
+                factura.setApiClientName((String) facturaData.get("apiClientName"));
+            }
+
+            // Set date from JSON "fecha" field if present
+            if (facturaData.containsKey("fecha") && facturaData.get("fecha") != null) {
+                String fechaStr = (String) facturaData.get("fecha");
+                if (!fechaStr.isEmpty()) {
+                    try {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                        Date fecha = format.parse(fechaStr);
+                        factura.setCreatedAt(fecha); // Update createdAt with the fecha value
+                    } catch (ParseException e) {
+                        // Handle date parsing error
+                        return ResponseEntity.badRequest().body("Formato de fecha inválido");
+                    }
+                }
+            }
+
+            // ... update other fields ...
+
+            String respuesta = factusApiClient.actualizarFacturaEnFactus(id, factura);
+            return ResponseEntity.ok(respuesta);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar la factura: " + e.getMessage());
+        }
+    }
+
+
+    @DeleteMapping("/eliminar/{id}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarFacturaNoValidada(@PathVariable Long id) {
+        try {
+            // Obtener la factura de la base de datos local
+            Optional<Factura> facturaOpt = facturaRepository.findById(id);
+            if (!facturaOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada"));
+            }
+
+            Factura factura = facturaOpt.get();
+            String referenceCode = factura.getNumber(); // Obtener el referenceCode
+
+            // Eliminar la factura en Factus
+            String respuestaFactus = factusApiClient.eliminarFacturaNoValidada(referenceCode);
+
+            // Devolver la respuesta
+            return ResponseEntity.ok(Map.of(
+                    "message", "Factura eliminada exitosamente",
+                    "respuestaFactus", respuestaFactus
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al eliminar la factura: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/validar-y-descargar/{id}")
+    @ResponseBody
+    public ResponseEntity<?> validarYDescargarFactura(@PathVariable Long id) {
+        try {
+            // Obtener la factura de la base de datos local
+            Optional<Factura> facturaOpt = facturaRepository.findById(id);
+            if (!facturaOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada"));
+            }
+
+            Factura factura = facturaOpt.get();
+            String referenceCode = factura.getNumber(); // Usar el referenceCode
+
+            // Validar la factura en Factus
+            factusApiClient.validarFactura(referenceCode); // Pasar el referenceCode
+            Thread.sleep(2000); // Esperar un momento para que se procese
+
+            // Descargar la factura
+            byte[] documentoPdf = factusApiClient.descargarFacturaPdf(referenceCode); // Pasar el referenceCode
+
+            if (documentoPdf != null && documentoPdf.length > 0) {
+                return ResponseEntity.ok()
+                        .header("Content-Type", "application/pdf")
+                        .header("Content-Disposition", "attachment; filename=factura-" + referenceCode + ".pdf")
+                        .body(documentoPdf);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "No se pudo generar el PDF de la factura"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al validar y descargar la factura: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/ver/{id}")
+    @ResponseBody
+    public ResponseEntity<?> verFactura(@PathVariable Long id) {
+        try {
+            // Primero obtener la factura de tu base de datos local
+            Optional<Factura> facturaOpt = facturaRepository.findById(id);
+            if (!facturaOpt.isPresent()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Factura no encontrada");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+
+            Factura factura = facturaOpt.get();
+
+            // Verificar si la factura ya ha sido procesada en Factus
+            if (factura.getStatus() != null && factura.getStatus().equals("CREADA")) {
+                try {
+                    // Si la factura está ya creada en Factus, intenta obtener los detalles
+                    Map<String, Object> facturaDetalle = factusApiClient.obtenerDetalleFactura(id);
+
+                    // Agregar los ítems de la factura local al detalle
+                    facturaDetalle.put("items", factura.getItems().stream().map(item -> {
+                        Map<String, Object> itemMap = new HashMap<>();
+                        itemMap.put("id", item.getId());
+                        itemMap.put("producto", item.getProducto().getName());
+                        itemMap.put("cantidad", item.getCantidad());
+                        itemMap.put("precio", item.getPrecio());
+                        itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
+                        itemMap.put("subtotal", item.getSubtotal());
+                        itemMap.put("iva", item.getIva());
+                        itemMap.put("total", item.getTotal());
+                        return itemMap;
+                    }).collect(Collectors.toList()));
+
+                    return ResponseEntity.ok(facturaDetalle);
+                } catch (Exception e) {
+                    // Si hay error al obtener la factura de Factus, devuelve información básica con ítems locales
+                    Map<String, Object> facturaBasica = new HashMap<>();
+                    facturaBasica.put("id", factura.getId());
+                    facturaBasica.put("referenceCode", factura.getNumber());
+                    facturaBasica.put("documentName", factura.getDocumentName());
+                    facturaBasica.put("status", factura.getStatus());
+                    facturaBasica.put("createdAt", factura.getCreatedAt());
+                    facturaBasica.put("items", factura.getItems().stream().map(item -> {
+                        Map<String, Object> itemMap = new HashMap<>();
+                        itemMap.put("id", item.getId());
+                        itemMap.put("producto", item.getProducto().getName());
+                        itemMap.put("cantidad", item.getCantidad());
+                        itemMap.put("precio", item.getPrecio());
+                        itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
+                        itemMap.put("subtotal", item.getSubtotal());
+                        itemMap.put("iva", item.getIva());
+                        itemMap.put("total", item.getTotal());
+                        return itemMap;
+                    }).collect(Collectors.toList()));
+                    facturaBasica.put("error", "No se pudo obtener detalle completo de Factus: " + e.getMessage());
+
+                    return ResponseEntity.ok(facturaBasica);
+                }
+            } else {
+                // Si la factura no ha sido procesada en Factus, devuelve información básica con ítems locales
+                Map<String, Object> facturaBasica = new HashMap<>();
+                facturaBasica.put("id", factura.getId());
+                facturaBasica.put("referenceCode", factura.getNumber());
+                facturaBasica.put("documentName", factura.getDocumentName());
+                facturaBasica.put("status", factura.getStatus() != null ? factura.getStatus() : "PENDIENTE");
+                facturaBasica.put("createdAt", factura.getCreatedAt());
+                facturaBasica.put("items", factura.getItems().stream().map(item -> {
+                    Map<String, Object> itemMap = new HashMap<>();
+                    itemMap.put("id", item.getId());
+                    itemMap.put("producto", item.getProducto().getName());
+                    itemMap.put("cantidad", item.getCantidad());
+                    itemMap.put("precio", item.getPrecio());
+                    itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
+                    itemMap.put("subtotal", item.getSubtotal());
+                    itemMap.put("iva", item.getIva());
+                    itemMap.put("total", item.getTotal());
+                    return itemMap;
+                }).collect(Collectors.toList()));
+                facturaBasica.put("mensaje", "Esta factura aún no ha sido procesada en el sistema Factus");
+
+                return ResponseEntity.ok(facturaBasica);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al obtener la factura: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    @GetMapping("/descargar/{id}")
+    @ResponseBody
+    public ResponseEntity<?> descargarFactura(@PathVariable Long id, @RequestParam(required = false) boolean forceValidate) {
+        try {
+            // Obtener la factura de la base de datos local
+            Optional<Factura> facturaOpt = facturaRepository.findById(id);
+            if (!facturaOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada en el sistema"));
+            }
+
+            Factura factura = facturaOpt.get();
+            String referenceCode = factura.getNumber(); // Usar el referenceCode, no el ID local
+
+            // Validar la factura si es necesario
+            if (forceValidate || "PENDIENTE".equals(factura.getStatus())) {
+                try {
+                    factusApiClient.validarFactura(referenceCode); // Usar el referenceCode
+                    Thread.sleep(1000); // Esperar un momento para que se procese
+                } catch (Exception e) {
+                    System.err.println("Error al validar la factura: " + e.getMessage());
+                }
+            }
+
+            // Descargar el PDF desde Factus
+            byte[] documentoPdf = factusApiClient.descargarFacturaPdf(referenceCode); // Usar el referenceCode
+
+            if (documentoPdf != null && documentoPdf.length > 0) {
+                // Actualizar el estado de la factura
+                if (!"CREADA".equals(factura.getStatus())) {
+                    factura.setStatus("CREADA");
+                    facturaRepository.save(factura);
+                }
+
+                return ResponseEntity.ok()
+                        .header("Content-Type", "application/pdf")
+                        .header("Content-Disposition", "attachment; filename=factura-" + referenceCode + ".pdf")
+                        .body(documentoPdf);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of(
+                                "error", "No se pudo generar el PDF de la factura",
+                                "id", id,
+                                "status", factura.getStatus(),
+                                "message", "La factura puede necesitar ser validada primero"
+                        ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al descargar la factura: " + e.getMessage()));
+        }
+    }
+
+    // Nuevo metodo para verificar el estado de procesamiento de una factura
+    @GetMapping("/estado-procesamiento/{id}")
+    @ResponseBody
+    public ResponseEntity<?> verificarEstadoProcesamiento(@PathVariable Long id) {
+        try {
+            Optional<Factura> facturaOpt = facturaRepository.findById(id);
+            if (!facturaOpt.isPresent()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Factura no encontrada");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+
+            Factura factura = facturaOpt.get();
+            String referenceCode = factura.getNumber();
+
+            if (referenceCode == null || referenceCode.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "La factura no tiene un número de referencia válido");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+
+            // Verificar el estado de la factura en Factus
+            String estadoFactus;
+            try {
+                estadoFactus = factusApiClient.obtenerEstadoFactura(referenceCode);
+            } catch (Exception e) {
+                estadoFactus = "NO_ENCONTRADA";
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", id);
+            response.put("referenceCode", referenceCode);
+            response.put("estadoLocal", factura.getStatus());
+            response.put("estadoFactus", estadoFactus);
+            response.put("fechaCreacion", factura.getCreatedAt());
+
+            // Determinar si está lista para descargar
+            boolean listaParaDescargar = "CREADA".equals(factura.getStatus()) ||
+                    "APPROVED".equals(estadoFactus) ||
+                    "COMPLETED".equals(estadoFactus);
+
+            response.put("listaParaDescargar", listaParaDescargar);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al verificar estado de procesamiento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="https://img.icons8.com/?size=80&id=e4rcHo2vRn-M&format=png" type="image/x-icon"><!--para agregar el icono a la pagina -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+	<link rel="stylesheet"
+		  href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+		  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+		  crossorigin="anonymous">
+	<title>AGREGAR PRÉSTAMOS</title>
+
+	<style>
+		body {
+			background-size: cover;
+			color: #000000;
+			font-family: Arial, sans-serif;
+		}
+
+		.container {
+
+			padding: 20px;
+			border-radius: 8px;
+			margin-top: 20px;
+			margin-bottom: 20px;
+			opacity: 0.98; /* Ajusta el valor de opacidad según tu preferencia */
+		}
+
+		.alert {
+			margin-bottom: 20px;
+		}
+	</style>
+</head>
+
+<body>
+
+<div class="container">
+	<div th:if="${success != null}"
+		 class="alert alert-primary alert-dismissible fade show">
+		[[${success}]]>
+		<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close"></button>
+	</div>
+</div>
+
+<div class="container">
+	<div th:if="${error != null}"
+		 class="alert alert-danger alert-dismissible fade show">
+		[[${error}]]>
+		<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close"></button>
+	</div>
+</div>
+
+<div class="container">
+	<div th:if="${warning != null}"
+		 class="alert alert-warning alert-dismissible fade show">
+		[[${warning}]]>
+		<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close"></button>
+	</div>
+</div>
+
+<div class="container">
+	<div th:if="${info != null}"
+		 class="alert alert-info alert-dismissible fade show">
+		[[${info}]]>
+		<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close"></button>
+	</div>
+</div>
+
+</body>
+</html>
