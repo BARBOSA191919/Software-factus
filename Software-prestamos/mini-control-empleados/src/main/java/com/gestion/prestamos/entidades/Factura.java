@@ -1,9 +1,11 @@
 package com.gestion.prestamos.entidades;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -14,42 +16,46 @@ public class Factura {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String status;
-    private String documentName;
-    private String number;
-    private String apiClientName;
-    private String identification;
-    private String graphicRepresentationName;
-    private String formaPago;       // Forma de pago
-    private String metodoPago;      // Metodo de pago
-    private Date createdAt;
+        private String status;
+        private String documentName;
+        private String number;
+        private String graphicRepresentationName;
+        private String formaPago;
+        @JsonProperty("metodo")
+        @Column(name = "metodo_pago")
+        private String metodoPago;
+        private Date createdAt;
 
-    // Nuevos campos
-    private String document; // Factura electrónica de venta
-    private Long numberingRangeId; // ID del rango de numeración
-    private String referenceCode; // Código único de referencia
-    private String observation; // Observación
+        // Campos para Factus
+        private String document; // Factura electrónica de venta
+        @Column(name = "numbering_range_id") // Asegúrate de que el nombre coincida
+        private Long numberingRangeId; // Debe ser Long para coincidir con el frontend
+        private String referenceCode;
+        private String observation;
 
-    // Totales de la factura
-    private BigDecimal subtotal;
-    private BigDecimal totalIva;
-    private BigDecimal totalDescuento;
-    private BigDecimal total;
+        // Totales
+        private BigDecimal subtotal;
+        private BigDecimal totalIva;
+        private BigDecimal totalDescuento;
+        private BigDecimal total;
 
-    @Embedded
-    private BillingPeriod billingPeriod;
+        @Embedded
+        private BillingPeriod billingPeriod;
 
-    public Factura() {
-        this.number = UUID.randomUUID().toString(); // Genera un UUID único
-    }
+        @ManyToOne
+        @JoinColumn(name = "cliente_id")
+        private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+        @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+        @JsonManagedReference
+        private List<Item> items = new ArrayList<>(); // Inicializamos la lista
 
-    @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Indica que este es el lado "principal" de la relación
-    private List<Item> items;
+        public Factura() {
+            this.number = "FAC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            this.status = "PENDIENTE";
+            this.createdAt = new Date();
+        }
+
 
     // Asegúrate de tener este metodo helper
     public void addItem(Item item) {
@@ -89,21 +95,7 @@ public class Factura {
         this.number = number;
     }
 
-    public String getApiClientName() {
-        return apiClientName;
-    }
 
-    public void setApiClientName(String apiClientName) {
-        this.apiClientName = apiClientName;
-    }
-
-    public String getIdentification() {
-        return identification;
-    }
-
-    public void setIdentification(String identification) {
-        this.identification = identification;
-    }
 
     public String getGraphicRepresentationName() {
         return graphicRepresentationName;
@@ -224,4 +216,6 @@ public class Factura {
     public void setObservation(String observation) {
         this.observation = observation;
     }
+
+
 }

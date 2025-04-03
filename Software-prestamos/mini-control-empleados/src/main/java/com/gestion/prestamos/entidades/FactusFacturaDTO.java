@@ -3,12 +3,13 @@ package com.gestion.prestamos.entidades;
 import java.util.List;
 
 public class FactusFacturaDTO {
-    private String document;
+
+    private String document; // "01" para factura electrónica
+    private Integer numbering_range_id;
     private String reference_code;
     private String observation;
-    private String payment_form;
-    private String payment_method_code;
-    private BillingPeriodDTO billing_period;
+    private String payment_form; // "1" Contado, "2" Crédito
+    private String payment_method_code; // "10" Efectivo, "31" Transferencia
     private CustomerDTO customer;
     private List<ItemDTO> items;
 
@@ -49,12 +50,12 @@ public class FactusFacturaDTO {
 
     // Nested CustomerDTO class
     public static class CustomerDTO {
-        private String identification_document_id;
+        private String identification_document_id; // "3" Cédula
         private String identification;
         private String names;
         private String email;
-        private String phone;
         private String address;
+        private String legal_organization_id; // "1" Natural, "2" Jurídica
         private String tribute_id;
 
 
@@ -91,12 +92,8 @@ public class FactusFacturaDTO {
             this.email = email;
         }
 
-        public String getPhone() {
-            return phone;
-        }
-
-        public void setPhone(String phone) {
-            this.phone = phone;
+        public String getLegal_organization_id() {
+            return legal_organization_id;
         }
 
         public String getAddress() {
@@ -127,17 +124,16 @@ public class FactusFacturaDTO {
 
     // Nested ItemDTO class
     public static class ItemDTO {
-        private String code_reference;
+        private String code_reference; // ID o código del producto
         private String name;
         private Double price;
         private Integer quantity;
-        private Double discount_rate;
-        private Double tax_rate;
-        private String unit_measure_id;
-        private String standard_code_id;
-        private Integer is_excluded;
-        private String tribute_id;
-
+        private Double discount_rate; // Porcentaje de descuento
+        private Double tax_rate; // Porcentaje de IVA
+        private String unit_measure_id; // "70" Unidad
+        private String standard_code_id; // "1" por defecto
+        private Integer is_excluded; // 0 No excluido, 1 Excluido
+        private String tribute_id; // "1" IVA
 
         // Getters and setters
         public String getCode_reference() {
@@ -264,12 +260,12 @@ public class FactusFacturaDTO {
         this.payment_method_code = payment_method_code;
     }
 
-    public BillingPeriodDTO getBilling_period() {
-        return billing_period;
+    public Integer getNumbering_range_id() {
+        return numbering_range_id;
     }
 
-    public void setBilling_period(BillingPeriodDTO billing_period) {
-        this.billing_period = billing_period;
+    public void setNumbering_range_id(Integer numbering_range_id) {
+        this.numbering_range_id = numbering_range_id;
     }
 
     public CustomerDTO getCustomer() {

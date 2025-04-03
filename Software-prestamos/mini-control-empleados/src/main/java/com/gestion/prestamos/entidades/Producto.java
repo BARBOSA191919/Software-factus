@@ -10,14 +10,11 @@ public class Producto {
     private Long id;
     private String name;
     private BigDecimal price;
-    private String measureId;
-    private Boolean excluded;
-    private String withholdingTaxRate;
-    private Double taxRate;
+    private String unitMeasureId; // "70" para unidad, según Factus
+    private String standardCodeId; // "1" por defecto
+    private Double taxRate; // Porcentaje de IVA (ej. 19.0)
+    private Boolean excluded; // Excluido de IVA
 
-    // Nuevos campos
-    private String standardCodeId; // Estándar de adopción del contribuyente
-    private String unitMeasureId; // Unidad de medida
 
     // Getters y Setters
     public Long getId() {
@@ -44,28 +41,12 @@ public class Producto {
         this.price = price;
     }
 
-    public String getMeasureId() {
-        return measureId;
-    }
-
-    public void setMeasureId(String measureId) {
-        this.measureId = measureId;
-    }
-
     public Boolean getExcluded() {
-        return excluded != null ? excluded : false;
+        return excluded;
     }
 
     public void setExcluded(Boolean excluded) {
         this.excluded = excluded;
-    }
-
-    public String getWithholdingTaxRate() {
-        return withholdingTaxRate;
-    }
-
-    public void setWithholdingTaxRate(String withholdingTaxRate) {
-        this.withholdingTaxRate = withholdingTaxRate;
     }
 
     public Double getTaxRate() {

@@ -17,14 +17,14 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "factura_id")
-    @JsonBackReference // Indica que este es el lado "secundario" de la relación
+    @JsonBackReference
     private Factura factura;
 
     private BigDecimal cantidad;
-    private Double precio;
-    private Double porcentajeDescuento;
+    private BigDecimal precio;
+    private BigDecimal porcentajeDescuento;
     private BigDecimal subtotal;
-    private BigDecimal iva;
+    private BigDecimal iva; // Valor del IVA
     private BigDecimal total;
 
     public Long getId() {
@@ -59,19 +59,19 @@ public class Item {
         this.cantidad = cantidad;
     }
 
-    public Double getPrecio() {
+    public BigDecimal getPrecio() {
         return precio;
     }
 
-    public void setPrecio(Double precio) {
+    public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
 
-    public Double getPorcentajeDescuento() {
+    public BigDecimal getPorcentajeDescuento() {
         return porcentajeDescuento;
     }
 
-    public void setPorcentajeDescuento(Double porcentajeDescuento) {
+    public void setPorcentajeDescuento(BigDecimal porcentajeDescuento) {
         this.porcentajeDescuento = porcentajeDescuento;
     }
 

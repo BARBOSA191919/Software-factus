@@ -791,11 +791,11 @@
 
                         tbody.append(`
                     <tr>
-                        <td>${factura.numero || 'N/A'}</td>  <!-- Asegúrate de que este campo esté correctamente mapeado -->
+                        <td>${factura.numero || 'N/A'}</td>
                         <td>${clienteNombre}</td>
                         <td>${factura.identification || 'N/A'}</td>
                         <td>${factura.pagos || 'N/A'}</td>
-                          <td>${factura.metodopago || 'N/A'}</td>
+                        <td>${factura.metodopago || 'N/A'}</td>
                         <td>${factura.createdAt || 'N/A'}</td>
                         <td>${factura.status || 'N/A'}</td>
                         <td>${fecha}</td>
@@ -807,9 +807,9 @@
                             <button class="btn btn-sm btn-info view-factura" data-id="${factura.id}">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-secondary download-factura" data-id="${factura.id}" onclick="descargarFactura(${factura.id})">
-                                <i class="fas fa-download"></i>
-                            </button>
+                       <button class="btn btn-sm btn-secondary download-factura" data-id="${factura.numero}">
+                                    <i class="fas fa-download"></i>
+                                </button>
                             <button class="btn btn-sm btn-danger delete-factura" data-id="${factura.id}">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -846,7 +846,7 @@
 
                     $('.download-factura').click(function() {
                         const id = $(this).data('id');
-                        descargarFactura(id);
+                        descargarFactura(id); // Ahora sí puede acceder a la función
                     });
                 },
                 error: function(xhr, status, error) {
@@ -1005,10 +1005,9 @@
             });
         }
 
-        function descargarFactura(id) {
-            console.log("Descargando factura ID:", id);
+        function descargarFactura(number) {
+            console.log("Descargando factura número:", number);
 
-            // Mostrar un indicador de carga
             Swal.fire({
                 title: 'Generando PDF',
                 text: 'Espere por favor...',
@@ -1018,71 +1017,42 @@
                 }
             });
 
-            // Hacer una solicitud para verificar el estado de la factura primero
-            fetch(`/api/facturas/estado-procesamiento/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.listaParaDescargar) {
-                        // Si está lista para descargar, usamos el método de descarga directa
-                        iniciarDescargaDirecta(id);
-                    } else {
-                        // Si no está lista, intentamos validar y luego descargar
-                        return fetch(`/api/facturas/validar-y-descargar/${id}`, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                            }
-                        })
-                            .then(response => {
-                                if (response.ok) {
-                                    if (response.headers.get('Content-Type').includes('application/pdf')) {
-                                        return response.blob().then(blob => {
-                                            descargarBlob(blob, `factura-${id}.pdf`);
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Descarga Completada',
-                                                text: 'El PDF de la factura se ha descargado correctamente',
-                                                confirmButtonColor: '#3085d6',
-                                                timer: 2000
-                                            });
-                                        });
-                                    } else {
-                                        return response.json().then(errorData => {
-                                            if (response.status === 202 && errorData.retry) {
-                                                // La factura está en procesamiento, mostramos mensaje y programamos reintento
-                                                Swal.fire({
-                                                    icon: 'info',
-                                                    title: 'Procesando factura',
-                                                    text: errorData.message || 'La factura está siendo procesada. Por favor espere.',
-                                                    confirmButtonText: 'Reintentar',
-                                                    timer: 5000,
-                                                    timerProgressBar: true
-                                                }).then((result) => {
-                                                    if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
-                                                        descargarFactura(id); // Reintentar
-                                                    }
-                                                });
-                                            } else {
-                                                mostrarError(errorData.error || 'Error al procesar la factura');
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    throw new Error('Error en la solicitud');
-                                }
-                            });
+            fetch(`/api/facturas/factura-download/${number}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token') // Si usas token
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || 'Error al descargar el PDF');
+                        });
                     }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `factura-${number}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    Swal.close();
                 })
                 .catch(error => {
-                    console.error("Error al verificar estado de la factura:", error);
+                    console.error("Error al descargar el PDF:", error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'No se pudo verificar el estado de la factura. Intente nuevamente.',
+                        text: error.message || 'No se pudo descargar el PDF. Intente nuevamente.',
                         confirmButtonColor: '#3085d6'
                     });
                 });
         }
+
 
         function iniciarDescargaDirecta(id) {
             // Crear un enlace para la descarga en lugar de un iframe
@@ -1797,50 +1767,78 @@
 
             const factura = {
                 cliente: {
-                    id: clienteId,
-                    nombre: clienteSeleccionado?.nombre,
-                    correo: clienteSeleccionado?.correo,
-                    direccion: clienteSeleccionado?.direccion,
-                    tipoCliente: clienteSeleccionado?.tipoCliente
+                    id: 10,
+                    nombre: "Julian Montenegro Pinto",
+                    correo: "julianpinto77@gmail.com",
+                    direccion: "calle 49 # guadaperra 123 los mas gays",
+                    tipoCliente: "Persona Natural",
+                    identificacion: "10003876652",
                 },
-                apiClientName: $('#factura-api-client-name').val(),
-                documentName: $('#factura-document-name').val(),
-                graphicRepresentationName: $('#factura-graphic-representation').val(),
-                identification: $('#factura-identification').val(),
-                formaPago: $('#factura-forma-pago').val(),
-                Pagos: $('#factura-metodo-pago').val(),
-                fecha: $('#factura-fecha').val(),
-                status: $('#factura-status').text(),
-                numero: $('#factura-numero').text(),
+                documentName: "Factus",
+                graphicRepresentationName: "PDF",
+                formaPago: "Contado",
+                metodo: "Credito",
                 createdAt: new Date().toISOString(),
-
-                // Campos automáticos nuevos
-                document: $('#factura-document').val(),
-                numberingRangeId: $('#factura-numbering-range-id').val(),
-                referenceCode: $('#factura-reference-code').val(),
-                observation: $('#factura-observation').val(),
-
-                billingPeriod: {
-                    startDate: startDate,
-                    endDate: endDate
-                },
-                subtotal: parseFloat(subtotal),
-                totalIva: parseFloat(totalIva),
-                totalDescuento: parseFloat(totalDescuento),
-                total: parseFloat(total),
-                items: facturaItems.map(item => ({
+                document: "Factura electrónica de venta",
+                numberingRangeId: 128,
+                referenceCode: "REF-" + Date.now(),
+                observation: "Debe o se envarga a la hembra",
+                subtotal: 100000,
+                totalIva: 19000,
+                totalDescuento: 0,
+                total: 119000,
+                items: [{
                     producto: {
-                        id: item.id
+                        id: 5,
+                        name: "smart watch",
+                        price: 1500000,
+                        taxRate: 19.0
                     },
-                    cantidad: item.quantity,
-                    precio: item.price,
-                    porcentajeDescuento: item.discount,
-                    subtotal: item.price * item.quantity,
-                    iva: (item.price * item.quantity) * (item.taxRate / 100),
-                    total: (item.price * item.quantity) * (1 + item.taxRate / 100)
-                }))
+                    cantidad: 1,
+                    precio: 100000,
+                    porcentajeDescuento: 0,
+                    subtotal: 100000,
+                    iva: 19000,
+                    total: 119000
+                }]
             };
 
+// Crear nueva factura
+            $.ajax({
+                url: '/api/facturas/crear',
+                method: 'POST',
+                data: JSON.stringify(factura),
+                contentType: 'application/json',
+                success: function(response) {
+                    $('#facturaModal').modal('hide');
+                    loadFacturas(); // Recargar lista de facturas
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: 'Factura creada correctamente',
+                        confirmButtonColor: '#3085d6'
+                    });
+                },
+                error: function(xhr, status, error) {
+                    let errorMsg = 'Error al crear la factura';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg += ': ' + xhr.responseJSON.error; // Mostrar el mensaje detallado del backend
+                    } else {
+                        errorMsg += ': ' + (xhr.statusText || 'Error desconocido');
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        confirmButtonColor: '#d33'
+                    });
+
+                    console.error("Error completo:", xhr.responseText);
+                    console.error("Estado:", status);
+                    console.error("Error:", error);
+                }
+            });
             console.log("Enviando factura:", JSON.stringify(factura));
 
             if (id) {
@@ -1948,9 +1946,9 @@
                             }
 
                             // Establecer los demás campos de la factura
-                            // Forma de pago y método de pago
+                            // Forma de pago y metodo de pago
                             $('#factura-forma-pago').val(factura.formaPago);
-                            $('#factura-metodo-pago').val(factura.metodoPago || factura.Pagos);
+                            $('#factura-metodo-pago').val(factura.metodo);
 
                             // Fecha principal de la factura
                             if (factura.fecha) {

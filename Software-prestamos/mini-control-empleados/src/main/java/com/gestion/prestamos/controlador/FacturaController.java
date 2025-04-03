@@ -1,16 +1,16 @@
 package com.gestion.prestamos.controlador;
 
 import com.gestion.prestamos.entidades.Factura;
-import com.gestion.prestamos.entidades.Item;
 import com.gestion.prestamos.repositorios.FacturaRepository;
 import com.gestion.prestamos.servicio.FactusApiClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,6 +26,9 @@ public class FacturaController {
     @Autowired
     private FacturaRepository facturaRepository;
 
+    // Define el logger
+    private static final Logger logger = LoggerFactory.getLogger(FacturaController.class);
+
     @GetMapping("/listar")
     @ResponseBody
     public ResponseEntity<?> listarFacturas() {
@@ -40,8 +43,6 @@ public class FacturaController {
                 facturaMap.put("numero", f.getNumber());
                 facturaMap.put("pagos", f.getFormaPago());
                 facturaMap.put("metodopago", f.getMetodoPago());
-                facturaMap.put("apiClientName", f.getApiClientName());
-                facturaMap.put("identification", f.getIdentification());
                 facturaMap.put("documentName", f.getDocumentName());
                 facturaMap.put("graphicRepresentationName", f.getGraphicRepresentationName());
                 facturaMap.put("status", f.getStatus());
@@ -84,51 +85,28 @@ public class FacturaController {
     @ResponseBody
     public ResponseEntity<?> crearFactura(@RequestBody Factura factura) {
         try {
-            // Validar que la factura tenga un cliente
-            if (factura.getCliente() == null || factura.getCliente().getId() == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Debe seleccionar un cliente");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            if (factura == null) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("error", "La factura no puede ser nula"));
             }
 
-            // Validar que la factura tenga ítems
-            if (factura.getItems() == null || factura.getItems().isEmpty()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Debe agregar al menos un producto a la factura");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
+            factusApiClient.eliminarTodasLasFacturasPendientes();
+            String respuestaFactus = factusApiClient.crearFacturaEnFactus(factura);
 
-            // Asignar valores adicionales
-            factura.setNumber("SETP" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()); // Número de referencia único
-            factura.setCreatedAt(new Date()); // Fecha actual
-            factura.setStatus("PENDIENTE"); // Estado inicial
-
-            // Guardar la factura en la base de datos
-            factura = facturaRepository.save(factura);
-
-            // Asociar los ítems a la factura
-            for (Item item : factura.getItems()) {
-                item.setFactura(factura);
-            }
-
-            // Guardar los ítems
-            facturaRepository.save(factura);
-
-            // Devolver la respuesta exitosa
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Factura creada exitosamente");
             response.put("id", factura.getId());
             response.put("referenceCode", factura.getNumber());
+            response.put("respuestaFactus", respuestaFactus);
 
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        } catch (RuntimeException e) {
             e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error al crear la factura: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "Error al crear la factura: " + e.getMessage()));
         }
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Factura> getFacturaById(@PathVariable Long id) {
@@ -157,11 +135,6 @@ public class FacturaController {
 
             Factura factura = facturaOptional.get();
 
-            // Update fields from request data
-            // You can access raw JSON fields directly from the Map
-            if (facturaData.containsKey("apiClientName")) {
-                factura.setApiClientName((String) facturaData.get("apiClientName"));
-            }
 
             // Set date from JSON "fecha" field if present
             if (facturaData.containsKey("fecha") && facturaData.get("fecha") != null) {
@@ -402,57 +375,38 @@ public class FacturaController {
         }
     }
 
-    // Nuevo metodo para verificar el estado de procesamiento de una factura
-    @GetMapping("/estado-procesamiento/{id}")
-    @ResponseBody
-    public ResponseEntity<?> verificarEstadoProcesamiento(@PathVariable Long id) {
+
+
+
+    @GetMapping("/factura-download/{number}")
+    public ResponseEntity<?> descargarFacturaPdf(@PathVariable String number) {
         try {
-            Optional<Factura> facturaOpt = facturaRepository.findById(id);
-            if (!facturaOpt.isPresent()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Factura no encontrada");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            // Obtener el PDF desde la API de Factus
+            byte[] pdfBytes = factusApiClient.descargarFacturaPdf(number);
+
+            // Verificar que el PDF no esté vacío
+            if (pdfBytes != null && pdfBytes.length > 0) {
+                return ResponseEntity.ok()
+                        .header("Content-Type", "application/pdf")
+                        .header("Content-Disposition", "attachment; filename=factura-" + number + ".pdf")
+                        .body(pdfBytes);
+            } else {
+                // Devuelve un JSON en caso de error
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "No se pudo generar el PDF de la factura");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(errorResponse);
             }
-
-            Factura factura = facturaOpt.get();
-            String referenceCode = factura.getNumber();
-
-            if (referenceCode == null || referenceCode.isEmpty()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "La factura no tiene un número de referencia válido");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
-
-            // Verificar el estado de la factura en Factus
-            String estadoFactus;
-            try {
-                estadoFactus = factusApiClient.obtenerEstadoFactura(referenceCode);
-            } catch (Exception e) {
-                estadoFactus = "NO_ENCONTRADA";
-            }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", id);
-            response.put("referenceCode", referenceCode);
-            response.put("estadoLocal", factura.getStatus());
-            response.put("estadoFactus", estadoFactus);
-            response.put("fechaCreacion", factura.getCreatedAt());
-
-            // Determinar si está lista para descargar
-            boolean listaParaDescargar = "CREADA".equals(factura.getStatus()) ||
-                    "APPROVED".equals(estadoFactus) ||
-                    "COMPLETED".equals(estadoFactus);
-
-            response.put("listaParaDescargar", listaParaDescargar);
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error al verificar estado de procesamiento: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            // Log del error
+            logger.error("Error al descargar el PDF de la factura " + number, e);
+
+            // Devuelve un JSON en caso de error
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error al descargar el PDF: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse);
         }
     }
-
 
 }

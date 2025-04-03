@@ -42,9 +42,7 @@ public class ProductoService {
                     Producto producto = new Producto();
                     producto.setName(dto.getName());
                     producto.setPrice(dto.getPrice());
-                    producto.setMeasureId(dto.getMeasureId());
                     producto.setExcluded(dto.getExcluded());
-                    producto.setWithholdingTaxRate(dto.getWithholdingTaxRate());
                     producto.setTaxRate(dto.getTaxRate());
                     return producto;
                 })

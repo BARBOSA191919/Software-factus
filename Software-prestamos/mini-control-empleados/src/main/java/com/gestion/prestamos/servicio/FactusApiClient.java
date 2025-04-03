@@ -1,11 +1,10 @@
 package com.gestion.prestamos.servicio;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gestion.prestamos.config.FactusConfig;
-import com.gestion.prestamos.entidades.Factura;
-import com.gestion.prestamos.entidades.FactusFacturaDTO;
-import com.gestion.prestamos.entidades.Item;
+import com.gestion.prestamos.entidades.*;
 import com.gestion.prestamos.repositorios.FacturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -107,6 +106,7 @@ public class FactusApiClient {
             throw new RuntimeException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
     }
+
     public String obtenerEstadoFactura(String referenceCode) {
         try {
             String token = obtenerTokenDeAcceso();
@@ -135,35 +135,31 @@ public class FactusApiClient {
 
     @Transactional
     public String crearFacturaEnFactus(Factura factura) {
-        // Primero guardar localmente
-        factura = facturaRepository.save(factura);
-
-
-        // Asociar items
-        if (factura.getItems() != null) {
-            for (Item item : factura.getItems()) {
-                item.setFactura(factura);
-            }
+        // Validar factura antes de procesarla
+        if (factura == null || factura.getCliente() == null || factura.getItems() == null || factura.getItems().isEmpty()) {
+            throw new IllegalArgumentException("La factura, cliente o items no pueden ser nulos o vacíos");
         }
 
-        factura = facturaRepository.save(factura);
-
+        // Asociar items y guardar localmente
+        factura.getItems().forEach(item -> item.setFactura(factura));
+        facturaRepository.save(factura);
 
         // Convertir a DTO para Factus
-        FactusFacturaDTO factusDTO = convertirAFactusDTO(factura);
+        FactusFacturaDTO factusDTO = FacturaMapper.convertirAFactusDTO(factura);
 
+        // Configurar la solicitud a Factus
         String token = obtenerTokenDeAcceso();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // Convertir la factura a JSON
         ObjectMapper mapper = new ObjectMapper();
         String facturaJson;
         try {
-            facturaJson = mapper.writeValueAsString(factura);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al serializar la factura: " + e.getMessage());
+            facturaJson = mapper.writeValueAsString(factusDTO);
+            System.out.println("JSON enviado a Factus: " + facturaJson);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error al serializar la factura: " + e.getMessage(), e);
         }
 
         HttpEntity<String> request = new HttpEntity<>(facturaJson, headers);
@@ -171,136 +167,86 @@ public class FactusApiClient {
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            System.out.println("Respuesta de Factus: " + response.getBody());
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
+                JsonNode rootNode = mapper.readTree(response.getBody());
+                // Cambiar de data.number a data.bill.number
+                String facturaNumber = rootNode.path("data").path("bill").path("number").asText();
+
+                if (facturaNumber == null || facturaNumber.isEmpty()) {
+                    throw new RuntimeException("El número de factura devuelto por Factus es nulo o vacío");
+                }
+
+                factura.setNumber(facturaNumber);
+                factura.setStatus("VALIDADA");
+                facturaRepository.save(factura);
+
                 return response.getBody();
             } else {
-                throw new RuntimeException("Error al crear factura: " + response.getStatusCode());
+                throw new RuntimeException("Error al crear factura en Factus: " + response.getStatusCode() + " - " + response.getBody());
             }
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("Error en la llamada a Factus: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(), e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error al parsear la respuesta de Factus: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException("Error al crear la factura: " + e.getMessage());
+            throw new RuntimeException("Error inesperado al crear la factura: " + e.getMessage(), e);
         }
     }
 
-    private FactusFacturaDTO convertirAFactusDTO(Factura factura) {
-        FactusFacturaDTO dto = new FactusFacturaDTO();
+    public class FacturaMapper {
+        public static FactusFacturaDTO convertirAFactusDTO(Factura factura) {
+            FactusFacturaDTO dto = new FactusFacturaDTO();
 
-        // Valores básicos de la factura
-        dto.setDocument("01"); // Factura electrónica de venta
-        dto.setNumbering_range_id(8); // Usa el valor correcto según tu configuración
-        dto.setReference_code(factura.getNumber());
-        dto.setObservation(factura.getDocumentName() != null ?
-                factura.getDocumentName().substring(0, Math.min(factura.getDocumentName().length(), 250)) : "");
-        dto.setPayment_form(factura.getFormaPago() != null ? factura.getFormaPago() : "1");
-        dto.setPayment_method_code(factura.getMetodoPago() != null ? factura.getMetodoPago() : "10");
+            // Campos básicos
+            dto.setDocument("01");
+            // Asegurarse de que numbering_range_id no sea null
+            dto.setNumbering_range_id(factura.getNumberingRangeId() != null ? factura.getNumberingRangeId().intValue() : 128); // Valor por defecto si es null
+            dto.setReference_code(factura.getNumber() != null ? factura.getNumber() : "REF-" + System.currentTimeMillis());
+            dto.setObservation(factura.getObservation() != null ? factura.getObservation() : "");
+            dto.setPayment_form(factura.getFormaPago() != null && factura.getFormaPago().equalsIgnoreCase("Contado") ? "1" : "2");
+            dto.setPayment_method_code(factura.getMetodoPago() != null && factura.getMetodoPago().equalsIgnoreCase("Efectivo") ? "10" : "31");
 
-        // Si el pago es a crédito (payment_form = 2), incluir payment_due_date
-        if ("2".equals(dto.getPayment_form())) {
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_MONTH, 30);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            dto.setPayment_due_date(dateFormat.format(cal.getTime()));
-        }
-
-        // Periodo de facturación
-        if (factura.getBillingPeriod() != null) {
-            FactusFacturaDTO.BillingPeriodDTO billingDTO = new FactusFacturaDTO.BillingPeriodDTO();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-            billingDTO.setStart_date(dateFormat.format(factura.getBillingPeriod().getStartDate()));
-            billingDTO.setEnd_date(dateFormat.format(factura.getBillingPeriod().getEndDate()));
-            billingDTO.setStart_time("00:00:00");
-            billingDTO.setEnd_time("23:59:59");
-
-            dto.setBilling_period(billingDTO);
-        }
-
-        // CLIENTE
-        FactusFacturaDTO.CustomerDTO customerDTO = new FactusFacturaDTO.CustomerDTO();
-        customerDTO.setIdentification_document_id("3"); // ID para cédula
-        customerDTO.setIdentification(factura.getCliente() != null && factura.getCliente().getIdentificacion() != null ?
-                factura.getCliente().getIdentificacion() : "1234567890");
-
-        // Nombre según tipo de cliente
-        if (factura.getCliente() != null && factura.getCliente().getTipoCliente() != null) {
-            customerDTO.setCompany(factura.getCliente().getNombre() != null ?
-                    factura.getCliente().getNombre() : "Cliente Empresarial");
-        } else {
-            customerDTO.setNames(factura.getCliente() != null && factura.getCliente().getNombre() != null ?
-                    factura.getCliente().getNombre() : "Cliente Individual");
-        }
-
-        customerDTO.setEmail(factura.getCliente() != null && factura.getCliente().getCorreo() != null ?
-                factura.getCliente().getCorreo() : "cliente@ejemplo.com");
-        customerDTO.setPhone(factura.getCliente() != null && factura.getCliente().getTelefono() != null ?
-                factura.getCliente().getTelefono() : "1234567890");
-        customerDTO.setAddress(factura.getCliente() != null && factura.getCliente().getDireccion() != null ?
-                factura.getCliente().getDireccion() : "Dirección por defecto");
-        customerDTO.setLegal_organization_id("2"); // Código para persona natural
-
-        // IMPORTANTE: Asegurar que tribute_id esté presente y correctamente asignado
-        customerDTO.setTribute_id("21"); // Campo obligatorio para responsable de IVA
-
-        dto.setCustomer(customerDTO);
-
-        // ITEMS
-        List<FactusFacturaDTO.ItemDTO> itemsDTO = new ArrayList<>();
-
-        if (factura.getItems() != null && !factura.getItems().isEmpty()) {
-            for (Item item : factura.getItems()) {
-                FactusFacturaDTO.ItemDTO itemDTO = new FactusFacturaDTO.ItemDTO();
-
-                itemDTO.setCode_reference(item.getProducto() != null && item.getProducto().getId() != null ?
-                        item.getProducto().getId().toString() : "DEFAULT_CODE");
-                itemDTO.setName(item.getProducto() != null && item.getProducto().getName() != null ?
-                        item.getProducto().getName() : "Producto por defecto");
-                itemDTO.setPrice(item.getPrecio() != null ? item.getPrecio() : Double.valueOf(0));
-                itemDTO.setQuantity(item.getCantidad() != null ? item.getCantidad().intValue() : 1);
-                itemDTO.setDiscount_rate(item.getPorcentajeDescuento() != null ? item.getPorcentajeDescuento() : 0);
-
-                Double taxRate = 0.0;
-                try {
-                    if (item != null && item.getProducto() != null && item.getProducto().getTaxRate() != null) {
-                        taxRate = item.getProducto().getTaxRate();
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error al obtener taxRate: " + e.getMessage());
-                }
-                itemDTO.setTax_rate(taxRate);
-
-                itemDTO.setUnit_measure_id("70"); // Unidades
-                itemDTO.setStandard_code_id("1"); // Código estándar
-                itemDTO.setIs_excluded(item.getProducto() != null &&
-                        item.getProducto().getExcluded() != null &&
-                        item.getProducto().getExcluded() ? 1 : 0);
-
-                // IMPORTANTE: Asegurar que tribute_id esté presente y correctamente asignado
-                itemDTO.setTribute_id("1"); // Campo obligatorio para IVA
-
-                itemsDTO.add(itemDTO);
+            // Cliente
+            FactusFacturaDTO.CustomerDTO customerDTO = new FactusFacturaDTO.CustomerDTO();
+            Cliente cliente = factura.getCliente();
+            if (cliente != null) {
+                customerDTO.setIdentification_document_id("3");
+                customerDTO.setIdentification(cliente.getIdentificacion() != null ? cliente.getIdentificacion() : "");
+                customerDTO.setNames(cliente.getNombre() != null ? cliente.getNombre() : "");
+                customerDTO.setEmail(cliente.getCorreo() != null && !cliente.getCorreo().isEmpty() ? cliente.getCorreo() : "sin_correo@example.com");
+                customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "");
+                customerDTO.setLegal_organization_id(cliente.getTipoCliente() != null && cliente.getTipoCliente().equalsIgnoreCase("Persona Jurídica") ? "2" : "1");
+                customerDTO.setTribute_id("21");
             }
-        } else {
-            // Item por defecto
-            FactusFacturaDTO.ItemDTO defaultItem = new FactusFacturaDTO.ItemDTO();
-            defaultItem.setCode_reference("DEFAULT_CODE");
-            defaultItem.setName("Producto por defecto");
-            defaultItem.setPrice(Double.valueOf(0));
-            defaultItem.setQuantity(1);
-            defaultItem.setDiscount_rate(0.0);
-            defaultItem.setTax_rate(0.0);
-            defaultItem.setUnit_measure_id("70");
-            defaultItem.setStandard_code_id("1");
-            defaultItem.setIs_excluded(0);
+            dto.setCustomer(customerDTO);
 
-            // IMPORTANTE: Asegurar que tribute_id esté presente en el item por defecto
-            defaultItem.setTribute_id("1");
+            // Items
+            List<FactusFacturaDTO.ItemDTO> itemsDTO = new ArrayList<>();
+            if (factura.getItems() != null) {
+                for (Item item : factura.getItems()) {
+                    if (item != null && item.getProducto() != null) {
+                        FactusFacturaDTO.ItemDTO itemDTO = new FactusFacturaDTO.ItemDTO();
+                        Producto producto = item.getProducto();
+                        itemDTO.setCode_reference(producto.getId() != null ? producto.getId().toString() : "N/A");
+                        itemDTO.setName(producto.getName() != null ? producto.getName() : "Producto sin nombre");
+                        itemDTO.setPrice(item.getPrecio() != null ? item.getPrecio().doubleValue() : 0.0);
+                        itemDTO.setQuantity(item.getCantidad() != null ? item.getCantidad().intValue() : 1);
+                        itemDTO.setDiscount_rate(item.getPorcentajeDescuento() != null ? item.getPorcentajeDescuento().doubleValue() : 0.0);
+                        itemDTO.setTax_rate(producto.getTaxRate() != null ? producto.getTaxRate() : 19.0);
+                        itemDTO.setUnit_measure_id("70");
+                        itemDTO.setStandard_code_id("1");
+                        itemDTO.setIs_excluded(producto.getExcluded() != null && producto.getExcluded() ? 1 : 0);
+                        itemDTO.setTribute_id("1");
+                        itemsDTO.add(itemDTO);
+                    }
+                }
+            }
+            dto.setItems(itemsDTO);
 
-            itemsDTO.add(defaultItem);
+            return dto;
         }
-
-        dto.setItems(itemsDTO);
-
-        return dto;
     }
 
     public String actualizarFacturaEnFactus(Long id, Factura factura) {
@@ -320,21 +266,6 @@ public class FactusApiClient {
         }
     }
 
-    public String eliminarFacturaEnFactus(Long id) {
-        String token = obtenerTokenDeAcceso();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        HttpEntity<String> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(factusConfig.getUrl() + "/facturas/" + id, HttpMethod.DELETE, request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new RuntimeException("Error al eliminar la factura en Factus");
-        }
-    }
 
     public String validarFactura(String referenceCode) {
         try {
@@ -347,14 +278,14 @@ public class FactusApiClient {
             HttpEntity<String> request = new HttpEntity<>("", headers);
 
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    factusConfig.getUrl() + "/v1/bills/validate/" + referenceCode, // Usar el referenceCode
+                    factusConfig.getUrl() + "/v1/bills/validate/" + referenceCode,
                     request,
                     String.class
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 // Actualizar el estado local si es necesario
-                Factura factura = facturaRepository.findByNumber(referenceCode); // Buscar por referenceCode
+                Factura factura = facturaRepository.findByNumber(referenceCode);
                 if (factura != null) {
                     factura.setStatus("VALIDADA");
                     facturaRepository.save(factura);
@@ -368,19 +299,8 @@ public class FactusApiClient {
         }
     }
 
-    @Transactional
-    public byte[] descargarFacturaPdf(String referenceCode) {
-        final int MAX_REINTENTOS = 5;
-        final int TIEMPO_ESPERA_BASE_MS = 2000; // 2 segundos
-
+    public byte[] descargarFacturaPdf(String number) {
         try {
-            // Obtener la factura de la base de datos local usando el referenceCode
-            Factura factura = facturaRepository.findByNumber(referenceCode);
-            if (factura == null) {
-                throw new RuntimeException("Factura no encontrada en la base de datos");
-            }
-
-            // Obtener token de acceso
             String token = obtenerTokenDeAcceso();
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
@@ -388,70 +308,33 @@ public class FactusApiClient {
 
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            // Implementar mecanismo de reintento con espera exponencial
-            Exception ultimaExcepcion = null;
+            String apiUrl = factusConfig.getUrl() + "/v1/bills/download-pdf/" + number;
+            ResponseEntity<String> response = restTemplate.exchange(
+                    apiUrl,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
 
-            for (int intento = 0; intento < MAX_REINTENTOS; intento++) {
-                try {
-                    // Construir la URL para descargar el PDF
-                    String apiUrl = factusConfig.getUrl() + "/v1/bills/download-pdf/" + referenceCode;
+            System.out.println("Respuesta de la API de Factus: " + response.getBody());
 
-                    // Realizar la solicitud GET a la API de Factus
-                    ResponseEntity<String> response = restTemplate.exchange(
-                            apiUrl,
-                            HttpMethod.GET,
-                            request,
-                            String.class
-                    );
-
-                    // Verificar si la respuesta es exitosa (código 200)
-                    if (response.getStatusCode() == HttpStatus.OK) {
-                        // Parsear la respuesta JSON
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode rootNode = mapper.readTree(response.getBody());
-
-                        // Extraer el PDF codificado en base64
-                        String pdfBase64 = rootNode.path("data").path("pdf_base_64_encoded").asText();
-
-                        // Decodificar el PDF desde base64
-                        return Base64.getDecoder().decode(pdfBase64);
-                    } else {
-                        // Manejar errores en la respuesta
-                        throw new RuntimeException("Error al descargar el PDF: " + response.getStatusCode());
-                    }
-                } catch (HttpClientErrorException e) {
-                    ultimaExcepcion = e;
-                    if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                        System.out.println("Factura aún no procesada en Factus. Reintentando...");
-                    } else {
-                        System.err.println("Error HTTP: " + e.getStatusCode() + " - " + e.getStatusText());
-                        System.err.println("Cuerpo de respuesta: " + e.getResponseBodyAsString());
-                    }
-
-                    // Esperar con retroceso exponencial antes de reintentar
-                    long tiempoEspera = TIEMPO_ESPERA_BASE_MS * (long)Math.pow(2, intento);
-                    System.out.println("Esperando " + tiempoEspera + "ms antes de reintentar...");
-                    Thread.sleep(tiempoEspera);
-
-                } catch (Exception e) {
-                    ultimaExcepcion = e;
-                    System.err.println("Error en intento " + (intento + 1) + ": " + e.getMessage());
-
-                    // Esperar con retroceso exponencial antes de reintentar
-                    long tiempoEspera = TIEMPO_ESPERA_BASE_MS * (long)Math.pow(2, intento);
-                    System.out.println("Esperando " + tiempoEspera + "ms antes de reintentar...");
-                    Thread.sleep(tiempoEspera);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode rootNode = mapper.readTree(response.getBody());
+                if (rootNode.has("data") && rootNode.get("data").has("pdf_base_64_encoded")) {
+                    String pdfBase64 = rootNode.get("data").get("pdf_base_64_encoded").asText();
+                    return Base64.getDecoder().decode(pdfBase64);
+                } else {
+                    throw new RuntimeException("El PDF no está disponible en la respuesta");
                 }
+            } else {
+                throw new RuntimeException("Error al descargar el PDF: " + response.getStatusCode());
             }
-
-            // Si llegamos aquí, todos los intentos fallaron
-            throw new RuntimeException("Error al descargar el PDF después de " + MAX_REINTENTOS + " intentos: " +
-                    (ultimaExcepcion != null ? ultimaExcepcion.getMessage() : "Error desconocido"));
-
         } catch (Exception e) {
-            throw new RuntimeException("Error al descargar el PDF de la factura: " + e.getMessage());
+            throw new RuntimeException("Error al descargar el PDF: " + e.getMessage());
         }
     }
+
     @Transactional
     public List<Factura> obtenerFacturas() {
         try {
@@ -656,166 +539,6 @@ public class FactusApiClient {
     }
 
 
-    @Transactional
-    public byte[] descargarFacturaPdf(Long id) {
-        final int MAX_REINTENTOS = 5;
-        final int TIEMPO_ESPERA_BASE_MS = 2000; // 2 segundos
-
-        try {
-            // 1. Obtener la factura de la base de datos
-            Factura factura = facturaRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Factura no encontrada en la base de datos"));
-
-            // 2. Verificar que tenga un número válido
-            if (factura.getNumber() == null || factura.getNumber().isEmpty()) {
-                throw new RuntimeException("La factura no tiene un número de referencia válido");
-            }
-
-            String facturaNumber = factura.getNumber();
-            System.out.println("Intentando descargar factura con número: " + facturaNumber);
-
-            // 3. Obtener token de acceso
-            String token = obtenerTokenDeAcceso();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-            HttpEntity<String> request = new HttpEntity<>(headers);
-
-            // 4. Implementar mecanismo de reintento con espera exponencial
-            Exception ultimaExcepcion = null;
-
-            for (int intento = 0; intento < MAX_REINTENTOS; intento++) {
-                try {
-                    System.out.println("Intento " + (intento + 1) + " de " + MAX_REINTENTOS +
-                            " para descargar factura " + facturaNumber);
-
-                    // 5. Construir la URL para descargar el PDF
-                    String apiUrl = factusConfig.getUrl() + "/v1/bills/download-pdf/" + facturaNumber;
-
-                    // 6. Realizar la solicitud GET a la API de Factus
-                    ResponseEntity<String> response = restTemplate.exchange(
-                            apiUrl,
-                            HttpMethod.GET,
-                            request,
-                            String.class
-                    );
-
-                    // 7. Verificar si la respuesta es exitosa (código 200)
-                    if (response.getStatusCode() == HttpStatus.OK) {
-                        // 8. Parsear la respuesta JSON
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode rootNode = mapper.readTree(response.getBody());
-
-                        // 9. Extraer el PDF codificado en base64
-                        String pdfBase64 = rootNode.path("data").path("pdf_base_64_encoded").asText();
-
-                        // 10. Decodificar el PDF desde base64
-                        return Base64.getDecoder().decode(pdfBase64);
-                    } else {
-                        // 11. Manejar errores en la respuesta
-                        throw new RuntimeException("Error al descargar el PDF: " + response.getStatusCode());
-                    }
-                } catch (HttpClientErrorException e) {
-                    ultimaExcepcion = e;
-                    if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                        System.out.println("Factura aún no procesada en Factus. Reintentando...");
-                    } else {
-                        System.err.println("Error HTTP: " + e.getStatusCode() + " - " + e.getStatusText());
-                        System.err.println("Cuerpo de respuesta: " + e.getResponseBodyAsString());
-                    }
-
-                    // 12. Esperar con retroceso exponencial antes de reintentar
-                    long tiempoEspera = TIEMPO_ESPERA_BASE_MS * (long)Math.pow(2, intento);
-                    System.out.println("Esperando " + tiempoEspera + "ms antes de reintentar...");
-                    Thread.sleep(tiempoEspera);
-
-                } catch (Exception e) {
-                    ultimaExcepcion = e;
-                    System.err.println("Error en intento " + (intento + 1) + ": " + e.getMessage());
-
-                    // 13. Esperar con retroceso exponencial antes de reintentar
-                    long tiempoEspera = TIEMPO_ESPERA_BASE_MS * (long)Math.pow(2, intento);
-                    System.out.println("Esperando " + tiempoEspera + "ms antes de reintentar...");
-                    Thread.sleep(tiempoEspera);
-                }
-            }
-
-            // 14. Si llegamos aquí, todos los intentos fallaron
-            if (ultimaExcepcion instanceof HttpClientErrorException) {
-                HttpClientErrorException httpEx = (HttpClientErrorException) ultimaExcepcion;
-                if (httpEx.getStatusCode() == HttpStatus.NOT_FOUND) {
-                    throw new RuntimeException("Después de " + MAX_REINTENTOS + " intentos, la factura aún no ha sido procesada " +
-                            "completamente en Factus. Por favor, intente nuevamente más tarde.");
-                }
-            }
-
-            throw new RuntimeException("Error al descargar el PDF después de " + MAX_REINTENTOS + " intentos: " +
-                    (ultimaExcepcion != null ? ultimaExcepcion.getMessage() : "Error desconocido"));
-
-        } catch (Exception e) {
-            System.err.println("Error al descargar el PDF de la factura: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error al descargar el PDF de la factura: " + e.getMessage());
-        }
-    }
-
-    public String asegurarFacturaExisteEnFactus(Long id) {
-        try {
-            // 1. Obtener la factura de la base de datos local
-            Factura factura = facturaRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Factura no encontrada en la base de datos"));
-
-            String facturaId = factura.getNumber();
-
-            // 2. Verificar si la factura ya existe en Factus
-            try {
-                String estado = obtenerEstadoFactura(facturaId);
-                System.out.println("Factura encontrada en Factus con estado: " + estado);
-                return facturaId;
-            } catch (HttpClientErrorException e) {
-                // Si el estado es 404, la factura no existe en Factus
-                if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                    System.out.println("Factura no encontrada en Factus. Creando nueva factura...");
-
-                    // 3. Crear la factura en Factus
-                    String resultado = crearFacturaEnFactus(factura);
-
-                    // 4. Verificar el resultado
-                    if (resultado != null && !resultado.isEmpty()) {
-                        System.out.println("Factura creada exitosamente en Factus");
-
-                        // 5. Esperar un momento para que se procese
-                        Thread.sleep(2000);
-
-                        // 6. Intentar validar la factura
-                        try {
-                            validarFactura(String.valueOf(id));
-                            System.out.println("Factura validada exitosamente");
-
-                            // Esperar un momento más para que se complete la validación
-                            Thread.sleep(3000);
-                        } catch (Exception validationEx) {
-                            System.err.println("Error al validar la factura: " + validationEx.getMessage());
-                            // Continuamos de todos modos, ya que la factura fue creada
-                        }
-
-                        return factura.getNumber();
-                    } else {
-                        throw new RuntimeException("Error al crear la factura en Factus");
-                    }
-                } else {
-                    // Si es otro error, lo propagamos
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error al asegurar existencia de factura en Factus: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error al asegurar existencia de factura en Factus: " + e.getMessage());
-        }
-    }
-
     public byte[] descargarPdf(String pdfUrl) {
         try {
             String token = obtenerTokenDeAcceso();
@@ -884,36 +607,22 @@ public class FactusApiClient {
         }
     }
 
-    public String eliminarFacturaNoValidada(String referenceCode) {
+    public String eliminarFacturaPendiente(String referenceCode) {
         try {
-            // Obtener el token de acceso
             String token = obtenerTokenDeAcceso();
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-            // Crear la solicitud HTTP
             HttpEntity<String> request = new HttpEntity<>(headers);
-
-            // Construir la URL correctamente
-            String apiUrl = factusConfig.getUrl() + "/v1/bills/destroy/reference/" + referenceCode;
-
-            // Realizar la solicitud DELETE
             ResponseEntity<String> response = restTemplate.exchange(
-                    apiUrl,
+                    factusConfig.getUrl() + "/v1/bills/delete/" + referenceCode,
                     HttpMethod.DELETE,
                     request,
                     String.class
             );
 
-            // Verificar si la respuesta es exitosa (código 200)
             if (response.getStatusCode() == HttpStatus.OK) {
-                // Eliminar la factura de la base de datos local si es necesario
-                Factura factura = facturaRepository.findByNumber(referenceCode);
-                if (factura != null) {
-                    facturaRepository.delete(factura);
-                }
-                return response.getBody(); // Devuelve la respuesta de Factus
+                return response.getBody();
             } else {
                 throw new RuntimeException("Error al eliminar la factura: " + response.getStatusCode());
             }
@@ -921,4 +630,87 @@ public class FactusApiClient {
             throw new RuntimeException("Error al eliminar la factura: " + e.getMessage());
         }
     }
-}
+    
+    public void eliminarTodasLasFacturasPendientes() {
+        try {
+            // Obtener la lista de facturas pendientes
+            List<Map<String, String>> facturasPendientes = obtenerFacturasPendientes();
+
+            // Eliminar cada factura pendiente
+            for (Map<String, String> factura : facturasPendientes) {
+                String referenceCode = factura.get("reference_code");
+                eliminarFacturaPendiente(referenceCode);
+                System.out.println("Factura eliminada: " + referenceCode);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al eliminar facturas pendientes: " + e.getMessage());
+        }
+    }
+
+    public List<Map<String, String>> obtenerFacturasPendientes() {
+        try {
+            String token = obtenerTokenDeAcceso();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    factusConfig.getUrl() + "/v1/bills/pending",
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                JsonNode facturasNode = root.path("data");
+
+                List<Map<String, String>> facturasPendientes = new ArrayList<>();
+                for (JsonNode facturaNode : facturasNode) {
+                    Map<String, String> factura = new HashMap<>();
+                    factura.put("id", facturaNode.path("id").asText());
+                    factura.put("reference_code", facturaNode.path("reference_code").asText());
+                    factura.put("status", facturaNode.path("status").asText());
+                    facturasPendientes.add(factura);
+                }
+
+                return facturasPendientes;
+            } else {
+                throw new RuntimeException("Error al obtener facturas pendientes: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener facturas pendientes: " + e.getMessage());
+        }
+    }
+    public String eliminarFacturaNoValidada(String referenceCode) {
+        try {
+            String token = obtenerTokenDeAcceso();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    factusConfig.getUrl() + "/v1/bills/delete/" + referenceCode,
+                    HttpMethod.DELETE,
+                    request,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // Actualizar el estado local si es necesario
+                Factura factura = facturaRepository.findByNumber(referenceCode);
+                if (factura != null) {
+                    factura.setStatus("ELIMINADA");
+                    facturaRepository.save(factura);
+                }
+                return response.getBody();
+            } else {
+                throw new RuntimeException("Error al eliminar la factura: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la factura: " + e.getMessage());
+        }
+    }}
+
