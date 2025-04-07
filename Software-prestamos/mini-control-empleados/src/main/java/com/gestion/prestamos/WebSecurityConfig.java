@@ -31,19 +31,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.roles("ADMIN")
 				.build();
 
-		UserDetails contador = User
-				.withUsername("cobrador1")
-				.password(passwordEncoder().encode("cobrador1"))
-				.roles("COBRADOR1")
-				.build();
 
-		UserDetails analista = User
-				.withUsername("cobrador2")
-				.password(passwordEncoder().encode("cobrador2"))
-				.roles("COBRADOR2")
-				.build();
-
-		return new InMemoryUserDetailsManager(admin, contador, analista);
+		return new InMemoryUserDetailsManager(admin);
 	}
 
 	@Override
@@ -52,18 +41,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 				.authorizeRequests()
 				.antMatchers("/", "/login").permitAll() // Permite acceso público al login
-				.antMatchers("/api/productos/**").hasAnyRole("ADMIN", "COBRADOR1", "COBRADOR2") // Acceso a productos
+				.antMatchers("/api/productos/**").hasAnyRole("ADMIN") // Acceso a productos
 				.antMatchers("/api/clientes/**").hasRole("ADMIN") // Solo ADMIN puede acceder a clientes
-				.antMatchers("/facturas/**").hasAnyRole("ADMIN", "COBRADOR1", "COBRADOR2") // Permite acceso a las vistas de facturas
-				.antMatchers("/api/facturas/**").hasAnyRole("ADMIN", "COBRADOR1", "COBRADOR2") // Acceso a facturas
+				.antMatchers("/facturas/**").hasAnyRole("ADMIN") // Permite acceso a las vistas de facturas
+				.antMatchers("/api/facturas/**").hasAnyRole("ADMIN") // Acceso a facturas
 				.anyRequest().authenticated() // Cualquier otra ruta requiere autenticación
 				.and()
 				.formLogin()
 				.loginPage("/login") // Página de login personalizada
+				.defaultSuccessUrl("/api/facturas/crear", true) // Redirige a la página principal tras el login
 				.permitAll()
 				.and()
 				.logout()
 				.permitAll()
+
 				.and()
 				.csrf().disable(); // Desactiva CSRF para simplificar (no recomendado en producción)
 	}

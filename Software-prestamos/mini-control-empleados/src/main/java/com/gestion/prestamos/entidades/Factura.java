@@ -56,7 +56,6 @@ public class Factura {
             this.createdAt = new Date();
         }
 
-
     // Asegúrate de tener este metodo helper
     public void addItem(Item item) {
         items.add(item);
