@@ -72,4 +72,5 @@ public class Producto {
     public void setUnitMeasureId(String unitMeasureId) {
         this.unitMeasureId = unitMeasureId;
     }
+
 }

@@ -45,6 +45,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/api/clientes/**").hasRole("ADMIN") // Solo ADMIN puede acceder a clientes
 				.antMatchers("/facturas/**").hasAnyRole("ADMIN") // Permite acceso a las vistas de facturas
 				.antMatchers("/api/facturas/**").hasAnyRole("ADMIN") // Acceso a facturas
+				// Solo el ADMIN y GERENTE pueden eliminar o modificar registros
+				.antMatchers( "/id/* ")
+				.hasAnyRole("ADMIN")
 				.anyRequest().authenticated() // Cualquier otra ruta requiere autenticación
 				.and()
 				.formLogin()

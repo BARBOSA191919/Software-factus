@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/128/4196/4196427.png" type="image/x-icon">
-	<title>FACTUS</title>
+	<title>FACTUS - Sistema de Facturación Electrónica</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 	<style>
-		/* CSS styles from the provided code */
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
 
 		body {
 			display: flex;
@@ -15,188 +21,451 @@
 			align-items: center;
 			height: 100vh;
 			margin: 0;
-			background-color: #f5f5f5;
+			background-color: #f7f9fc;
 			font-family: "Poppins", sans-serif;
 			overflow: hidden;
+			color: #333;
 		}
 
-
-		@media (width >= 500px) {
-			body {
-				padding: 0;
-			}
-
-			.card {
-				margin: 0;
-				width: 300px;
-			}
-
-		}
-
-
-		.background {
-			position: fixed;
-			top: -50vmin;
-			left: -50vmin;
-			width: 120vmin;
-			height: 100vmin;
-			border-radius: 47% 53% 61% 39% / 45% 51% 49% 55%;
-			background: #65c8ff;
-		}
-
-		.background::before {
-			content: "";
-			position: fixed;
-			top: 110vmin;
-			right: -50vmin;
-			width: 120vmin;
-			height: 100vmin;
-			border-radius: 47% 53% 61% 39% / 45% 51% 49% 55%;
-			background: #012a40;
-		}
-
-		@media (width >= 500px) {
-			.background::before {
-				top: 60vmin;
-			}
-		}
-
-		.card {
-			overflow: hidden;
+		.container {
+			display: flex;
+			width: 900px;
+			height: 550px;
 			position: relative;
-			z-index: 3;
-			width: 260px;
-			margin: 0 auto ;
-			padding: 115px 30px 54px;
-			border-radius: 24px;
-			background: #ffffff;
-			text-align: center;
-			box-shadow: 0 100px 100px rgb(0 0 0 / 10%);
-
+			z-index: 5;
+			box-shadow: 0 25px 50px rgba(0, 41, 63, 0.15);
+			border-radius: 20px;
+			overflow: hidden;
 		}
 
-		.card::before {
+		.left-panel {
+			width: 40%;
+			background: linear-gradient(145deg, #0059b3, #0072e5);
+			padding: 50px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			color: white;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.left-panel::before {
 			content: "";
 			position: absolute;
-			top: -880px;
-			left: 50%;
-			translate: -50% 0;
-			width: 1000px;
-			height: 100px;
+			top: -80px;
+			left: -80px;
+			width: 200px;
+			height: 200px;
+			background-color: rgba(255, 255, 255, 0.1);
 			border-radius: 50%;
-			background-color: #216ce7;
 		}
 
-		.card::after {
+		.left-panel::after {
 			content: "";
-			position: inherit;
-			right: -50vmin;
-			bottom: -55vmin;
-			width: inherit;
-			height: inherit;
-			border-radius: inherit;
-			background: #143d81;
+			position: absolute;
+			bottom: -100px;
+			right: -100px;
+			width: 250px;
+			height: 250px;
+			background-color: rgba(0, 0, 0, 0.1);
+			border-radius: 50%;
+		}
+
+		.brand {
+			display: flex;
+			align-items: center;
+			margin-bottom: 50px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.logo-container {
+			width: 50px;
+			height: 50px;
+			background: white;
+			border-radius: 12px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-right: 15px;
+			box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 		}
 
 		.logo {
-			position: absolute;
-			top: 30px;
-			left: 50%;
-			translate: -50%;
-			width: 64px;
-			height: 64px;
+			width: 30px;
+			height: 30px;
 		}
 
-		h2 {
-			font-size: 22px;
-			font-weight: 400;
-			margin: 0 0 30px;
-			color: rgb(0 0 0 / 90%);
+		.brand-name {
+			font-size: 24px;
+			font-weight: 600;
+			letter-spacing: 1px;
+		}
+
+		.tagline {
+			font-size: 14px;
+			opacity: 0.8;
+		}
+
+		.welcome-text {
+			position: relative;
+			z-index: 2;
+		}
+
+		.welcome-text h1 {
+			font-size: 28px;
+			font-weight: 600;
+			margin-bottom: 15px;
+		}
+
+		.welcome-text p {
+			font-size: 15px;
+			line-height: 1.6;
+			opacity: 0.9;
+		}
+
+		.features {
+			margin-top: 40px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.feature-item {
+			display: flex;
+			align-items: center;
+			margin-bottom: 15px;
+		}
+
+		.feature-icon {
+			margin-right: 12px;
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 50%;
+		}
+
+		.feature-text {
+			font-size: 14px;
+		}
+
+		.copyright {
+			font-size: 12px;
+			opacity: 0.7;
+			margin-top: 30px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.right-panel {
+			width: 60%;
+			background-color: white;
+			padding: 50px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+
+		.login-header {
+			margin-bottom: 40px;
+			text-align: center;
+		}
+
+		.login-header h2 {
+			font-size: 26px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 10px;
+		}
+
+		.login-header p {
+			font-size: 14px;
+			color: #777;
 		}
 
 		.form {
-			margin: 0 0 25px;
-			display: grid;
-			place-items: center;
-			gap: 12px;
+			width: 100%;
 		}
 
-		input, button {
-			width: 87%;
-			height: 40px;
-			border-radius: 28px;
-			font-size: 16px;
-			font-family: inherit;
+		.form-group {
+			margin-bottom: 20px;
+			position: relative;
 		}
 
-		button{
-			margin-top: 5px;
-		}
-		input {
-			border: 0;
-			padding: 0 24px;
-			color: #222222;
-			background: #ededed;
-			margin-bottom: -1px;
+		.form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-size: 14px;
+			font-weight: 500;
+			color: #555;
 		}
 
-		input::placeholder {
-			color: rgb(0 0 0 / 50%);
+		.input-with-icon {
+			position: relative;
 		}
 
-		.form > button {
-			border: 0;
-			color: #f9f9f9;
-			background: #226ce7;
-			display: grid;
-			place-items: center;
+		.input-with-icon input {
+			width: 100%;
+			padding: 12px 15px 12px 45px;
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			font-size: 14px;
+			transition: all 0.3s ease;
+		}
+
+		.input-with-icon input:focus {
+			border-color: #0072e5;
+			box-shadow: 0 0 0 3px rgba(0, 114, 229, 0.1);
+			outline: none;
+		}
+
+		.input-icon {
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #999;
+		}
+
+		.remember-forgot {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			font-size: 13px;
+		}
+
+		.remember {
+			display: flex;
+			align-items: center;
+		}
+
+		.remember input {
+			margin-right: 8px;
+		}
+
+		.forgot-link {
+			color: #0072e5;
+			text-decoration: none;
+			transition: color 0.3s;
+		}
+
+		.forgot-link:hover {
+			color: #0059b3;
+			text-decoration: underline;
+		}
+
+		.login-button {
+			width: 100%;
+			padding: 13px;
+			background: linear-gradient(to right, #0072e5, #0095ff);
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 15px;
 			font-weight: 500;
 			cursor: pointer;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 114, 229, 0.2);
 		}
 
-		.card > footer {
-			color: #504e4e;
+		.login-button:hover {
+			background: linear-gradient(to right, #0059b3, #0072e5);
+			box-shadow: 0 6px 15px rgba(0, 114, 229, 0.3);
+			transform: translateY(-2px);
 		}
 
-		.card > footer > a {
-			color: #216ce7;
+		.alert {
+			padding: 12px 15px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			font-size: 14px;
+			display: flex;
+			align-items: center;
+		}
 
+		.alert-danger {
+			background-color: #fff2f2;
+			color: #e74c3c;
+			border-left: 4px solid #e74c3c;
+		}
+
+		.alert-success {
+			background-color: #f0fff4;
+			color: #2ecc71;
+			border-left: 4px solid #2ecc71;
+		}
+
+		.alert i {
+			margin-right: 10px;
+			font-size: 16px;
+		}
+
+		.extra-options {
+			text-align: center;
+			margin-top: 25px;
+			font-size: 13px;
+			color: #777;
+		}
+
+		.extra-options a {
+			color: #0072e5;
+			text-decoration: none;
+			font-weight: 500;
+		}
+
+		.extra-options a:hover {
+			text-decoration: underline;
+		}
+
+		@media (max-width: 920px) {
+			.container {
+				width: 95%;
+				height: auto;
+				flex-direction: column;
+			}
+
+			.left-panel {
+				width: 100%;
+				padding: 30px;
+			}
+
+			.right-panel {
+				width: 100%;
+				padding: 30px;
+			}
+		}
+
+		@media (max-width: 600px) {
+			.container {
+				width: 100%;
+				border-radius: 0;
+				height: 100vh;
+			}
+
+			.left-panel {
+				display: none;
+			}
+
+			.right-panel {
+				justify-content: flex-start;
+				padding-top: 60px;
+			}
 		}
 	</style>
 </head>
 <body>
+<div class="container">
+	<!-- Panel izquierdo -->
+	<div class="left-panel">
+		<div class="brand">
+			<div class="logo-container">
+				<img class="logo" src="https://cdn-icons-png.flaticon.com/128/4196/4196427.png" alt="Logo Factus">
+			</div>
+			<div>
+				<div class="brand-name">FACTUS</div>
+				<div class="tagline">Facturación Electrónica</div>
+			</div>
+		</div>
 
-<!-- Contenedor del fondo que variará -->
-<div class="background"></div>
-<div class="card">
-	<img class="logo" src="https://cdn-icons-png.flaticon.com/128/4196/4196427.png" alt="imagen logo">
-	<H2>Software Factus</H2>
+		<div class="welcome-text">
+			<h1>Bienvenido de vuelta</h1>
+			<p>Sistema integral de facturación electrónica diseñado para simplificar sus procesos contables y fiscales.</p>
 
-	<form class="form" th:action="@{/login}" method="post">
+			<div class="features">
+				<div class="feature-item">
+					<div class="feature-icon">
+						<i class="fas fa-check-circle fa-sm"></i>
+					</div>
+					<div class="feature-text">Cumplimiento con normas fiscales</div>
+				</div>
+				<div class="feature-item">
+					<div class="feature-icon">
+						<i class="fas fa-bolt fa-sm"></i>
+					</div>
+					<div class="feature-text">Facturación rápida y eficiente</div>
+				</div>
+				<div class="feature-item">
+					<div class="feature-icon">
+						<i class="fas fa-chart-line fa-sm"></i>
+					</div>
+					<div class="feature-text">Reportes financieros detallados</div>
+				</div>
+			</div>
+		</div>
 
-		<!-- Mensajes de error -->
-		<div th:if="${param.error}">
-			<div class="alert alert-danger" role="alert">
+		<div class="copyright">
+			© 2025 Factus. Todos los derechos reservados.
+		</div>
+	</div>
+
+	<!-- Panel derecho (formulario de login) -->
+	<div class="right-panel">
+		<div class="login-header">
+			<h2>Iniciar Sesión</h2>
+			<p>Ingrese sus credenciales para acceder al sistema</p>
+		</div>
+
+		<form class="form" th:action="@{/login}" method="post">
+			<!-- Mensajes de error -->
+			<div th:if="${param.error}" class="alert alert-danger">
+				<i class="fas fa-exclamation-circle"></i>
 				Usuario o contraseña inválidos
 			</div>
-		</div>
-		<div th:if="${param.logout}">
-			<div class="alert alert-success" role="alert">
+			<div th:if="${param.logout}" class="alert alert-success">
+				<i class="fas fa-check-circle"></i>
 				Has cerrado sesión exitosamente
 			</div>
-		</div>
 
-		<label for="username"></label>
-		<input type="text" id="username" name="username" placeholder="Usuario" required >
+			<div class="form-group">
+				<label for="username">Usuario</label>
+				<div class="input-with-icon">
+					<i class="fas fa-user input-icon"></i>
+					<input type="text" id="username" name="username" placeholder="Ingrese su usuario" required>
+				</div>
+			</div>
 
-		<label for="password"></label>
-		<input type="password" id="password" name="password" placeholder="Contraseña" required>
+			<div class="form-group">
+				<label for="password">Contraseña</label>
+				<div class="input-with-icon">
+					<i class="fas fa-lock input-icon"></i>
+					<input type="password" id="password" name="password" placeholder="Ingrese su contraseña" required>
+				</div>
+			</div>
 
-		<button type="submit">Iniciar Sesión</button>
-	</form>
+			<div class="remember-forgot">
+				<div class="remember">
+					<input type="checkbox" id="remember-me" name="remember-me">
+					<label for="remember-me">Recordarme</label>
+				</div>
+				<a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+			</div>
 
+			<button type="submit" class="login-button">
+				Iniciar Sesión
+			</button>
 
+			<div class="extra-options">
+				¿Necesita ayuda? <a href="#">Contacte a soporte</a>
+			</div>
+		</form>
+	</div>
 </div>
 
+<script>
+	// Animación simple para los mensajes de alerta
+	document.addEventListener('DOMContentLoaded', function() {
+		const alerts = document.querySelectorAll('.alert');
+		alerts.forEach(alert => {
+			setTimeout(() => {
+				alert.style.transition = 'opacity 0.5s ease';
+				alert.style.opacity = '0.9';
+			}, 200);
+		});
+	});
+</script>
 </body>
 </html>

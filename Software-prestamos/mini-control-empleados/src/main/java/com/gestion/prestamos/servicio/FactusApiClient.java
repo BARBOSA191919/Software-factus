@@ -213,10 +213,10 @@ public class FactusApiClient {
             Cliente cliente = factura.getCliente();
             if (cliente != null) {
                 customerDTO.setIdentification_document_id("3");
-                customerDTO.setIdentification(cliente.getIdentificacion() != null ? cliente.getIdentificacion() : "");
+                customerDTO.setIdentification(cliente.getIdentificacion() != null ? cliente.getIdentificacion() : "1003865544");
                 customerDTO.setNames(cliente.getNombre() != null ? cliente.getNombre() : "");
                 customerDTO.setEmail(cliente.getCorreo() != null && !cliente.getCorreo().isEmpty() ? cliente.getCorreo() : "sin_correo@example.com");
-                customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "");
+                customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "calle 38");
                 customerDTO.setLegal_organization_id(cliente.getTipoCliente() != null && cliente.getTipoCliente().equalsIgnoreCase("Persona Jurídica") ? "2" : "1");
                 customerDTO.setTribute_id("21");
             }

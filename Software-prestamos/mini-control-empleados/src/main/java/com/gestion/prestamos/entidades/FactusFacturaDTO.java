@@ -55,8 +55,10 @@ public class FactusFacturaDTO {
         private String names;
         private String email;
         private String address;
-        private String legal_organization_id; // "1" Natural, "2" Jurídica
+        private String legalOrganizationId; // ID de organización legal
         private String tribute_id;
+        private String municipio;       // Municipio
+
 
 
         // Getters and setters
@@ -68,12 +70,28 @@ public class FactusFacturaDTO {
             this.identification_document_id = identification_document_id;
         }
 
+        public String getMunicipio() {
+            return municipio;
+        }
+
+        public void setMunicipio(String municipio) {
+            this.municipio = municipio;
+        }
+
         public String getIdentification() {
             return identification;
         }
 
         public void setIdentification(String identification) {
             this.identification = identification;
+        }
+
+        public String getLegalOrganizationId() {
+            return legalOrganizationId;
+        }
+
+        public void setLegalOrganizationId(String legalOrganizationId) {
+            this.legalOrganizationId = legalOrganizationId;
         }
 
         public String getNames() {
@@ -92,9 +110,7 @@ public class FactusFacturaDTO {
             this.email = email;
         }
 
-        public String getLegal_organization_id() {
-            return legal_organization_id;
-        }
+
 
         public String getAddress() {
             return address;

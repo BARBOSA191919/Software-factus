@@ -43,6 +43,7 @@ public class FacturaController {
                 facturaMap.put("numero", f.getNumber());
                 facturaMap.put("pagos", f.getFormaPago());
                 facturaMap.put("metodopago", f.getMetodoPago());
+                facturaMap.put("identificacion", f.getCliente().getIdentificacion());
                 facturaMap.put("documentName", f.getDocumentName());
                 facturaMap.put("graphicRepresentationName", f.getGraphicRepresentationName());
                 facturaMap.put("status", f.getStatus());

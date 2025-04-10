@@ -119,10 +119,9 @@
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Precio</th>
-                            <th>Unidad Medida</th>
+                            <th>Codigo medida</th>
                             <th>Tasa IVA</th>
                             <th>Codigo estandar</th>
-                            <th>Codigo medida</th>
 
                             <th>Acciones</th>
                         </tr>
@@ -213,7 +212,6 @@
                 <form id="producto-form">
                     <input type="hidden" id="producto-id">
                     <input type="hidden" id="producto-standardCodeId">
-                    <input type="hidden" id="producto-unitMeasureId">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -233,10 +231,11 @@
                             <div class="mb-3">
                                 <label for="producto-medida" class="form-label"><i class="fas fa-ruler"></i> Unidad de Medida</label>
                                 <select class="form-select" id="producto-medida" required>
-                                    <option value="unidad">Unidad</option>
-                                    <option value="kg">Kilogramo</option>
-                                    <option value="lt">Litro</option>
-                                    <option value="mt">Metro</option>
+                                    <option value="70">Unidad</option>
+                                    <option value="414">Kilogramo</option>
+                                    <option value="449">Litro</option>
+                                    <option value="512">Metro</option>
+                                    <option value="874">Galon</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -613,7 +612,26 @@
         </div>
     </div>
 </div>
-
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
+                <input type="hidden" id="delete-type">
+                <input type="hidden" id="delete-id">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmar-eliminacion">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Scripts de Bootstrap y jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -721,7 +739,6 @@
                     <td>${producto.id}</td>
                     <td>${producto.name}</td>
                     <td>$${producto.price}</td>
-                    <td>${producto.measureId || 'N/A'}</td>
                     <td>${producto.taxRate || '0'}%</td>
                     <td>
                         <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}">
@@ -815,7 +832,7 @@
                     <tr>
                         <td>${factura.numero || 'N/A'}</td>
                         <td>${clienteNombre}</td>
-                        <td>${factura.identification || 'N/A'}</td>
+                        <td>${factura.identificacion || 'N/A'}</td>
                         <td>${factura.pagos || 'N/A'}</td>
                         <td>${factura.metodopago || 'N/A'}</td>
                         <td>${factura.createdAt || 'N/A'}</td>
@@ -1009,9 +1026,10 @@
                     });
                     // Evento para el botón de descarga dentro del modal
                     $('#download-btn-modal').click(function() {
-                        const invoiceId = $(this).data('id');
-                        downloadFactura(invoiceId);
+                        const id = $(this).data('id');
+                        descargarFactura(id);
                     });
+
                 },
                 error: function(xhr, status, error) {
                     console.error("Error obteniendo detalles de factura:", error);
@@ -1205,27 +1223,28 @@
         // Función actualizada para guardar producto
         $('#guardar-producto').click(function() {
             const id = $('#producto-id').val();
-            const measureId = $('#producto-medida').val();
-
             // Generar standardCodeId automáticamente (basado en el nombre del producto + timestamp)
             const currentTime = new Date().getTime();
             const nameSanitized = $('#producto-nombre').val().replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-            const standardCodeId = `STD-${nameSanitized}-${currentTime}`;
-
-            // Generar unitMeasureId automáticamente (basado en la unidad de medida seleccionada)
-            const unitMeasureId = `UM-${measureId.toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
 
             const producto = {
-                name: $('#producto-nombre').val(),
-                price: parseFloat($('#producto-precio').val()),
-                measureId: measureId,
-                excluded: $('#producto-excluido').is(':checked'),
-                withholdingTaxRate: $('#producto-retencion').val(),
-                taxRate: parseFloat($('#producto-tasa-iva').val()),
-                // Campos automáticos nuevos
-                standardCodeId: standardCodeId,
-                unitMeasureId: unitMeasureId
+                name: $('#producto-nombre').val(), // Ejemplo: "Smart Watch"
+                price: parseFloat($('#producto-precio').val()), // Ejemplo: 1500000
+                excluded: $('#producto-excluido').is(':checked'), // Ejemplo: false
+                withholdingTaxRate: $('#producto-retencion').val() || "0", // Ejemplo: "0"
+                taxRate: parseFloat($('#producto-tasa-iva').val()), // Ejemplo: 19.0
+                standardCodeId: `STD-${nameSanitized}-${currentTime}`, // Ejemplo: "STD-SMAR-1698765432109"
+                unitMeasureId: $('#producto-medida').val(),  // Ejemplo: "unidad 70"
             };
+            // Validación básica
+            if (!producto.name || producto.price <= 0 || !producto.taxRate) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'El nombre, precio y tasa de IVA son obligatorios y deben ser válidos.'
+                });
+                return;
+            }
 
             if (id) {
                 $.ajax({
@@ -1236,10 +1255,24 @@
                     success: function() {
                         $('#productoModal').modal('hide');
                         loadProductos();
-                        alert('Producto actualizado correctamente');
-                    },
-                    error: function(error) {
-                        alert('Error al actualizar producto: ' + error.responseJSON.message);
+                        swal.fire({
+                            toast:true,
+                            position:'top-end',
+                            icon:'success',
+                            title:'Exito',
+                            text:'Producto actualizado correctamente',
+                            timer:2000,
+                            showConfirmButton: false
+
+                        });
+
+                 },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al actualizar producto: ' + (xhr.responseJSON?.message || 'Desconocido')
+                        });
                     }
                 });
             } else {
@@ -1252,10 +1285,22 @@
                     success: function() {
                         $('#productoModal').modal('hide');
                         loadProductos();
-                        alert('Producto creado correctamente');
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: 'Producto creado correctamente',
+                            timer:2000,
+                            showConfirmButton: false
+                        });
                     },
-                    error: function(error) {
-                        alert('Error al crear producto: ' + error.responseJSON.message);
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al crear producto: ' + (xhr.responseJSON?.message || 'Desconocido')
+                        });
                     }
                 });
             }
@@ -1318,6 +1363,15 @@
                 legalOrganizationId: id ? $('#cliente-legalOrganizationId').val() : legalOrganizationId,
                 tributeId: id ? $('#cliente-tributeId').val() : tributeId
             };
+            // Validación básica
+            if (!cliente.nombre || !cliente.identificacion || !cliente.tipoCliente) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'El nombre, identificación y tipo de cliente son obligatorios.'
+                });
+                return;
+            }
 
             // Agregar campos específicos para persona jurídica si aplica
             if (tipoCliente === 'Persona Jurídica') {
@@ -1337,10 +1391,22 @@
                     success: function() {
                         $('#clienteModal').modal('hide');
                         loadClientes();
-                        alert('Cliente actualizado correctamente');
-                    },
-                    error: function(error) {
-                        alert('Error al actualizar cliente: ' + error.responseJSON.message);
+                        swal.fire({
+                            toast:true,
+                            position:'top-end',
+                            icon:'success',
+                            title:'Exito',
+                            text:'Cliente actualizado correctamente',
+                            timer:2000,
+                            showConfirmButton: false
+
+                        });                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al actualizar cliente: ' + (xhr.responseJSON?.message || 'Desconocido')
+                        });
                     }
                 });
             } else {
@@ -1353,10 +1419,23 @@
                     success: function() {
                         $('#clienteModal').modal('hide');
                         loadClientes();
-                        alert('Cliente creado correctamente');
+                        Swal.fire({
+                            toast:true,
+                            position:'top-end',
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: 'Cliente creado correctamente',
+                            timer:2000,
+                            showConfirmButton: false
+
+                        });
                     },
-                    error: function(error) {
-                        alert('Error al crear cliente: ' + error.responseJSON.message);
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al crear cliente: ' + (xhr.responseJSON?.message || 'Desconocido')
+                        });
                     }
                 });
             }
@@ -1373,7 +1452,6 @@
                     $('#producto-id').val(producto.id);
                     $('#producto-nombre').val(producto.name);
                     $('#producto-precio').val(producto.price);
-                    $('#producto-medida').val(producto.measureId);
                     $('#producto-excluido').prop('checked', producto.excluded);
                     $('#producto-retencion').val(producto.withholdingTaxRate);
                     $('#producto-tasa-iva').val(producto.taxRate);
@@ -1572,10 +1650,9 @@
                         <td>${producto.id}</td>
                         <td>${producto.name}</td>
                         <td>$${producto.price}</td>
-                        <td>${producto.measureId || 'N/A'}</td>
-                        <td>${producto.taxRate || '0'}%</td>
+                        <td>${producto.unitMeasureId || '0'}</td>
+                        <td>${producto.taxRate + '$' || 'Auto'}</td>
                         <td>${producto.standardCodeId || 'Auto'}</td>
-                        <td>${producto.unitMeasureId || 'Auto'}</td>
                         <td>
                             <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}">
                                 <i class="fas fa-edit"></i>
@@ -1774,54 +1851,45 @@
             // Get the factura ID from your hidden field
             const id = $('#factura-id').val();
 
-            // Obtener los totales - obtenemos el texto de los elementos, no el valor
-            const subtotal = $('#factura-subtotal').text().replace('$', '').trim();
-            const totalIva = $('#factura-iva-total').text().replace('$', '').trim();
-            const totalDescuento = $('#factura-descuento-total').text().replace('$', '').trim();
-            const total = $('#factura-total').text().replace('$', '').trim();
-
-            const startDate = new Date().toISOString();
-            const endDate = new Date(new Date().setDate(new Date().getDate() + 30)).toISOString();
 
             // Obtener cliente seleccionado
             const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
-
             const factura = {
                 cliente: {
-                    id: 10,
-                    nombre: "Julian Montenegro Pinto",
-                    correo: "julianpinto77@gmail.com",
-                    direccion: "calle 49 # guadaperra 123 los mas gays",
-                    tipoCliente: "Persona Natural",
-                    identificacion: "10003876652",
+                    id: clienteSeleccionado.id,
+                    nombre: clienteSeleccionado.nombre,
+                    correo: clienteSeleccionado.correo,
+                    direccion: clienteSeleccionado.direccion,
+                    tipoCliente: clienteSeleccionado.tipoCliente,
+                    identificacion: clienteSeleccionado.identificacion,
                 },
-                documentName: "Factus",
+                documentName: $('#factura-document-name').val(), // "Factus"
                 graphicRepresentationName: "PDF",
-                formaPago: "Contado",
-                metodo: "Credito",
+                formaPago: $('#factura-forma-pago').val(), // Ejemplo: "Contado"
+                metodo: $('#factura-metodo-pago').val(), // Ejemplo: "Efectivo"
                 createdAt: new Date().toISOString(),
-                document: "Factura electrónica de venta",
-                numberingRangeId: 128,
-                referenceCode: "REF-" + Date.now(),
-                observation: "Debe o se envarga a la hembra",
-                subtotal: 100000,
-                totalIva: 19000,
-                totalDescuento: 0,
-                total: 119000,
-                items: [{
+                document: $('#factura-document').val(), // "Factura electrónica de venta"
+                numberingRangeId: parseInt($('#factura-numbering-range-id').val()) || 128,
+                referenceCode: $('#factura-reference-code').val(), // Ejemplo: "REF-1698765432109-456"
+                observation: $('#factura-observation').val(), // Ejemplo: "Cliente capacitado"
+                subtotal: parseFloat($('#factura-subtotal').text().replace('$', '')),
+                totalIva: parseFloat($('#factura-iva-total').text().replace('$', '')),
+                totalDescuento: parseFloat($('#factura-descuento-total').text().replace('$', '')),
+                total: parseFloat($('#factura-total').text().replace('$', '')),
+                items: facturaItems.map(item => ({
                     producto: {
-                        id: 5,
-                        name: "smart watch",
-                        price: 1500000,
-                        taxRate: 19.0
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        taxRate: item.taxRate
                     },
-                    cantidad: 1,
-                    precio: 100000,
-                    porcentajeDescuento: 0,
-                    subtotal: 100000,
-                    iva: 19000,
-                    total: 119000
-                }]
+                    cantidad: item.quantity,
+                    precio: item.price,
+                    porcentajeDescuento: item.discount,
+                    subtotal: item.price * item.quantity,
+                    iva: (item.price * item.quantity * (item.taxRate / 100)),
+                    total: (item.price * item.quantity) - (item.price * item.quantity * (item.discount / 100)) + (item.price * item.quantity * (item.taxRate / 100))
+                }))
             };
 
 // Crear nueva factura
@@ -1834,10 +1902,15 @@
                     $('#facturaModal').modal('hide');
                     loadFacturas(); // Recargar lista de facturas
                     Swal.fire({
+                        toast:true,
+                        position:'top-end',
                         icon: 'success',
                         title: 'Éxito',
-                        text: 'Factura creada correctamente',
-                        confirmButtonColor: '#3085d6'
+                        text: 'Documento con el código de referencia registrado y validado con éxito',
+                        confirmButtonColor: '#3085d6',
+                        timer:3000,
+                        showConfirmButton: false
+
                     });
                 },
                 error: function(xhr, status, error) {
@@ -1872,8 +1945,18 @@
                     success: function(response) {
                         $('#facturaModal').modal('hide');
                         loadFacturas();
-                        alert('Factura actualizada correctamente');
-                    },
+                        Swal.fire({
+                            toast:true,
+                            position:'top-end',
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: 'Documento con el código de referencia actualizado con exito',
+                            confirmButtonColor: '#3085d6',
+                            timer:3000,
+                            showConfirmButton: false
+
+                        });
+                        },
                     error: function(xhr) {
                         let errorMsg = 'Error al actualizar factura';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -2100,8 +2183,16 @@
                 success: function() {
                     $('#confirmDeleteModal').modal('hide');
                     refreshFunction();
-                    alert(`${type.charAt(0).toUpperCase() + type.slice(1)} eliminado correctamente`);
-                },
+                    Swal.fire({
+                        toast:true,
+                        position:'top-end',
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: `${type.charAt(0).toUpperCase() + type.slice(1)} eliminado correctamente`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    },
                 error: function(error) {
                     alert(`Error al eliminar ${type}: ${error.responseJSON.message}`);
                 }
