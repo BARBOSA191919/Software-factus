@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gestion.prestamos.config.FactusConfig;
 import com.gestion.prestamos.entidades.*;
 import com.gestion.prestamos.repositorios.FacturaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -29,24 +31,21 @@ public class FactusApiClient {
         this.restTemplate = restTemplate;
         this.factusConfig = factusConfig;
     }
-
+    // Define el logger
+    private static final Logger logger = LoggerFactory.getLogger(FactusApiClient.class);
 
     @Autowired
     private FacturaRepository facturaRepository;
-
     public String obtenerTokenDeAcceso() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // Asegúrate de que el contenido sea form-urlencoded
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON)); // Aceptar respuesta JSON
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        System.out.println("Configuración Factus: URL=" + factusConfig.getUrl());
-        System.out.println("Intentando autenticación con email: " + factusConfig.getEmail());
+        logger.info("Configuración Factus: URL={}", factusConfig.getUrl());
+        logger.info("Intentando autenticación con email: {}", factusConfig.getEmail());
 
         try {
-            // Codificar la contraseña para manejar caracteres especiales como %
             String encodedPassword = URLEncoder.encode(factusConfig.getPassword(), StandardCharsets.UTF_8.toString());
-
-            // Construir el cuerpo de la solicitud
             String body = String.format(
                     "grant_type=password&username=%s&password=%s&client_id=%s&client_secret=%s",
                     factusConfig.getEmail(),
@@ -55,81 +54,37 @@ public class FactusApiClient {
                     factusConfig.getClientSecret()
             );
 
-            // Crear la entidad de la solicitud con el cuerpo y los headers
             HttpEntity<String> request = new HttpEntity<>(body, headers);
+            logger.info("Endpoint de autenticación: {}", factusConfig.getUrl() + "/oauth/token");
 
-            // Imprimir el endpoint para depuración (no imprimas el cuerpo en producción)
-            System.out.println("Endpoint: " + factusConfig.getUrl() + "/oauth/token");
-
-            // Hacer la solicitud POST al endpoint de autenticación
             ResponseEntity<String> response = restTemplate.postForEntity(
                     factusConfig.getUrl() + "/oauth/token",
                     request,
                     String.class
             );
 
-            // Imprimir el código de estado de la respuesta
-            System.out.println("Respuesta de autenticación: " + response.getStatusCode());
+            logger.info("Respuesta de autenticación: {}", response.getStatusCode());
 
-            // Procesar la respuesta
             if (response.getStatusCode() == HttpStatus.OK) {
-                // Parsear la respuesta JSON
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
-
-                // Verificar si la respuesta contiene el token de acceso
                 if (root.has("access_token")) {
-                    return root.get("access_token").asText(); // Devolver el token de acceso
+                    String token = root.get("access_token").asText();
+                    logger.info("Token obtenido exitosamente: {}", token);
+                    return token;
                 } else {
                     throw new RuntimeException("Token de acceso no encontrado en la respuesta");
                 }
             } else {
-                // Lanzar una excepción si el código de estado no es 200 OK
                 throw new RuntimeException("Error al obtener token: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            // Manejar excepciones y proporcionar detalles adicionales
-            System.err.println("Excepción al obtener token: " + e.getMessage());
-
-            // Si es un error HTTP, imprimir detalles adicionales
+            logger.error("Excepción al obtener token: {}", e.getMessage(), e);
             if (e instanceof HttpClientErrorException) {
                 HttpClientErrorException httpEx = (HttpClientErrorException) e;
-                System.err.println("Status code: " + httpEx.getStatusCode());
-                System.err.println("Response headers: " + httpEx.getResponseHeaders());
-                System.err.println("Response body (if available): " + httpEx.getResponseBodyAsString());
+                logger.error("Status code: {}, Response body: {}", httpEx.getStatusCode(), httpEx.getResponseBodyAsString());
             }
-
-            // Imprimir el stack trace para depuración
-            e.printStackTrace();
-
-            // Lanzar una excepción con un mensaje descriptivo
             throw new RuntimeException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
-        }
-    }
-
-    public String obtenerEstadoFactura(String referenceCode) {
-        try {
-            String token = obtenerTokenDeAcceso();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(
-                    factusConfig.getUrl() + "/v1/bills/show/" + referenceCode, // Usar el referenceCode
-                    HttpMethod.GET,
-                    request,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(response.getBody());
-                return root.path("status").asText(); // Devuelve el estado de la factura
-            } else {
-                throw new RuntimeException("Error al obtener el estado de la factura: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al obtener el estado de la factura: " + e.getMessage());
         }
     }
 
@@ -267,33 +222,27 @@ public class FactusApiClient {
     }
 
 
-    public String validarFactura(String referenceCode) {
+    public void validarFactura(String number) {
         try {
-            String token = obtenerTokenDeAcceso();
+            String token = obtenerTokenDeAcceso(); // Esto funciona según el log: "Respuesta de autenticación: 200 OK"
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-            // Empty body as per documentation
-            HttpEntity<String> request = new HttpEntity<>("", headers);
+            HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    factusConfig.getUrl() + "/v1/bills/validate/" + referenceCode,
+            ResponseEntity<String> response = restTemplate.exchange(
+                    factusConfig.getUrl() + "/v1/bills/validate/" + number, // Posiblemente este endpoint está mal
+                    HttpMethod.GET,
                     request,
                     String.class
             );
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                // Actualizar el estado local si es necesario
-                Factura factura = facturaRepository.findByNumber(referenceCode);
-                if (factura != null) {
-                    factura.setStatus("VALIDADA");
-                    facturaRepository.save(factura);
-                }
-                return response.getBody();
-            } else {
-                throw new RuntimeException("Error al validar la factura: " + response.getStatusCode());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new RuntimeException("Error al validar la factura: " + response.getStatusCode() + " - " + response.getBody());
             }
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("Error al validar la factura: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
         } catch (Exception e) {
             throw new RuntimeException("Error al validar la factura: " + e.getMessage());
         }
@@ -332,6 +281,39 @@ public class FactusApiClient {
             }
         } catch (Exception e) {
             throw new RuntimeException("Error al descargar el PDF: " + e.getMessage());
+        }
+    }
+
+    // Metodo para descargar XML (ya proporcionado anteriormente)
+    public String descargarFacturaXml(String number) {
+        try {
+            String token = obtenerTokenDeAcceso();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    factusConfig.getUrl() + "/v1/bills/download-xml/" + number,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode rootNode = mapper.readTree(response.getBody());
+                if (rootNode.has("data") && rootNode.get("data").has("xml_base_64_encoded")) {
+                    return rootNode.get("data").get("xml_base_64_encoded").asText();
+                } else {
+                    throw new RuntimeException("El XML no está disponible en la respuesta");
+                }
+            } else {
+                throw new RuntimeException("Error al descargar el XML: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al descargar el XML: " + e.getMessage());
         }
     }
 
@@ -539,74 +521,6 @@ public class FactusApiClient {
     }
 
 
-    public byte[] descargarPdf(String pdfUrl) {
-        try {
-            String token = obtenerTokenDeAcceso();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<byte[]> response = restTemplate.exchange(
-                    pdfUrl,
-                    HttpMethod.GET,
-                    request,
-                    byte[].class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody(); // Devuelve el contenido del PDF
-            } else {
-                throw new RuntimeException("Error al descargar el PDF: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al descargar el PDF: " + e.getMessage());
-        }
-    }
-
-    private String obtenerUrlPdfDesdeRespuesta(String jsonResponse) {
-        try {
-            // Parsear la respuesta JSON
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-
-            // Extraer la URL del PDF
-            JsonNode pdfUrlNode = rootNode.path("public_url"); // Asegúrate de que "public_url" sea el campo correcto
-            if (pdfUrlNode.isMissingNode() || pdfUrlNode.asText().isEmpty()) {
-                throw new RuntimeException("No se encontró la URL del PDF en la respuesta de Factus");
-            }
-
-            return pdfUrlNode.asText();
-        } catch (Exception e) {
-            throw new RuntimeException("Error al procesar la respuesta de Factus: " + e.getMessage());
-        }
-    }
-
-    public String obtenerUrlPdf(String facturaId) {
-        try {
-            String token = obtenerTokenDeAcceso();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(
-                    factusConfig.getUrl() + "/v1/bills/show/" + facturaId,
-                    HttpMethod.GET,
-                    request,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(response.getBody());
-                return root.path("public_url").asText(); // Devuelve la URL del PDF
-            } else {
-                throw new RuntimeException("Error al obtener la URL del PDF: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al obtener la URL del PDF: " + e.getMessage());
-        }
-    }
-
     public String eliminarFacturaPendiente(String referenceCode) {
         try {
             String token = obtenerTokenDeAcceso();
@@ -630,7 +544,7 @@ public class FactusApiClient {
             throw new RuntimeException("Error al eliminar la factura: " + e.getMessage());
         }
     }
-    
+
     public void eliminarTodasLasFacturasPendientes() {
         try {
             // Obtener la lista de facturas pendientes
@@ -683,34 +597,42 @@ public class FactusApiClient {
             throw new RuntimeException("Error al obtener facturas pendientes: " + e.getMessage());
         }
     }
-    public String eliminarFacturaNoValidada(String referenceCode) {
+
+
+    public String eliminarFactura(String referenceCode) {
         try {
             String token = obtenerTokenDeAcceso();
+            logger.info("Token de acceso obtenido para eliminar factura: {}", token);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            logger.info("Headers enviados a Factus: {}", headers);
 
             HttpEntity<String> request = new HttpEntity<>(headers);
 
+            String url = factusConfig.getUrl() + "/v1/bills/destroy/reference/" + referenceCode;
+            logger.info("Llamando a Factus API para eliminar factura: {}", url);
+
             ResponseEntity<String> response = restTemplate.exchange(
-                    factusConfig.getUrl() + "/v1/bills/delete/" + referenceCode,
+                    url,
                     HttpMethod.DELETE,
                     request,
                     String.class
             );
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                // Actualizar el estado local si es necesario
-                Factura factura = facturaRepository.findByNumber(referenceCode);
-                if (factura != null) {
-                    factura.setStatus("ELIMINADA");
-                    facturaRepository.save(factura);
-                }
-                return response.getBody();
-            } else {
-                throw new RuntimeException("Error al eliminar la factura: " + response.getStatusCode());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new RuntimeException("Error al eliminar la factura: " + response.getStatusCode() + " - " + response.getBody());
             }
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            logger.error("Error HTTP al eliminar factura: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Error al eliminar la factura: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
         } catch (Exception e) {
+            logger.error("Error inesperado al eliminar factura: {}", e.getMessage(), e);
             throw new RuntimeException("Error al eliminar la factura: " + e.getMessage());
         }
-    }}
+    }
+
+}
 

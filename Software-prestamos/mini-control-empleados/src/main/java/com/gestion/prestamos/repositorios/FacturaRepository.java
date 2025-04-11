@@ -9,4 +9,6 @@ public interface FacturaRepository extends JpaRepository<Factura, Long> {
     Factura findByNumber(String referenceCode); // Buscar por referenceCode
 
     List<Factura> findByStatus(String pendiente);
+
+    Factura findByReferenceCode(String referenceCode);
 }

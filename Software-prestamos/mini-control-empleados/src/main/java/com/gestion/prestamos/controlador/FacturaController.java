@@ -34,13 +34,13 @@ public class FacturaController {
     public ResponseEntity<?> listarFacturas() {
         try {
             List<Map<String, Object>> simplifiedFacturas = new ArrayList<>();
-
             List<Factura> facturas = factusApiClient.obtenerFacturas();
 
             for (Factura f : facturas) {
                 Map<String, Object> facturaMap = new HashMap<>();
                 facturaMap.put("id", f.getId());
                 facturaMap.put("numero", f.getNumber());
+                facturaMap.put("referenceCode", f.getReferenceCode()); // Añadir referenceCode explícitamente
                 facturaMap.put("pagos", f.getFormaPago());
                 facturaMap.put("metodopago", f.getMetodoPago());
                 facturaMap.put("identificacion", f.getCliente().getIdentificacion());
@@ -50,13 +50,11 @@ public class FacturaController {
                 facturaMap.put("createdAt", f.getCreatedAt());
                 facturaMap.put("total", f.getTotal());
 
-                // Handle BillingPeriod safely
                 if (f.getBillingPeriod() != null) {
                     facturaMap.put("startDate", f.getBillingPeriod().getStartDate());
                     facturaMap.put("endDate", f.getBillingPeriod().getEndDate());
                 }
 
-                // Handle Cliente safely
                 if (f.getCliente() != null) {
                     Map<String, Object> clienteMap = new HashMap<>();
                     clienteMap.put("id", f.getCliente().getId());
@@ -69,10 +67,9 @@ public class FacturaController {
 
             return ResponseEntity.ok(simplifiedFacturas);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error al listar facturas: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            logger.error("Error al listar facturas: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al listar facturas: " + e.getMessage()));
         }
     }
 
@@ -163,70 +160,82 @@ public class FacturaController {
         }
     }
 
-
-    @DeleteMapping("/eliminar/{id}")
+    @GetMapping("/validar-y-descargar/{number}")
     @ResponseBody
-    public ResponseEntity<?> eliminarFacturaNoValidada(@PathVariable Long id) {
+    public ResponseEntity<?> validarYDescargarFactura(@PathVariable String number) {
         try {
-            // Obtener la factura de la base de datos local
-            Optional<Factura> facturaOpt = facturaRepository.findById(id);
-            if (!facturaOpt.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Factura no encontrada"));
+            logger.info("Iniciando validación y descarga para factura número: {}", number);
+
+            if (number == null || number.isEmpty()) {
+                logger.error("El número de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El número de factura no es válido"));
             }
 
-            Factura factura = facturaOpt.get();
-            String referenceCode = factura.getNumber(); // Obtener el referenceCode
+            // Intentar validar la factura
+            logger.info("Validando factura con número: {}", number);
+            try {
+                factusApiClient.validarFactura(number);
+                logger.info("Validación completada, esperando 2 segundos...");
+                Thread.sleep(2000); // Esperar a que Factus procese la validación
+            } catch (RuntimeException e) {
+                logger.warn("No se pudo validar la factura número {}: {}", number, e.getMessage());
+                // Continuamos para intentar descargar el PDF
+            }
 
-            // Eliminar la factura en Factus
-            String respuestaFactus = factusApiClient.eliminarFacturaNoValidada(referenceCode);
+            // Descargar el PDF
+            logger.info("Descargando PDF para factura número: {}", number);
+            byte[] documentoPdf = factusApiClient.descargarFacturaPdf(number);
 
-            // Devolver la respuesta
-            return ResponseEntity.ok(Map.of(
-                    "message", "Factura eliminada exitosamente",
-                    "respuestaFactus", respuestaFactus
-            ));
+            if (documentoPdf != null && documentoPdf.length > 0) {
+                logger.info("PDF generado correctamente para factura número: {}", number);
+                return ResponseEntity.ok()
+                        .header("Content-Type", "application/pdf")
+                        .header("Content-Disposition", "attachment; filename=\"factura-" + number + ".pdf\"")
+                        .body(documentoPdf);
+            } else {
+                logger.warn("No se pudo generar el PDF para factura número: {}", number);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "No se pudo generar el PDF de la factura. Es posible que la factura no esté validada o no exista."));
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al validar y descargar la factura número {}: {}", number, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error al eliminar la factura: " + e.getMessage()));
+                    .body(Map.of("error", "Error al procesar la solicitud: " + e.getMessage()));
         }
     }
 
-    @GetMapping("/validar-y-descargar/{id}")
+    @GetMapping("/descargar-xml/{number}")
     @ResponseBody
-    public ResponseEntity<?> validarYDescargarFactura(@PathVariable Long id) {
+    public ResponseEntity<?> descargarXml(@PathVariable String number) {
         try {
-            // Obtener la factura de la base de datos local
-            Optional<Factura> facturaOpt = facturaRepository.findById(id);
-            if (!facturaOpt.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Factura no encontrada"));
+            logger.info("Iniciando descarga de XML para factura número: {}", number);
+
+            if (number == null || number.isEmpty()) {
+                logger.error("El número de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El número de factura no es válido"));
             }
 
-            Factura factura = facturaOpt.get();
-            String referenceCode = factura.getNumber(); // Usar el referenceCode
-
-            // Validar la factura en Factus
-            factusApiClient.validarFactura(referenceCode); // Pasar el referenceCode
-            Thread.sleep(2000); // Esperar un momento para que se procese
-
-            // Descargar la factura
-            byte[] documentoPdf = factusApiClient.descargarFacturaPdf(referenceCode); // Pasar el referenceCode
-
-            if (documentoPdf != null && documentoPdf.length > 0) {
-                return ResponseEntity.ok()
-                        .header("Content-Type", "application/pdf")
-                        .header("Content-Disposition", "attachment; filename=factura-" + referenceCode + ".pdf")
-                        .body(documentoPdf);
-            } else {
+            logger.info("Descargando XML para factura número: {}", number);
+            String xmlBase64 = factusApiClient.descargarFacturaXml(number);
+            if (xmlBase64 == null || xmlBase64.isEmpty()) {
+                logger.warn("No se obtuvo XML para factura número: {}", number);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "No se pudo generar el PDF de la factura"));
+                        .body(Map.of("error", "No se pudo obtener el XML de la factura"));
             }
+
+            byte[] xmlBytes = Base64.getDecoder().decode(xmlBase64);
+            logger.info("XML descargado y decodificado correctamente para factura número: {}", number);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/xml")
+                    .header("Content-Disposition", "attachment; filename=\"factura-" + number + ".xml\"") // Añadí comillas al nombre del archivo
+                    .body(xmlBytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al descargar el XML para factura número {}: {}", number, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error al validar y descargar la factura: " + e.getMessage()));
+                    .body(Map.of("error", "Error al descargar el XML: " + e.getMessage()));
         }
     }
 
@@ -377,8 +386,6 @@ public class FacturaController {
     }
 
 
-
-
     @GetMapping("/factura-download/{number}")
     public ResponseEntity<?> descargarFacturaPdf(@PathVariable String number) {
         try {
@@ -410,4 +417,28 @@ public class FacturaController {
         }
     }
 
+    @DeleteMapping("/eliminar/{referenceCode}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarFactura(@PathVariable String referenceCode) {
+        try {
+            logger.info("Iniciando eliminación para factura con referenceCode: {}", referenceCode);
+            if (referenceCode == null || referenceCode.isEmpty()) {
+                logger.error("El referenceCode de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El referenceCode de factura no es válido"));
+            }
+            logger.info("Eliminando factura con referenceCode: {}", referenceCode);
+            String respuesta = factusApiClient.eliminarFactura(referenceCode);
+            logger.info("Factura eliminada correctamente con referenceCode: {}", referenceCode);
+            return ResponseEntity.ok(Map.of("message", "Factura eliminada correctamente", "respuesta", respuesta));
+        } catch (RuntimeException e) {
+            logger.error("Error al eliminar la factura con referenceCode {}: {}", referenceCode, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "No se pudo eliminar la factura: " + e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error inesperado al eliminar la factura con referenceCode {}: {}", referenceCode, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error inesperado al eliminar la factura: " + e.getMessage()));
+        }
+    }
 }
