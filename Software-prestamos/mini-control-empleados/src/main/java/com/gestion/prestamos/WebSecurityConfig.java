@@ -21,7 +21,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new BCryptPasswordEncoder();
 	}
 
-
 	@Override
 	@Bean
 	protected UserDetailsService userDetailsService() {
@@ -31,34 +30,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.roles("ADMIN")
 				.build();
 
-
 		return new InMemoryUserDetailsManager(admin);
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.headers().frameOptions().sameOrigin(); // Permitir iframes del mismo origen
+		http.headers().frameOptions().sameOrigin();
 		http
 				.authorizeRequests()
-				.antMatchers("/", "/login").permitAll() // Permite acceso público al login
-				.antMatchers("/api/productos/**").hasAnyRole("ADMIN") // Acceso a productos
-				.antMatchers("/api/clientes/**").hasRole("ADMIN") // Solo ADMIN puede acceder a clientes
-				.antMatchers("/facturas/**").hasAnyRole("ADMIN") // Permite acceso a las vistas de facturas
-				.antMatchers("/api/facturas/**").hasAnyRole("ADMIN") // Acceso a facturas
-				// Solo el ADMIN y GERENTE pueden eliminar o modificar registros
-				.antMatchers( "/id/* ")
-				.hasAnyRole("ADMIN")
-				.anyRequest().authenticated() // Cualquier otra ruta requiere autenticación
+				.antMatchers("/", "/login").permitAll()
+				.antMatchers("/api/productos/**").authenticated()
+				.antMatchers("/api/clientes/**").authenticated()
+				.antMatchers("/facturas/**").authenticated()
+				.antMatchers("/api/facturas/**").authenticated()
+				.antMatchers("/id/*").authenticated()
+				.anyRequest().authenticated()
 				.and()
 				.formLogin()
-				.loginPage("/login") // Página de login personalizada
-				.defaultSuccessUrl("/api/facturas/crear", true) // Redirige a la página principal tras el login
+				.loginPage("/login")
+				.defaultSuccessUrl("/api/facturas/crear", true)
 				.permitAll()
+				.and()
+				.oauth2Login()
+				.loginPage("/login")
+				.defaultSuccessUrl("/api/facturas/crear", true)
 				.and()
 				.logout()
+				.logoutSuccessUrl("/login?logout")
 				.permitAll()
-
 				.and()
-				.csrf().disable(); // Desactiva CSRF para simplificar (no recomendado en producción)
+				.csrf().disable();
 	}
 }
