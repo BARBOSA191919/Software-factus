@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +31,7 @@ public class FacturaController {
 
     // Define el logger
     private static final Logger logger = LoggerFactory.getLogger(FacturaController.class);
+
 
     @GetMapping("/listar")
     @ResponseBody
@@ -74,8 +78,26 @@ public class FacturaController {
     }
 
     @GetMapping("/crear")
-    public String mostrarFormularioCreacion(Model model) {
+    public String mostrarFormularioCreacion(Model model, @AuthenticationPrincipal OAuth2User oAuth2User, Authentication authentication) {
         model.addAttribute("factura", new Factura());
+
+        if (oAuth2User != null) {
+            // Caso de OAuth2 (Google)
+            String userName = oAuth2User.getAttribute("name");
+            String userPicture = oAuth2User.getAttribute("picture");
+            model.addAttribute("userName", userName != null ? userName : "Usuario");
+            model.addAttribute("userPicture", userPicture != null ? userPicture : "");
+        } else if (authentication != null) {
+            // Caso de formLogin
+            String userName = authentication.getName(); // Obtiene el nombre de usuario (por ejemplo, "admin")
+            model.addAttribute("userName", userName != null ? userName : "Usuario");
+            model.addAttribute("userPicture", ""); // No hay foto para formLogin
+        } else {
+            // Caso por defecto
+            model.addAttribute("userName", "Usuario");
+            model.addAttribute("userPicture", "");
+        }
+
         return "/Facturas/Dashboard";
     }
 

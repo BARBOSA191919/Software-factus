@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:text-align="http://www.w3.org/1999/xhtml" lang="es">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
 		.container {
 			display: flex;
 			width: 900px;
-			height: 550px;
+			height: 600px;
 			position: relative;
 			z-index: 5;
 			box-shadow: 0 25px 50px rgba(0, 41, 63, 0.15);
@@ -39,9 +39,9 @@
 		}
 
 		.left-panel {
-			width: 40%;
+			width: 50%;
 			background: linear-gradient(145deg, #0059b3, #0072e5);
-			padding: 50px;
+			padding: 45px;
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
@@ -152,12 +152,55 @@
 			font-size: 14px;
 		}
 
+		.footer {
+			position: relative;
+			z-index: 2;
+			margin-top: 30px;
+		}
+
 		.copyright {
 			font-size: 12px;
 			opacity: 0.7;
-			margin-top: 30px;
-			position: relative;
-			z-index: 2;
+			margin-bottom: 10px;
+		}
+
+		.legal-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 15px;
+			font-size: 12px;
+			opacity: 0.9;
+		}
+
+		.legal-links a {
+			color: white;
+			text-decoration: none;
+			transition: color 0.3s ease;
+		}
+
+		.legal-links a:hover {
+			color: #e0e0e0;
+			text-decoration: underline;
+		}
+
+		.social-links {
+			display: flex;
+			justify-content: center; /* Center icons horizontally */
+			align-items: center; /* Align icons vertically */
+			gap: 15px;
+			margin-top: 15px;
+			width: 100%; /* Ensure it takes full width for centering */
+		}
+
+		.social-links a {
+			color: white;
+			font-size: 18px;
+			transition: color 0.3s ease;
+			text-decoration: none; /* Prevent underlines */
+		}
+
+		.social-links a:hover {
+			color: #e0e0e0;
 		}
 
 		.right-panel {
@@ -397,8 +440,15 @@
 			</div>
 		</div>
 
-		<div class="copyright">
-			© 2025 Factus. Todos los derechos reservados.
+		<div class="footer">
+			<div class="copyright">
+				© 2025 Factus. Todos los derechos reservados.
+			</div>
+			<div class="legal-links">
+				<a href="https://www.factus.com.co/terminos-y-condiciones" target="_blank">Términos y Condiciones</a>
+				<a href="https://www.factus.com.co/politica-de-tratamiento-de-datos" target="_blank" >Política de Privacidad</a>
+				<a href="https://www.factus.com.co/acuerdo-nivel-servicio" target="_blank" style="display: block; text-align: center; width: 90%;">Acuerdo de Nivel de Servicio</a>			</div>
+
 		</div>
 	</div>
 
@@ -441,7 +491,7 @@
 					<input type="checkbox" id="remember-me" name="remember-me">
 					<label for="remember-me">Recordarme</label>
 				</div>
-				<a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+				<a href="https://app.factus.com.co/login" target="_blank" class="forgot-link">¿Olvidó su contraseña?</a>
 			</div>
 
 			<button type="submit" class="login-button">
@@ -454,11 +504,23 @@
 				</a>
 			</div>
 			<div class="extra-options">
-				¿Necesita ayuda? <a href="#">Contacte a soporte</a>
+				¿Necesita ayuda? <a href="https://www.factus.com.co/" target="_blank">Contacte a soporte</a>
+				<div class="social-links">
+					<a href="https://www.facebook.com/factusfacturacion" target="_blank" title="Facebook">
+						<i class="fab fa-facebook-f"></i>
+					</a>
+					<a href="https://www.instagram.com/factusfacturacion/" target="_blank" title="Instagram">
+						<i class="fab fa-instagram"></i>
+					</a>
+					<a href="https://api.whatsapp.com/send?phone=573161331234" target="_blank" title="WhatsApp"  >
+						<i class="fab fa-whatsapp"></i>
+					</a>
+				</div>
 			</div>
 		</form>
 	</div>
 </div>
+
 
 <script>
 	// Animación simple para los mensajes de alerta

@@ -658,6 +658,46 @@
             margin-right: 0;
         }
 
+        /* Estilos para la información del usuario */
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin: 10px 10px 20px 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #ffffff;
+        }
+
+        .user-info span {
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        /* Ajustar cuando la sidebar está colapsada */
+        .sidebar.collapsed .user-info {
+            flex-direction: column;
+            padding: 10px;
+            margin: 10px 5px 20px 5px;
+        }
+
+        .sidebar.collapsed .user-info img {
+            margin-right: 0;
+            margin-bottom: 5px;
+        }
+
+        .sidebar.collapsed .user-info span {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -666,10 +706,19 @@
         <!-- Sidebar -->
         <div class="col-md-2 sidebar p-0">
             <div class="d-flex flex-column p-3">
+                <!-- Logo y título -->
                 <div class="text-center mb-4">
                     <img src="https://i.ibb.co/XkN8BLQ5/factus-logo.png" alt="Logo" width="40" class="mb-2">
                     <h4>FACTUS</h4>
                 </div>
+                <div class="user-info">
+                    <!-- Mostrar la foto del usuario si existe, o la predeterminada si no -->
+                    <img th:src="${userPicture != null && userPicture != ''} ? ${userPicture} : 'https://cdn-icons-png.flaticon.com/128/4526/4526169.png'" alt="Foto de perfil"/>
+                    <!-- Mostrar el nombre del usuario -->
+                    <span th:text="${userName != null} ? ${userName} : 'Usuario'">Usuario</span>
+                </div>
+
+                <!-- Menú de navegación -->
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-link active" id="dashboard-link">
@@ -692,12 +741,15 @@
                         </a>
                     </li>
                 </ul>
+
+                <!-- Botón de logout -->
                 <form id="logoutForm" class="mt-auto px-3" th:action="@{/logout}" method="post">
                     <button type="button" class="btn btn-danger btn-block w-100" onclick="confirmLogout()">
                         <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                     </button>
                 </form>
             </div>
+
             <!-- Botón de la flecha -->
             <button class="sidebar-toggle btn btn-primary">
                 <i class="fas fa-chevron-left"></i>
