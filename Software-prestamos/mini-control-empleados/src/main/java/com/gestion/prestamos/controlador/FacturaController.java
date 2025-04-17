@@ -44,7 +44,7 @@ public class FacturaController {
                 Map<String, Object> facturaMap = new HashMap<>();
                 facturaMap.put("id", f.getId());
                 facturaMap.put("numero", f.getNumber());
-                facturaMap.put("referenceCode", f.getReferenceCode()); // Añadir referenceCode explícitamente
+                facturaMap.put("referenceCode", f.getReferenceCode());
                 facturaMap.put("pagos", f.getFormaPago());
                 facturaMap.put("metodopago", f.getMetodoPago());
                 facturaMap.put("identificacion", f.getCliente().getIdentificacion());
@@ -63,6 +63,10 @@ public class FacturaController {
                     Map<String, Object> clienteMap = new HashMap<>();
                     clienteMap.put("id", f.getCliente().getId());
                     clienteMap.put("nombre", f.getCliente().getNombre());
+                    // Agregar los campos adicionales del cliente
+                    clienteMap.put("identificacion", f.getCliente().getIdentificacion());
+                    clienteMap.put("correo", f.getCliente().getCorreo());
+                    clienteMap.put("direccion", f.getCliente().getDireccion());
                     facturaMap.put("cliente", clienteMap);
                 }
 
@@ -281,6 +285,11 @@ public class FacturaController {
                     // Si la factura está ya creada en Factus, intenta obtener los detalles
                     Map<String, Object> facturaDetalle = factusApiClient.obtenerDetalleFactura(id);
 
+                    // Asegúrate de incluir referenceCode y formaPago, incluso si no vienen de Factus
+                    facturaDetalle.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
+                    facturaDetalle.put("formaPago", factura.getFormaPago());
+                    facturaDetalle.put("metodoPago", factura.getMetodoPago());
+
                     // Agregar los ítems de la factura local al detalle
                     facturaDetalle.put("items", factura.getItems().stream().map(item -> {
                         Map<String, Object> itemMap = new HashMap<>();
@@ -300,10 +309,12 @@ public class FacturaController {
                     // Si hay error al obtener la factura de Factus, devuelve información básica con ítems locales
                     Map<String, Object> facturaBasica = new HashMap<>();
                     facturaBasica.put("id", factura.getId());
-                    facturaBasica.put("referenceCode", factura.getNumber());
+                    facturaBasica.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
                     facturaBasica.put("documentName", factura.getDocumentName());
                     facturaBasica.put("status", factura.getStatus());
                     facturaBasica.put("createdAt", factura.getCreatedAt());
+                    facturaBasica.put("formaPago", factura.getFormaPago());
+                    facturaBasica.put("metodoPago", factura.getMetodoPago());
                     facturaBasica.put("items", factura.getItems().stream().map(item -> {
                         Map<String, Object> itemMap = new HashMap<>();
                         itemMap.put("id", item.getId());
@@ -324,10 +335,12 @@ public class FacturaController {
                 // Si la factura no ha sido procesada en Factus, devuelve información básica con ítems locales
                 Map<String, Object> facturaBasica = new HashMap<>();
                 facturaBasica.put("id", factura.getId());
-                facturaBasica.put("referenceCode", factura.getNumber());
+                facturaBasica.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
                 facturaBasica.put("documentName", factura.getDocumentName());
                 facturaBasica.put("status", factura.getStatus() != null ? factura.getStatus() : "PENDIENTE");
                 facturaBasica.put("createdAt", factura.getCreatedAt());
+                facturaBasica.put("formaPago", factura.getFormaPago());
+                facturaBasica.put("metodoPago", factura.getMetodoPago());
                 facturaBasica.put("items", factura.getItems().stream().map(item -> {
                     Map<String, Object> itemMap = new HashMap<>();
                     itemMap.put("id", item.getId());
@@ -351,7 +364,6 @@ public class FacturaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-
 
     @GetMapping("/descargar/{id}")
     @ResponseBody

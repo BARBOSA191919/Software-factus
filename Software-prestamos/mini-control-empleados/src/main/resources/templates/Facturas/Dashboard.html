@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Facturación</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome para iconos -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">    <!-- FontAwesome para iconos -->
     <link rel="shortcut icon" href="https://i.ibb.co/r21Tj1nF/icon-halltec.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -153,8 +152,10 @@
             padding: 30px;
             background-color: #f0f4f8;
             min-height: 100vh;
+            position: relative;
+            z-index: 0; /* Bajo para no interferir con el dropdown */
+            overflow: visible !important; /* Asegurar que no corte el dropdown */
         }
-
         .card {
             border: none;
             border-radius: 12px;
@@ -185,16 +186,28 @@
             color: #1a202c;
         }
 
-        /* Ajustes para tablas */
+        /* Asegurar que la tabla no interfiera con el dropdown */
         .table {
             width: 100%;
-            font-size: 0.95rem; /* Tamaño de fuente legible */
+            font-size: 0.9rem;
             border-collapse: separate;
             border-spacing: 0;
             background-color: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             border-radius: 8px;
-            overflow: hidden;
+            position: relative;
+            z-index: 1; /* Bajo para no interferir con el dropdown */
+        }
+
+        /* Estilo para columnas específicas */
+        .table th:nth-child(1), .table td:nth-child(1) { /* Número */
+            max-width: 90px;
+        }
+        .table th:nth-child(3), .table td:nth-child(3) { /* ID */
+            max-width: 100px;
+        }
+        .table th:nth-child(5), .table td:nth-child(5) { /* Método */
+            max-width: 120px;
         }
 
         .table thead {
@@ -202,32 +215,37 @@
             color: white;
         }
 
+        /* Ajustar el tamaño y comportamiento de las celdas de la tabla */
         .table th, .table td {
-            padding: 12px 15px; /* Más espacio interno */
+            padding: 8px 10px;
             vertical-align: middle;
             text-align: left;
-            white-space: nowrap; /* Evita que el texto se rompa innecesariamente */
+            white-space: nowrap;
+            text-overflow: ellipsis;
             overflow: hidden;
-            max-width: 300px; /* Limita el ancho de las celdas */
+            max-width: 150px;
         }
+
 
         .table th {
             background-color: #1e3a8a;
             color: white;
             font-weight: 600;
         }
-        /* Contenedor responsive */
-        .table-responsive {
-            overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
-            margin-bottom: 20px;
+
+
+
+        /* Ajustar botones de acción */
+        .table .btn {
+            padding: 4px 8px;
+            font-size: 0.85rem;
         }
 
-        /* Botones de acción en tablas */
-        .table .btn {
-            padding: 6px 10px;
-            font-size: 0.9rem;
-            margin-right: 5px;
+        /* Asegurar que las filas de la tabla no tengan overflow */
+        .table tbody tr {
+            position: relative;
         }
+
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: #f9fafb;
         }
@@ -236,6 +254,146 @@
             background-color: #eff6ff;
         }
 
+        .table-responsive {
+            overflow-x: auto; /* Mantener solo el scroll horizontal si es necesario */
+            position: relative;
+        }
+        /* Estilo específico para los dropdowns en tablas */
+        .table .dropdown {
+            position: static;  /* Importante para evitar que se recorte */
+        }
+
+        .table .dropdown-menu {
+            position: absolute !important;
+            right: 0;
+            left: auto !important;
+            min-width: 150px;
+            z-index: 1500 !important;  /* Z-index alto para asegurar que aparezca encima */
+            transform: none !important;  /* Evitar transformaciones que afecten la posición */
+        }
+
+        /* Para dispositivos móviles */
+        @media (max-width: 768px) {
+            .table .dropdown-menu {
+                position: fixed !important;
+                top: auto !important;
+                left: 10% !important;
+                right: 10% !important;
+                width: 80%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+        }
+        /* Estilo general para botones de acción */
+        .action-buttons {
+            display: flex;
+            gap: 6px; /* Reducir el espacio entre botones */
+            justify-content: center;
+            flex-wrap: wrap; /* Permitir que los botones se ajusten si no hay espacio */
+        }
+
+        /* Estilo para botones en Clientes y Productos (como ya está) */
+        .action-buttons .btn {
+            padding: 4px 8px;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .action-buttons.factura-actions .btn {
+            padding: 2px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .action-buttons .btn i {
+            margin: 0;
+        }
+
+        [data-bs-toggle="tooltip"] {
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons .btn {
+                padding: 3px 6px;
+                font-size: 12px;
+            }
+            .action-buttons.factura-actions .btn {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+        .dropdown {
+            position: relative;
+            z-index: 1050 !important;
+        }
+
+        .dropdown-menu {
+            z-index: 1050 !important;
+            min-width: 180px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 5px;
+        }
+        /* Estilo para los ítems del menú */
+        .dropdown-item {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        .dropdown-item i {
+            margin-right: 8px;
+        }
+        /* Asegurar que el botón del dropdown esté correctamente posicionado */
+        .dropdown-toggle {
+            position: relative;
+        }
+        /* Estilo para dropdown compacto */
+        .dropdown .btn-light.dropdown-toggle {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            padding: 2px 4px !important;
+            width: 28px;
+            height: 28px;
+        }
+
+        .dropdown .btn-light.dropdown-toggle:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+        /* Estilo para el menú compacto */
+        .dropdown-menu.compact-menu {
+            min-width: 40px !important;
+            padding: 0.25rem 0;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-menu.compact-menu .dropdown-item {
+            padding: 4px 8px;
+            text-align: center;
+        }
+
+        .dropdown-menu.compact-menu .dropdown-item i {
+            margin-right: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Tooltip para mostrar texto en hover */
+        [data-bs-toggle="tooltip"] {
+            cursor: pointer;
+        }
+        .dropdown-menu.show {
+            display: block !important;
+            z-index: 1050 !important;
+            position: absolute !important;
+        }
         /* Buttons */
         .btn-primary {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -476,6 +634,22 @@
                 margin-left: 0;
                 padding: 16px;
             }
+            /* Asegurar que en pantallas pequeñas el dropdown sea visible */
+            @media (max-width: 768px) {
+                .table th, .table td {
+                    padding: 6px 8px;
+                    font-size: 0.85rem;
+                    max-width: 100px;
+                }
+                .table th:nth-child(1), .table td:nth-child(1) {
+                    max-width: 60px;
+                }
+                .dropdown-menu {
+                    z-index: 9999 !important; /* Mantener z-index alto */
+                    position: fixed !important; /* Forzar posicionamiento absoluto */
+                    transform: translateY(5px); /* Mantener debajo del botón */
+                }
+            }
 
             .sidebar {
                 width: 100%;
@@ -697,7 +871,91 @@
         .sidebar.collapsed .user-info span {
             display: none;
         }
+        .swal-invoice-modal .swal2-popup {
+            font-family: Arial, sans-serif;
+            max-width: 95%;
+            padding: 1rem;
+        }
 
+        .swal-invoice-modal .invoice-container {
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .swal-invoice-modal .card {
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .swal-invoice-modal .card-header {
+            padding: 6px 12px;
+        }
+
+        .swal-invoice-modal .card-body {
+            padding: 10px;
+        }
+
+        /* More compact tables */
+        .swal-invoice-modal .table {
+            margin-bottom: 0;
+            font-size: 12px;
+        }
+
+        .swal-invoice-modal .table th,
+        .swal-invoice-modal .table td {
+            padding: 6px 8px;
+            vertical-align: middle;
+        }
+
+        /* Reduce spacing between sections */
+        .swal-invoice-modal .row {
+            margin-bottom: 10px;
+        }
+
+        /* Make badges more compact */
+        .swal-invoice-modal .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+        }
+
+        /* Compact footer */
+        .swal-invoice-modal .invoice-footer {
+            margin-top: 10px;
+            padding-top: 5px;
+            border-top: 1px solid #dee2e6;
+            font-size: 11px;
+        }
+
+        /* Button styling for side-by-side layout */
+        .swal-invoice-modal .swal2-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .swal-invoice-modal .swal2-footer {
+            margin-top: 0;
+            padding-top: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Place buttons side by side */
+        .swal-invoice-modal .btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            margin: 0 5px;
+        }
+
+        /* Remove excess spacing */
+        .swal-invoice-modal .mb-4 {
+            margin-bottom: 10px !important;
+        }
+
+        .swal-invoice-modal .mb-1 {
+            margin-bottom: 3px !important;
+        }
     </style>
 </head>
 <body>
@@ -1376,11 +1634,83 @@
 </div>
 <!-- Scripts de Bootstrap y jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Script para ajustar posición de dropdowns en tablas
+    document.addEventListener('shown.bs.dropdown', function(event) {
+        const dropdown = event.target;
+
+        // Si el dropdown está dentro de una tabla
+        if (dropdown.closest('.table')) {
+            const menu = dropdown.querySelector('.dropdown-menu');
+            const buttonRect = dropdown.getBoundingClientRect();
+
+            // Calcular posición ideal
+            const left = buttonRect.left;
+            let top = buttonRect.bottom + 2; // 2px de separación (reducido)
+
+            // Verificar si hay espacio hacia abajo
+            const viewportHeight = window.innerHeight;
+            const menuHeight = menu.offsetHeight;
+
+            if (top + menuHeight > viewportHeight) {
+                // No hay espacio abajo, mostrar arriba
+                top = buttonRect.top - menuHeight - 2;
+            }
+
+            // Aplicar posición manualmente
+            menu.style.position = 'fixed';
+            menu.style.top = `${top}px`;
+            menu.style.left = `${left}px`;
+            menu.style.zIndex = '1000';
+            menu.style.width = 'auto';
+            menu.style.minWidth = '40px';
+            menu.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
+        }
+    });;
+    
+    document.querySelectorAll('.dropdown-toggle').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const dropdownMenu = button.nextElementSibling;
+            const isVisible = dropdownMenu.style.display === 'block';
+
+            // Cerrar todos los dropdowns primero
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+
+            // Mostrar/ocultar el dropdown actual
+            if (!isVisible) {
+                dropdownMenu.style.display = 'block';
+
+                // Ajustar posición si está cerca del borde
+                const rect = dropdownMenu.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    dropdownMenu.style.left = 'auto';
+                    dropdownMenu.style.right = '0';
+                }
+                if (rect.bottom > window.innerHeight) {
+                    dropdownMenu.style.top = 'auto';
+                    dropdownMenu.style.bottom = '100%';
+                }
+            }
+        });
+    });
+
+    // Cerrar dropdowns al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
 
     $(document).ready(function() {
+
         // Manejar el botón de la flecha para abrir/cerrar sidebar
         $('.sidebar-toggle').click(function() {
             $('.sidebar').toggleClass('collapsed');
@@ -1678,26 +2008,28 @@
 
                     paginatedData.forEach(function(cliente) {
                         tbody.append(`
-                    <tr>
-                        <td>${cliente.id}</td>
-                        <td>${cliente.nombre}</td>
-                        <td>${cliente.tipoCliente}</td>
-                        <td>${cliente.identificacion}</td>
-                        <td>${cliente.telefono || 'N/A'}</td>
-                        <td>${cliente.correo || 'N/A'}</td>
-                        <td>${cliente.legalOrganizationId || 'N/A'}</td>
-                        <td>${cliente.tributeId || 'N/A'}</td>
-                        <td>${cliente.aplicaIVA || 'No'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-cliente" data-id="${cliente.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-cliente" data-id="${cliente.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `);
+                        <tr>
+                            <td>${cliente.id}</td>
+                            <td>${cliente.nombre}</td>
+                            <td>${cliente.tipoCliente}</td>
+                            <td>${cliente.identificacion}</td>
+                            <td>${cliente.telefono || 'N/A'}</td>
+                            <td>${cliente.correo || 'N/A'}</td>
+                            <td>${cliente.legalOrganizationId || 'N/A'}</td>
+                            <td>${cliente.tributeId || 'N/A'}</td>
+                            <td>${cliente.aplicaIVA || 'No'}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-primary edit-cliente" data-id="${cliente.id}" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-cliente" data-id="${cliente.id}" data-bs-toggle="tooltip" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
                     });
 
                     if (paginatedData.length === 0) {
@@ -1732,11 +2064,14 @@
         $('#buscar-clientes').on('keyup', function() {
             loadClientes(1);
         });
+
+
         function loadFacturas(page = 1, itemsPerPage = 6) {
             $.ajax({
                 url: '/api/facturas/listar',
                 method: 'GET',
                 success: function(data) {
+
                     const tbody = $('#facturas-table-body');
                     tbody.empty();
 
@@ -1755,7 +2090,19 @@
 
                     paginatedData.forEach(function(factura) {
                         const clienteNombre = factura.cliente ? factura.cliente.nombre : 'N/A';
+
                         const fecha = factura.createdAt ? new Date(factura.createdAt).toLocaleDateString() : 'N/A';
+                        const hasCliente = factura.cliente && factura.cliente.nombre;
+
+                        // Convertir factura.cliente a JSON y escapar las comillas
+                        let clienteData;
+                        try {
+                            clienteData = factura.cliente ? JSON.stringify(factura.cliente).replace(/'/g, "\\'") : '{}';
+                        } catch (error) {
+                            console.error("Error al convertir cliente a JSON:", error);
+                            clienteData = '{}'; // Valor por defecto si falla
+                        }
+
                         tbody.append(`
                     <tr>
                         <td>${factura.numero || 'N/A'}</td>
@@ -1768,29 +2115,48 @@
                         <td>${fecha}</td>
                         <td>$${factura.total?.toFixed(2) || '0.00'}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary edit-factura" data-id="${factura.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-info view-factura" data-id="${factura.id}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-secondary download-factura" data-id="${factura.numero}">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button class="btn btn-success btn-sm validate-factura-btn" data-id="${factura.numero}">
-                                <i class="bi bi-check-circle"></i>
-                            </button>
-                            <button class="btn btn-primary btn-sm download-xml-btn" data-id="${factura.numero}">
-                                <i class="bi bi-file-earmark-code"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm delete-factura-btn" data-id="${factura.referenceCode || 'N/A'}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `);
+                <div class="dropdown position-static">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog"></i> Opciones
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" data-bs-popper="static">
+                        <li>
+                            <a class="dropdown-item edit-factura" href="#" data-id="${factura.id}">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item view-factura" href="#" data-id="${factura.id}" data-numero="${factura.numero || 'N/A'}" data-cliente='${clienteData}' ${hasCliente ? '' : 'style="pointer-events: none; opacity: 0.5;" title="No hay cliente asociado"'}>
+                                <i class="fas fa-eye"></i> Detalles
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item download-factura" href="#" data-id="${factura.numero}">
+                                <i class="fas fa-download"></i> Pdf
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item validate-factura-btn" href="#" data-id="${factura.numero}">
+                                <i class="bi bi-check-circle"></i> Validar
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item download-xml-btn" href="#" data-id="${factura.numero}">
+                                <i class="bi bi-file-earmark-code"></i> XML
+                            </a>
+                        </li>
+                        <li class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item delete-factura-btn text-danger" href="#" data-id="${factura.referenceCode || 'N/A'}">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    `);
                     });
-
                     if (paginatedData.length === 0) {
                         tbody.append(`
                     <tr>
@@ -1807,32 +2173,53 @@
 
                     renderPagination(totalPages, currentPage, 'facturas');
 
-                    $('.edit-factura').click(function() {
-                        const number = $(this).data('id');
-                        editFactura(number);
+                    // Reasignar eventos para las acciones del menú desplegable
+                    $('.edit-factura').click(function(e) {
+                        e.preventDefault();
+                        const id = $(this).data('id');
+                        editFactura(id);
                     });
 
-                    $('.view-factura').click(function() {
-                        const number = $(this).data('id');
-                        viewFactura(number);
+                    $(document).on('click', '.view-factura', function(e) {
+                        e.preventDefault();
+                        const id = $(this).data('id');
+                        const numero = $(this).data('numero');
+                        let cliente = null;
+
+                        // Obtener el valor exacto del atributo data-cliente
+                        const clienteRaw = $(this).attr('data-cliente');
+                        if (clienteRaw && clienteRaw !== '{}') {
+                            try {
+                                cliente = JSON.parse(clienteRaw);
+                            } catch (error) {
+                                console.error("Error al parsear cliente:", error, "Valor recibido:", clienteRaw);
+                                cliente = null; // Si falla el parseo, cliente será null
+                            }
+                        }
+
+                        viewFactura(id, numero, cliente);
                     });
 
-                    $('.download-factura').click(function() {
+                    $('.download-factura').click(function(e) {
+                        e.preventDefault();
                         const number = $(this).data('id');
                         descargarFactura(number);
                     });
 
-                    $('.validate-factura-btn').click(function() {
+                    $('.validate-factura-btn').click(function(e) {
+                        e.preventDefault();
                         const number = $(this).data('id');
                         validateFactura(number);
                     });
 
-                    $('.download-xml-btn').click(function() {
+                    $('.download-xml-btn').click(function(e) {
+                        e.preventDefault();
                         const number = $(this).data('id');
                         descargarXml(number);
                     });
 
-                    $('.delete-factura-btn').click(function() {
+                    $('.delete-factura-btn').click(function(e) {
+                        e.preventDefault();
                         const referenceCode = $(this).data('id');
                         eliminarFactura(referenceCode);
                     });
@@ -1872,10 +2259,11 @@
         });
 
 
-        function viewFactura(id) {
+        function viewFactura(id, facturaNumero, cliente) {
             console.log("Visualizando factura ID:", id);
+            console.log("Número de factura recibido:", facturaNumero);
+            console.log("Cliente recibido:", cliente);
 
-            // Mostrar un indicador de carga
             Swal.fire({
                 title: 'Cargando detalles',
                 text: 'Espere por favor...',
@@ -1889,10 +2277,8 @@
                 url: `/api/facturas/ver/${id}`,
                 method: 'GET',
                 success: function(data) {
-                    console.log("Detalles de factura recibidos:", data);
                     Swal.close();
 
-                    // Verificar si hay un error en la respuesta
                     if (data.error) {
                         Swal.fire({
                             icon: 'error',
@@ -1903,113 +2289,181 @@
                         return;
                     }
 
-                    // Crear el contenido HTML para la factura
-                    let customerInfo = '';
-                    if (data.cliente) { // Asegúrate de que estás accediendo a "cliente"
-                        customerInfo = `
-                        <div class="mb-3">
-                            <strong>Cliente:</strong> ${data.cliente.nombre || 'N/A'}<br>
-                            <strong>Identificación:</strong> ${data.cliente.identificacion || 'N/A'}<br>
-                            <strong>Correo:</strong> ${data.cliente.correo || 'N/A'}<br>
-                            <strong>Dirección:</strong> ${data.cliente.direccion || 'N/A'}
-                        </div>
-                    `;
-                    }
+                    // Asignar el número de factura
+                    data.numero = facturaNumero !== 'N/A' ? facturaNumero : id;
 
-                    let itemsHTML = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Producto</th><th>Cantidad' +
-                        '</th><th>Precio</th><th>Iva</th><th>Dto %</th><th>Subtotal</th><th>Total</th></tr></thead><tbody>';
+                    // Validar que cliente sea un objeto válido con al menos un nombre
+                    data.cliente = cliente && typeof cliente === 'object' && cliente.nombre ? cliente : null;
+
+                    let currentDate = new Date().toLocaleDateString('es-ES');
+                    let modalContent = `
+                <div class="invoice-container">
+                    <!-- Encabezado de la factura -->
+                    <div class="invoice-header">
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-6">
+                                <div class="company-logo">
+                                    <h2 class="mb-1">REREFENCIA</h2>
+                                    <div class="text-muted">N FROM ° ${data.referenceCode}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <div class="invoice-date">
+                                    <div class="date-label">Fecha de emisión:</div>
+                                    <div class="date-value">${data.fecha || currentDate}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="separator">
+                    </div>
+
+                    <!-- Información del cliente y empresa -->
+                    <div class="row invoice-info mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Cliente</h5>
+                                </div>
+                                <div class="card-body">
+                                    ${data.cliente ? `
+                                    <div class="client-details">
+                                        <p class="mb-1"><strong>${data.cliente.nombre || 'N/A'}</strong></p>
+                                        <p class="mb-1"><i class="fas fa-id-card me-2"></i>${data.cliente.ids || data.cliente.identificacion || 'N/A'}</p>
+                                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>${data.cliente.email || data.cliente.correo || 'N/A'}</p>
+                                        <p class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>${data.cliente.address || data.cliente.direccion || 'N/A'}</p>
+                                    </div>
+                                    ` : 'No hay información del cliente disponible'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Detalles de Factura</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Factura:</strong> #${data.numero}</p>
+                                    <p class="mb-1"><strong>Fecha:</strong> ${data.createdAt || currentDate}</p>
+                                    <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-success">${data.status || 'Emitida'}</span></p>
+                                    <p class="mb-0"><strong>Método de pago:</strong> ${data.metodoPago || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle de productos -->
+                    <div class="items-section mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Detalle de Productos</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-start">Producto</th>
+                                                <th class="text-center">Cantidad</th>
+                                                <th class="text-end">Precio</th>
+                                                <th class="text-end">IVA</th>
+                                                <th class="text-end">Dto %</th>
+                                                <th class="text-end">Subtotal</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
 
                     if (data.items && data.items.length > 0) {
                         data.items.forEach(item => {
-                            itemsHTML += `
+                            modalContent += `
                         <tr>
-                            <td>${item.producto || 'N/A'}</td>
-                            <td>${item.cantidad || '0'}</td>
-                            <td>$${item.precio ? item.precio.toFixed(0) : '0.00'}</td>
-                             <td>$${item.iva ? item.iva.toFixed(0) : '0.00'}</td>
-                             <td>${item.porcentajeDescuento ? item.porcentajeDescuento.toFixed(1) : '0.00'}</td>
-                            <td>$${item.subtotal ? item.subtotal.toFixed(0) : '0.00'}</td>
-                            <td>$${item.total ? item.total.toFixed(0) : '0.00'}</td>
-                        </tr>
-                    `;
+                            <td class="text-start">${item.producto || 'N/A'}</td>
+                            <td class="text-center">${item.cantidad || '0'}</td>
+                            <td class="text-end">$${item.precio ? item.precio.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0'}</td>
+                            <td class="text-end">$${item.iva ? item.iva.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0'}</td>
+                            <td class="text-end">${item.porcentajeDescuento ? item.porcentajeDescuento.toFixed(1) : '0.0'}%</td>
+                            <td class="text-end">$${item.subtotal ? item.subtotal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0'}</td>
+                            <td class="text-end">$${item.total ? item.total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0'}</td>
+                        </tr>`;
                         });
                     } else {
-                        itemsHTML += '<tr><td colspan="4" class="text-center">No hay items disponibles</td></tr>';
+                        modalContent += `<tr><td colspan="7" class="text-center">No hay items disponibles</td></tr>`;
                     }
 
-                    itemsHTML += '</tbody></table></div>';
+                    modalContent += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    let totalsHTML = '';
+                    <!-- Resumen de totales -->
+                    <div class="row">
+                        <div class="col-md-5 ms-auto">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Resumen</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-sm mb-0">
+                                        <tbody>`;
+
                     if (data.totals) {
-                        totalsHTML = `
-                    <div class="card mt-3">
-                        <div class="card-header bg-info text-white"><strong>Totales</strong></div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Subtotal:</strong> $${data.totals.grossTotal ? data.totals.grossTotal.toFixed(2) : '0.00'}</p>
-                                    <p><strong>Descuentos:</strong> $${data.totals.discounts ? data.totals.discounts.toFixed(2) : '0.00'}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>Impuestos:</strong> $${data.totals.taxes ? data.totals.taxes.toFixed(2) : '0.00'}</p>
-                                    <p><strong>Total:</strong> $${data.totals.total ? data.totals.total.toFixed(2) : '0.00'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                        modalContent += `
+                                            <tr>
+                                                <td class="text-start"><strong>Subtotal</strong></td>
+                                                <td class="text-end">$${data.totals.grossTotal ? data.totals.grossTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-start"><strong>Descuentos</strong></td>
+                                                <td class="text-end">$${data.totals.discounts ? data.totals.discounts.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-start"><strong>Impuestos</strong></td>
+                                                <td class="text-end">$${data.totals.taxes ? data.totals.taxes.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00'}</td>
+                                            </tr>
+                                            <tr class="table-active">
+                                                <td class="text-start"><strong>Total</strong></td>
+                                                <td class="text-end"><strong>$${data.totals.total ? data.totals.total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00'}</strong></td>
+                                            </tr>`;
                     }
 
-// Mostrar el modal con los detalles
-                    Swal.fire({
-                        title: `Factura #${data.referenceCode || id}`,
-                        html: `
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <strong>Información General</strong>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong>Estado:</strong> ${data.status || 'N/A'}<br>
-                                <strong>Fecha:</strong> ${data.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A'}<br>
+                    modalContent += `
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            ${customerInfo}
                         </div>
                     </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header bg-primary text-white"><strong>Items</strong></div>
-                        <div class="card-body">
-                            ${itemsHTML}
-                        </div>
+                    <!-- Pie de página -->
+                    <div class="invoice-footer mt-4 text-center">
+                        <div class="text-muted small">Este documento es una representación digital de su factura</div>
                     </div>
+                </div>`;
 
-                    ${totalsHTML}
-                </div>
-            </div>
-        </div>
-    `,
-                        width: '800px',
+                    Swal.fire({
+                        title: `Factura #${data.numero}`,
+                        html: modalContent,
+                        width: '750px',  // slightly smaller width
+                        customClass: {
+                            container: 'swal-invoice-modal'
+                        },
                         showCloseButton: true,
                         showConfirmButton: true,
                         confirmButtonText: 'Cerrar',
                         confirmButtonColor: '#3085d6',
-                        footer: `<button id="download-btn-modal" class="btn btn-secondary" data-id="${id}"><i class="fas fa-download"></i> Descargar PDF</button>`
+                        footer: `<button id="download-btn-modal" class="btn btn-secondary" data-id="${data.numero}"><i class="fas fa-download"></i> Descargar PDF</button>`,
+                        didOpen: () => {
+                            $('#download-btn-modal').off('click').on('click', function() {
+                                const number = $(this).data('id');
+                                descargarFactura(number);
+                            });
+                        }
                     });
-                    // Evento para el botón de descarga dentro del modal
-                    $('#download-btn-modal').click(function() {
-                        const id = $(this).data('id');
-                        descargarFactura(id);
-                    });
-
                 },
                 error: function(xhr, status, error) {
-                    console.error("Error obteniendo detalles de factura:", error);
-                    console.error("Respuesta:", xhr.responseText);
-
+                    Swal.close();
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -2766,25 +3220,26 @@
                     // Llenar tabla
                     paginatedData.forEach(function(producto) {
                         tbody.append(`
-                    <tr>
-                        <td>${producto.id}</td>
-                        <td>${producto.name}</td>
-                        <td>$${parseFloat(producto.price).toFixed(2)}</td>
-                        <td>${producto.unitMeasureId || 'N/A'}</td>
-                        <td>${producto.taxRate ? producto.taxRate + '%' : '0%'}</td>
-                        <td>${producto.standardCodeId || 'Auto'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-producto" data-id="${producto.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `);
+        <tr>
+            <td>${producto.id}</td>
+            <td>${producto.name}</td>
+            <td>$${parseFloat(producto.price).toFixed(2)}</td>
+            <td>${producto.unitMeasureId || 'N/A'}</td>
+            <td>${producto.taxRate ? producto.taxRate + '%' : '0%'}</td>
+            <td>${producto.standardCodeId || 'Auto'}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-primary edit-producto" data-id="${producto.id}" data-bs-toggle="tooltip" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-producto" data-id="${producto.id}" data-bs-toggle="tooltip" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `);
                     });
-
                     // Mostrar mensaje si no hay datos
                     if (paginatedData.length === 0) {
                         tbody.append(`
@@ -2803,13 +3258,14 @@
                     // Renderizar paginación
                     renderPagination(totalPages, page, 'productos');
 
-                    // Eventos de botones
-                    $('.edit-producto').click(function() {
+                    $('.edit-producto').click(function(e) {
+                        e.preventDefault();
                         const id = $(this).data('id');
                         editProducto(id);
                     });
 
-                    $('.delete-producto').click(function() {
+                    $('.delete-producto').click(function(e) {
+                        e.preventDefault();
                         const id = $(this).data('id');
                         openDeleteModal('producto', id);
                     });
