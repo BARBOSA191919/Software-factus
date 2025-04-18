@@ -54,10 +54,7 @@ public class FacturaController {
                 facturaMap.put("createdAt", f.getCreatedAt());
                 facturaMap.put("total", f.getTotal());
 
-                if (f.getBillingPeriod() != null) {
-                    facturaMap.put("startDate", f.getBillingPeriod().getStartDate());
-                    facturaMap.put("endDate", f.getBillingPeriod().getEndDate());
-                }
+
 
                 if (f.getCliente() != null) {
                     Map<String, Object> clienteMap = new HashMap<>();

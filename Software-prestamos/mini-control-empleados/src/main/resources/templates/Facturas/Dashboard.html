@@ -1017,7 +1017,7 @@
         <!-- Contenido principal -->
         <div class="col-md-10 content">
             <div id="dashboard-content" class="content-section">
-              <center>  <h2 class="mb-4"> DASHBOARD </h2></center>
+                <center>  <h2 class="mb-4"> DASHBOARD </h2></center>
                 <div class="row">
                     <div class="col-md-4 mb-4">
                         <div class="card bg-primary text-white clickable-card" data-section="clientes">
@@ -1109,8 +1109,8 @@
                 <!-- Campo de búsqueda -->
                 <div class="search-container">
                     <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" id="buscar-clientes" placeholder="Buscar cliente por nombre o identificación...">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="buscar-clientes" placeholder="Buscar cliente por nombre o identificación...">
                     </div>
                 </div>
 
@@ -1145,18 +1145,18 @@
                 <div class="header-section mb-6">
                     <h2 class="text-center">Gestión de Facturas</h2>
                     <div class="d-flex justify-content-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#facturaModal">
-                        <i class="fas fa-plus"></i> Nueva Factura
-                    </button>
-                </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#facturaModal">
+                            <i class="fas fa-plus"></i> Nueva Factura
+                        </button>
                     </div>
+                </div>
 
                 <!-- Campo de búsqueda -->
                 <div class="search-container">
                     <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" id="buscar-facturas" placeholder="Buscar factura por número o cliente...">
-                </div>
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="buscar-facturas" placeholder="Buscar factura por número o cliente...">
+                    </div>
                 </div>
 
                 <div class="table-responsive">
@@ -1668,7 +1668,7 @@
             menu.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
         }
     });;
-    
+
     document.querySelectorAll('.dropdown-toggle').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
@@ -2820,7 +2820,7 @@
 
                         });
 
-                 },
+                    },
                     error: function(xhr) {
                         Swal.fire({
                             icon: 'error',
@@ -3464,6 +3464,7 @@
                     direccion: clienteSeleccionado.direccion,
                     tipoCliente: clienteSeleccionado.tipoCliente,
                     identificacion: clienteSeleccionado.identificacion,
+                    municipioId: 10 // Municipio fijo
                 },
                 documentName: $('#factura-document-name').val(), // "Factus"
                 graphicRepresentationName: "PDF",
@@ -3558,7 +3559,7 @@
                             showConfirmButton: false
 
                         });
-                        },
+                    },
                     error: function(xhr) {
                         let errorMsg = 'Error al actualizar factura';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -3794,7 +3795,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    },
+                },
                 error: function(error) {
                     alert(`Error al eliminar ${type}: ${error.responseJSON.message}`);
                 }

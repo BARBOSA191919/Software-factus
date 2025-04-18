@@ -25,6 +25,16 @@ public class Factura {
         @Column(name = "metodo_pago")
         private String metodoPago;
         private Date createdAt;
+    // Nuevos campos
+    @Column(name = "municipio")
+    private Integer municipio; // Código del municipio (ej. "05001" para Medellín)
+
+    @Column(name = "fecha_vencimiento")
+    @Temporal(TemporalType.DATE)
+    private Date fechaVencimiento;
+
+    @Column(name = "inc")
+    private BigDecimal inc; // Impuesto Nacional al Consumo, si aplica
 
         // Campos para Factus
         private String document; // Factura electrónica de venta
@@ -38,9 +48,6 @@ public class Factura {
         private BigDecimal totalIva;
         private BigDecimal totalDescuento;
         private BigDecimal total;
-
-        @Embedded
-        private BillingPeriod billingPeriod;
 
         @ManyToOne
         @JoinColumn(name = "cliente_id")
@@ -95,6 +102,29 @@ public class Factura {
     }
 
 
+    public Integer getMunicipio() {
+        return municipio;
+    }
+
+    public void setMunicipio(Integer municipio) {
+        this.municipio = municipio;
+    }
+
+    public Date getFechaVencimiento() {
+        return fechaVencimiento;
+    }
+
+    public void setFechaVencimiento(Date fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
+    }
+
+    public BigDecimal getInc() {
+        return inc;
+    }
+
+    public void setInc(BigDecimal inc) {
+        this.inc = inc;
+    }
 
     public String getGraphicRepresentationName() {
         return graphicRepresentationName;
@@ -160,13 +190,6 @@ public class Factura {
         this.total = total;
     }
 
-    public BillingPeriod getBillingPeriod() {
-        return billingPeriod;
-    }
-
-    public void setBillingPeriod(BillingPeriod billingPeriod) {
-        this.billingPeriod = billingPeriod;
-    }
 
     public Cliente getCliente() {
         return cliente;
@@ -216,5 +239,9 @@ public class Factura {
         this.observation = observation;
     }
 
+    // Metodo para calcular número de líneas
+    public int getNumeroLineas() {
+        return items != null ? items.size() : 0;
+    }
 
 }

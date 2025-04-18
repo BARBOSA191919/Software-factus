@@ -13,40 +13,50 @@ public class FactusFacturaDTO {
     private CustomerDTO customer;
     private List<ItemDTO> items;
 
+    // Nuevos campos
+    private String due_date; // Fecha de vencimiento en formato ISO (ej. "2025-05-01")
+    private Integer lines_count; // Número de líneas
+    private Double discount_total; // Descuento total de la factura
+    private List<TributeDTO> tributes; // Tributos adicionales, como INC
+
+    // Clase interna para tributos
+    public static class TributeDTO {
+        private String tribute_id; // Ej. "03" para INC
+        private Double rate; // Tasa del tributo
+        private Double amount; // Monto del tributo
+
+        public String getTribute_id() {
+            return tribute_id;
+        }
+
+        public void setTribute_id(String tribute_id) {
+            this.tribute_id = tribute_id;
+        }
+
+        public Double getRate() {
+            return rate;
+        }
+
+        public void setRate(Double rate) {
+            this.rate = rate;
+        }
+
+        public Double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(Double amount) {
+            this.amount = amount;
+        }
+    }
+
     public void setNumbering_range_id(int i) {
     }
 
     public void setPayment_due_date(String format) {
     }
 
-    // Nested BillingPeriodDTO class
-    public static class BillingPeriodDTO {
-        private String start_date;
-        private String end_date;
 
-        // Getters and setters
-        public String getStart_date() {
-            return start_date;
-        }
-
-        public void setStart_date(String start_date) {
-            this.start_date = start_date;
-        }
-
-        public String getEnd_date() {
-            return end_date;
-        }
-
-        public void setEnd_date(String end_date) {
-            this.end_date = end_date;
-        }
-
-        public void setStart_time(String time) {
-        }
-
-        public void setEnd_time(String time) {
-        }
-    }
 
     // Nested CustomerDTO class
     public static class CustomerDTO {
@@ -57,25 +67,26 @@ public class FactusFacturaDTO {
         private String address;
         private String legalOrganizationId; // ID de organización legal
         private String tribute_id;
-        private String municipio;       // Municipio
+        private Integer municipality_id; // Código DANE del municipio (ej. "05001" para Medellín)
+
+        // Getters y setters
 
 
+        public Integer getMunicipality_id() {
+            return municipality_id;
+        }
 
-        // Getters and setters
+        public void setMunicipality_id(Integer municipality_id) {
+            this.municipality_id = municipality_id;
+        }
+
+        // Resto de getters y setters sin cambios
         public String getIdentification_document_id() {
             return identification_document_id;
         }
 
         public void setIdentification_document_id(String identification_document_id) {
             this.identification_document_id = identification_document_id;
-        }
-
-        public String getMunicipio() {
-            return municipio;
-        }
-
-        public void setMunicipio(String municipio) {
-            this.municipio = municipio;
         }
 
         public String getIdentification() {
@@ -110,8 +121,6 @@ public class FactusFacturaDTO {
             this.email = email;
         }
 
-
-
         public String getAddress() {
             return address;
         }
@@ -120,22 +129,22 @@ public class FactusFacturaDTO {
             this.address = address;
         }
 
-        public void setCompany(String nombre) {
-        }
-
-        public void setLegal_organization_id(String number) {
-        }
-
-
-        // Getter
         public String getTribute_id() {
             return tribute_id;
         }
 
-        // Setter
         public void setTribute_id(String tribute_id) {
             this.tribute_id = tribute_id;
         }
+
+        public void setCompany(String nombre) {
+            this.names = nombre; // Ajuste para manejar nombres de empresas
+        }
+
+        public void setLegal_organization_id(String number) {
+            this.legalOrganizationId = number;
+        }
+
     }
 
     // Nested ItemDTO class
@@ -298,5 +307,37 @@ public class FactusFacturaDTO {
 
     public void setItems(List<ItemDTO> items) {
         this.items = items;
+    }
+
+    public String getDue_date() {
+        return due_date;
+    }
+
+    public void setDue_date(String due_date) {
+        this.due_date = due_date;
+    }
+
+    public Integer getLines_count() {
+        return lines_count;
+    }
+
+    public void setLines_count(Integer lines_count) {
+        this.lines_count = lines_count;
+    }
+
+    public Double getDiscount_total() {
+        return discount_total;
+    }
+
+    public void setDiscount_total(Double discount_total) {
+        this.discount_total = discount_total;
+    }
+
+    public List<TributeDTO> getTributes() {
+        return tributes;
+    }
+
+    public void setTributes(List<TributeDTO> tributes) {
+        this.tributes = tributes;
     }
 }

@@ -156,12 +156,44 @@ public class FactusApiClient {
 
             // Campos básicos
             dto.setDocument("01");
-            // Asegurarse de que numbering_range_id no sea null
-            dto.setNumbering_range_id(factura.getNumberingRangeId() != null ? factura.getNumberingRangeId().intValue() : 128); // Valor por defecto si es null
+            dto.setNumbering_range_id(factura.getNumberingRangeId() != null ? factura.getNumberingRangeId().intValue() : 128);
             dto.setReference_code(factura.getNumber() != null ? factura.getNumber() : "REF-" + System.currentTimeMillis());
             dto.setObservation(factura.getObservation() != null ? factura.getObservation() : "");
             dto.setPayment_form(factura.getFormaPago() != null && factura.getFormaPago().equalsIgnoreCase("Contado") ? "1" : "2");
             dto.setPayment_method_code(factura.getMetodoPago() != null && factura.getMetodoPago().equalsIgnoreCase("Efectivo") ? "10" : "31");
+
+            // Nuevos campos
+            // Fecha de vencimiento
+            if (factura.getFechaVencimiento() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                dto.setDue_date(sdf.format(factura.getFechaVencimiento()));
+            }
+
+            // Número de líneas
+            dto.setLines_count(factura.getNumeroLineas());
+
+            // Descuento total
+            dto.setDiscount_total(factura.getTotalDescuento() != null ? factura.getTotalDescuento().doubleValue() : 0.0);
+
+            // Tributos (INC, IVA)
+            List<FactusFacturaDTO.TributeDTO> tributes = new ArrayList<>();
+            // INC
+            if (factura.getInc() != null && factura.getInc().doubleValue() > 0) {
+                FactusFacturaDTO.TributeDTO incTribute = new FactusFacturaDTO.TributeDTO();
+                incTribute.setTribute_id("03"); // INC
+                incTribute.setRate(8.0); // Tasa estándar del INC (ajusta según tu caso)
+                incTribute.setAmount(factura.getInc().doubleValue());
+                tributes.add(incTribute);
+            }
+            // IVA (si no está en los ítems)
+            if (factura.getTotalIva() != null && factura.getTotalIva().doubleValue() > 0) {
+                FactusFacturaDTO.TributeDTO ivaTribute = new FactusFacturaDTO.TributeDTO();
+                ivaTribute.setTribute_id("01"); // IVA
+                ivaTribute.setRate(19.0); // Tasa estándar del IVA
+                ivaTribute.setAmount(factura.getTotalIva().doubleValue());
+                tributes.add(ivaTribute);
+            }
+            dto.setTributes(tributes);
 
             // Cliente
             FactusFacturaDTO.CustomerDTO customerDTO = new FactusFacturaDTO.CustomerDTO();
@@ -174,6 +206,8 @@ public class FactusApiClient {
                 customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "calle 38");
                 customerDTO.setLegal_organization_id(cliente.getTipoCliente() != null && cliente.getTipoCliente().equalsIgnoreCase("Persona Jurídica") ? "2" : "1");
                 customerDTO.setTribute_id("21");
+                // Municipio
+                customerDTO.setMunicipality_id(factura.getMunicipio() != null ? factura.getMunicipio() : 1); // Valor por defecto: Medellín
             }
             dto.setCustomer(customerDTO);
 
@@ -599,8 +633,18 @@ public class FactusApiClient {
     }
 
 
+    @Transactional
     public String eliminarFactura(String referenceCode) {
         try {
+            // Verificar si la factura existe localmente
+            Optional<Factura> facturaOpt = facturaRepository.findByReferenceCode(referenceCode);
+            if (!facturaOpt.isPresent()) {
+                logger.warn("Factura con referenceCode {} no encontrada en la base de datos local", referenceCode);
+                throw new RuntimeException("Factura no encontrada localmente: " + referenceCode);
+            }
+            Factura factura = facturaOpt.get();
+
+            // Obtener token
             String token = obtenerTokenDeAcceso();
             logger.info("Token de acceso obtenido para eliminar factura: {}", token);
 
@@ -610,7 +654,6 @@ public class FactusApiClient {
             logger.info("Headers enviados a Factus: {}", headers);
 
             HttpEntity<String> request = new HttpEntity<>(headers);
-
             String url = factusConfig.getUrl() + "/v1/bills/destroy/reference/" + referenceCode;
             logger.info("Llamando a Factus API para eliminar factura: {}", url);
 
@@ -621,18 +664,28 @@ public class FactusApiClient {
                     String.class
             );
 
-            if (response.getStatusCode() != HttpStatus.OK) {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // Actualizar estado en la base de datos local
+                factura.setStatus("ELIMINADA");
+                facturaRepository.save(factura);
+                logger.info("Factura {} eliminada exitosamente en Factus y actualizada localmente", referenceCode);
+                return response.getBody();
+            } else {
+                logger.error("Error al eliminar factura: {} - {}", response.getStatusCode(), response.getBody());
                 throw new RuntimeException("Error al eliminar la factura: " + response.getStatusCode() + " - " + response.getBody());
             }
-            return response.getBody();
         } catch (HttpClientErrorException e) {
             logger.error("Error HTTP al eliminar factura: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new RuntimeException("Factura no encontrada en Factus: " + referenceCode);
+            } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                throw new RuntimeException("Error de autenticación: Token inválido o sin permisos");
+            }
             throw new RuntimeException("Error al eliminar la factura: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
         } catch (Exception e) {
             logger.error("Error inesperado al eliminar factura: {}", e.getMessage(), e);
             throw new RuntimeException("Error al eliminar la factura: " + e.getMessage());
         }
     }
-
 }
 
