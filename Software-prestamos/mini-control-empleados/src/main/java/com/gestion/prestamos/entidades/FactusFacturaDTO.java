@@ -68,6 +68,7 @@ public class FactusFacturaDTO {
         private String legalOrganizationId; // ID de organización legal
         private String tribute_id;
         private Integer municipality_id; // Código DANE del municipio (ej. "05001" para Medellín)
+        private String phone; // Código DANE del municipio (ej. "05001" para Medellín)
 
         // Getters y setters
 
@@ -78,6 +79,14 @@ public class FactusFacturaDTO {
 
         public void setMunicipality_id(Integer municipality_id) {
             this.municipality_id = municipality_id;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
         }
 
         // Resto de getters y setters sin cambios

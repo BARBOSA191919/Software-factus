@@ -6,7 +6,9 @@ import com.gestion.prestamos.servicio.FactusApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -33,12 +37,13 @@ public class FacturaController {
     private static final Logger logger = LoggerFactory.getLogger(FacturaController.class);
 
 
+
     @GetMapping("/listar")
     @ResponseBody
     public ResponseEntity<?> listarFacturas() {
         try {
             List<Map<String, Object>> simplifiedFacturas = new ArrayList<>();
-            List<Factura> facturas = factusApiClient.obtenerFacturas();
+            List<Factura> facturas = facturaRepository.findAll(); // Usar repositorio local en lugar de Factus
 
             for (Factura f : facturas) {
                 Map<String, Object> facturaMap = new HashMap<>();
@@ -47,23 +52,28 @@ public class FacturaController {
                 facturaMap.put("referenceCode", f.getReferenceCode());
                 facturaMap.put("pagos", f.getFormaPago());
                 facturaMap.put("metodopago", f.getMetodoPago());
-                facturaMap.put("identificacion", f.getCliente().getIdentificacion());
+                facturaMap.put("identificacion", f.getCliente() != null ? f.getCliente().getIdentificacion() : null);
                 facturaMap.put("documentName", f.getDocumentName());
                 facturaMap.put("graphicRepresentationName", f.getGraphicRepresentationName());
                 facturaMap.put("status", f.getStatus());
                 facturaMap.put("createdAt", f.getCreatedAt());
                 facturaMap.put("total", f.getTotal());
-
-
+                // Nuevos campos
+                facturaMap.put("municipio", f.getMunicipio());
+                facturaMap.put("fechaVencimiento", f.getFechaVencimiento());
+                facturaMap.put("inc", f.getInc());
+                facturaMap.put("tributos", f.getTributos().stream()
+                        .map(t -> Map.of("tributeId", t.getTributeId(), "rate", t.getRate(), "amount", t.getAmount()))
+                        .collect(Collectors.toList()));
 
                 if (f.getCliente() != null) {
                     Map<String, Object> clienteMap = new HashMap<>();
                     clienteMap.put("id", f.getCliente().getId());
                     clienteMap.put("nombre", f.getCliente().getNombre());
-                    // Agregar los campos adicionales del cliente
                     clienteMap.put("identificacion", f.getCliente().getIdentificacion());
                     clienteMap.put("correo", f.getCliente().getCorreo());
                     clienteMap.put("direccion", f.getCliente().getDireccion());
+                    clienteMap.put("municipioId", f.getCliente().getMunicipioId());
                     facturaMap.put("cliente", clienteMap);
                 }
 
@@ -130,21 +140,69 @@ public class FacturaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Factura> getFacturaById(@PathVariable Long id) {
+    @ResponseBody
+    public ResponseEntity<?> getFacturaById(@PathVariable Long id) {
         try {
-            // Replace with your actual repository or service method
             Optional<Factura> facturaOptional = facturaRepository.findById(id);
 
             if (facturaOptional.isPresent()) {
-                return ResponseEntity.ok(facturaOptional.get());
+                Factura factura = facturaOptional.get();
+                Map<String, Object> facturaMap = new HashMap<>();
+                facturaMap.put("id", factura.getId());
+                facturaMap.put("numero", factura.getNumber());
+                facturaMap.put("referenceCode", factura.getReferenceCode());
+                facturaMap.put("formaPago", factura.getFormaPago());
+                facturaMap.put("metodoPago", factura.getMetodoPago());
+                facturaMap.put("documentName", factura.getDocumentName());
+                facturaMap.put("graphicRepresentationName", factura.getGraphicRepresentationName());
+                facturaMap.put("status", factura.getStatus());
+                facturaMap.put("createdAt", factura.getCreatedAt());
+                facturaMap.put("subtotal", factura.getSubtotal());
+                facturaMap.put("totalIva", factura.getTotalIva());
+                facturaMap.put("totalDescuento", factura.getTotalDescuento());
+                facturaMap.put("total", factura.getTotal());
+                facturaMap.put("municipio", factura.getMunicipio());
+                facturaMap.put("fechaVencimiento", factura.getFechaVencimiento());
+                facturaMap.put("inc", factura.getInc());
+                facturaMap.put("tributos", factura.getTributos().stream()
+                        .map(t -> Map.of("tributeId", t.getTributeId(), "rate", t.getRate(), "amount", t.getAmount()))
+                        .collect(Collectors.toList()));
+
+                if (factura.getCliente() != null) {
+                    Map<String, Object> clienteMap = new HashMap<>();
+                    clienteMap.put("id", factura.getCliente().getId());
+                    clienteMap.put("nombre", factura.getCliente().getNombre());
+                    clienteMap.put("identificacion", factura.getCliente().getIdentificacion());
+                    clienteMap.put("correo", factura.getCliente().getCorreo());
+                    clienteMap.put("direccion", factura.getCliente().getDireccion());
+                    clienteMap.put("municipioId", factura.getCliente().getMunicipioId());
+                    facturaMap.put("cliente", clienteMap);
+                }
+
+                facturaMap.put("items", factura.getItems().stream().map(item -> {
+                    Map<String, Object> itemMap = new HashMap<>();
+                    itemMap.put("id", item.getId());
+                    itemMap.put("producto", item.getProducto().getName());
+                    itemMap.put("cantidad", item.getCantidad());
+                    itemMap.put("precio", item.getPrecio());
+                    itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
+                    itemMap.put("subtotal", item.getSubtotal());
+                    itemMap.put("iva", item.getIva());
+                    itemMap.put("total", item.getTotal());
+                    return itemMap;
+                }).collect(Collectors.toList()));
+
+                return ResponseEntity.ok(facturaMap);
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada"));
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            logger.error("Error al obtener factura {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener la factura: " + e.getMessage()));
         }
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarFacturaRest(@PathVariable Long id, @RequestBody Map<String, Object> facturaData) {
         try {
@@ -180,6 +238,25 @@ public class FacturaController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al actualizar la factura: " + e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/municipios.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> getMunicipios() {
+        try {
+            ClassPathResource resource = new ClassPathResource("static/json/municipios.json");
+            if (!resource.exists()) {
+                logger.error("El archivo municipios.json no se encuentra en static/json/");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"error\": \"Archivo municipios.json no encontrado\"}");
+            }
+            String json = new String(Files.readAllBytes(resource.getFile().toPath()));
+            return ResponseEntity.ok(json);
+        } catch (IOException e) {
+            logger.error("Error al leer municipios.json: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"Error al leer el archivo municipios.json: " + e.getMessage() + "\"}");
         }
     }
 

@@ -29,6 +29,9 @@ public class Factura {
     @Column(name = "municipio")
     private Integer municipio; // Código del municipio (ej. "05001" para Medellín)
 
+    @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Tributo> tributos = new ArrayList<>();
+
     @Column(name = "fecha_vencimiento")
     @Temporal(TemporalType.DATE)
     private Date fechaVencimiento;
@@ -244,4 +247,11 @@ public class Factura {
         return items != null ? items.size() : 0;
     }
 
+    public List<Tributo> getTributos() {
+        return tributos;
+    }
+
+    public void setTributos(List<Tributo> tributos) {
+        this.tributos = tributos;
+    }
 }

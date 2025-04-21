@@ -15,6 +15,7 @@ public class Cliente {
     private String telefono;        // Teléfono
     private String correo;          // Correo electrónico
     private String municipio;       // Municipio
+    private Integer municipioId; // For the municipality ID
     private String direccion;       // Dirección
     @Column(name = "aplicaiva") // Mapea el campo aplicaIVA a la columna aplicaiva en la base de datos
     private String aplicaIVA;     // Nuevos campos
@@ -153,5 +154,13 @@ public class Cliente {
 
     public void setLegalOrganizationId(String legalOrganizationId) {
         this.legalOrganizationId = legalOrganizationId;
+    }
+
+    public Integer getMunicipioId() {
+        return municipioId;
+    }
+
+    public void setMunicipioId(Integer municipioId) {
+        this.municipioId = municipioId;
     }
 }

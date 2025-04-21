@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -151,47 +152,52 @@ public class FactusApiClient {
     }
 
     public class FacturaMapper {
+
         public static FactusFacturaDTO convertirAFactusDTO(Factura factura) {
             FactusFacturaDTO dto = new FactusFacturaDTO();
 
-            // Campos básicos
-            dto.setDocument("01");
+            // Forzar document a "01" para cumplir con Factus
+            dto.setDocument("01"); // Siempre "01" para factura electrónica
+
+            // Asegurar numbering_range_id
             dto.setNumbering_range_id(factura.getNumberingRangeId() != null ? factura.getNumberingRangeId().intValue() : 128);
-            dto.setReference_code(factura.getNumber() != null ? factura.getNumber() : "REF-" + System.currentTimeMillis());
+
+            dto.setReference_code(factura.getReferenceCode() != null ? factura.getReferenceCode() : "REF-" + System.currentTimeMillis());
             dto.setObservation(factura.getObservation() != null ? factura.getObservation() : "");
             dto.setPayment_form(factura.getFormaPago() != null && factura.getFormaPago().equalsIgnoreCase("Contado") ? "1" : "2");
             dto.setPayment_method_code(factura.getMetodoPago() != null && factura.getMetodoPago().equalsIgnoreCase("Efectivo") ? "10" : "31");
 
-            // Nuevos campos
-            // Fecha de vencimiento
+            // Fecha de vencimiento (due_date)
             if (factura.getFechaVencimiento() != null) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 dto.setDue_date(sdf.format(factura.getFechaVencimiento()));
+            } else {
+                dto.setDue_date(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
             }
 
-            // Número de líneas
+            // Número de líneas (lines_count)
             dto.setLines_count(factura.getNumeroLineas());
 
-            // Descuento total
+            // Descuento total (discount_total)
             dto.setDiscount_total(factura.getTotalDescuento() != null ? factura.getTotalDescuento().doubleValue() : 0.0);
 
-            // Tributos (INC, IVA)
+            // Tributos (IVA e INC)
             List<FactusFacturaDTO.TributeDTO> tributes = new ArrayList<>();
-            // INC
-            if (factura.getInc() != null && factura.getInc().doubleValue() > 0) {
+            if (factura.getTributos() != null && !factura.getTributos().isEmpty()) {
+                for (Tributo tributo : factura.getTributos()) {
+                    FactusFacturaDTO.TributeDTO tributeDTO = new FactusFacturaDTO.TributeDTO();
+                    tributeDTO.setTribute_id(tributo.getTributeId());
+                    tributeDTO.setRate(tributo.getRate() != null ? tributo.getRate() : 0.0);
+                    tributeDTO.setAmount(tributo.getAmount() != null ? tributo.getAmount().doubleValue() : 0.0);
+                    tributes.add(tributeDTO);
+                }
+            }
+            if (factura.getInc() != null && factura.getInc().compareTo(BigDecimal.ZERO) > 0) {
                 FactusFacturaDTO.TributeDTO incTribute = new FactusFacturaDTO.TributeDTO();
-                incTribute.setTribute_id("03"); // INC
-                incTribute.setRate(8.0); // Tasa estándar del INC (ajusta según tu caso)
+                incTribute.setTribute_id("03");
+                incTribute.setRate(8.0); // Ajusta según tu configuración
                 incTribute.setAmount(factura.getInc().doubleValue());
                 tributes.add(incTribute);
-            }
-            // IVA (si no está en los ítems)
-            if (factura.getTotalIva() != null && factura.getTotalIva().doubleValue() > 0) {
-                FactusFacturaDTO.TributeDTO ivaTribute = new FactusFacturaDTO.TributeDTO();
-                ivaTribute.setTribute_id("01"); // IVA
-                ivaTribute.setRate(19.0); // Tasa estándar del IVA
-                ivaTribute.setAmount(factura.getTotalIva().doubleValue());
-                tributes.add(ivaTribute);
             }
             dto.setTributes(tributes);
 
@@ -203,30 +209,33 @@ public class FactusApiClient {
                 customerDTO.setIdentification(cliente.getIdentificacion() != null ? cliente.getIdentificacion() : "1003865544");
                 customerDTO.setNames(cliente.getNombre() != null ? cliente.getNombre() : "");
                 customerDTO.setEmail(cliente.getCorreo() != null && !cliente.getCorreo().isEmpty() ? cliente.getCorreo() : "sin_correo@example.com");
-                customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "calle 38");
+                customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "Sin dirección");
+                customerDTO.setPhone(cliente.getTelefono() != null ? cliente.getTelefono() : ""); // Añadir teléfono
                 customerDTO.setLegal_organization_id(cliente.getTipoCliente() != null && cliente.getTipoCliente().equalsIgnoreCase("Persona Jurídica") ? "2" : "1");
                 customerDTO.setTribute_id("21");
-                // Municipio
-                customerDTO.setMunicipality_id(factura.getMunicipio() != null ? factura.getMunicipio() : 1); // Valor por defecto: Medellín
+                // Usar factura.getMunicipio() y validar que no sea nulo
+                customerDTO.setMunicipality_id(factura.getMunicipio() != null ? factura.getMunicipio() : cliente.getMunicipioId());
+                if (customerDTO.getMunicipality_id() == null) {
+                    throw new IllegalArgumentException("El municipioId no puede ser nulo");
+                }
             }
             dto.setCustomer(customerDTO);
 
-            // Items
+            // Ítems
             List<FactusFacturaDTO.ItemDTO> itemsDTO = new ArrayList<>();
             if (factura.getItems() != null) {
                 for (Item item : factura.getItems()) {
                     if (item != null && item.getProducto() != null) {
                         FactusFacturaDTO.ItemDTO itemDTO = new FactusFacturaDTO.ItemDTO();
-                        Producto producto = item.getProducto();
-                        itemDTO.setCode_reference(producto.getId() != null ? producto.getId().toString() : "N/A");
-                        itemDTO.setName(producto.getName() != null ? producto.getName() : "Producto sin nombre");
+                        itemDTO.setCode_reference(item.getProducto().getId() != null ? item.getProducto().getId().toString() : "N/A");
+                        itemDTO.setName(item.getProducto().getName() != null ? item.getProducto().getName() : "Producto sin nombre");
                         itemDTO.setPrice(item.getPrecio() != null ? item.getPrecio().doubleValue() : 0.0);
                         itemDTO.setQuantity(item.getCantidad() != null ? item.getCantidad().intValue() : 1);
                         itemDTO.setDiscount_rate(item.getPorcentajeDescuento() != null ? item.getPorcentajeDescuento().doubleValue() : 0.0);
-                        itemDTO.setTax_rate(producto.getTaxRate() != null ? producto.getTaxRate() : 19.0);
+                        itemDTO.setTax_rate(item.getProducto().getTaxRate() != null ? item.getProducto().getTaxRate() : 19.0);
                         itemDTO.setUnit_measure_id("70");
                         itemDTO.setStandard_code_id("1");
-                        itemDTO.setIs_excluded(producto.getExcluded() != null && producto.getExcluded() ? 1 : 0);
+                        itemDTO.setIs_excluded(item.getProducto().getExcluded() != null && item.getProducto().getExcluded() ? 1 : 0);
                         itemDTO.setTribute_id("1");
                         itemsDTO.add(itemDTO);
                     }
