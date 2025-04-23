@@ -494,7 +494,10 @@
 
     /* Estilo para columnas específicas */
     .table th:nth-child(1), .table td:nth-child(1) { /* Número */
-        max-width: 90px;
+        max-width: none; /* Remove max-width constraint to allow full display */
+        white-space: normal; /* Allow text to wrap if needed */
+        text-overflow: clip; /* Remove ellipsis */
+        overflow: visible; /* Allow content to overflow if necessary */
     }
     .table th:nth-child(3), .table td:nth-child(3) { /* ID */
         max-width: 100px;
@@ -516,7 +519,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        max-width: 150px;
+        max-width: 180px;
     }
 
 
@@ -1423,7 +1426,6 @@
 
     /* Estilo para la información del cliente */
     #facturaModal #cliente-nombres,
-    #facturaModal #cliente-identificacion,
     #facturaModal #cliente-correos,
     #facturaModal #cliente-telefonos,
     #facturaModal #cliente-direcciones,
@@ -1443,6 +1445,8 @@
         letter-spacing: 0.5px;
         font-weight: 600;
     }
+
+
 
     /* Línea separadora del resumen */
     #facturaModal .summary-card hr {
@@ -1502,6 +1506,67 @@
 
     #facturaModal .table-responsive::-webkit-scrollbar-thumb:hover {
         background: #95a5a6;
+    }
+    /* Style the Select2 container to match the input */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ced4da !important; /* Match border color of input */
+        border-radius: 0.25rem !important;   /* Match border-radius of input */
+        height: 45px !important;             /* Match height of form-control-sm */
+        padding: 0.25rem 0.5rem !important;  /* Match padding of input */
+        font-size: 0.875rem !important;      /* Match font size of input */
+        line-height: 1.5 !important;         /* Match line height of input */
+        background-color: #fff !important;   /* Match background color */
+        box-shadow: none !important;         /* Remove any default shadow */
+    }
+
+    /* Style the placeholder text */
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d !important;           /* Match placeholder color of input */
+    }
+
+    /* Style the selected text */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #495057 !important;           /* Match text color of input */
+        line-height: 1.5 !important;         /* Align text vertically */
+        padding-left: 0 !important;          /* Remove extra padding */
+    }
+
+    /* Style the dropdown arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 30px !important;             /* Match height of container */
+        width: 20px !important;              /* Adjust width of arrow area */
+        right: 5px !important;               /* Position arrow */
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: #6c757d transparent transparent transparent !important; /* Match placeholder color */
+        border-width: 5px 4px 0 4px !important; /* Smaller arrow */
+        margin-top: -2px !important;         /* Center arrow vertically */
+    }
+
+    /* Focus state to match input */
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #80bdff !important;    /* Match focus border color of input */
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important; /* Match focus shadow */
+        outline: none !important;
+    }
+
+    /* Style the dropdown menu */
+    .select2-container--default .select2-dropdown {
+        border: 1px solid #ced4da !important; /* Match border color */
+        border-radius: 0.25rem !important;   /* Match border-radius */
+        font-size: 0.875rem !important;      /* Match font size */
+        margin-top: 0 !important;            /* No gap between input and dropdown */
+    }
+
+    .select2-container--default .select2-results__option {
+        padding: 0.25rem 0.5rem !important;  /* Match padding */
+        color: #495057 !important;           /* Match text color */
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #007bff !important; /* Match Bootstrap primary color */
+        color: white !important;
     }
 </style>
 
@@ -1661,7 +1726,7 @@
                 <div class="search-container">
                     <div class="search-box">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="search-input" id="buscar-clientes" placeholder="Buscar cliente por nombre o identificación...">
+                        <input type="text" class="search-input" id="buscar-clientes" placeholder="Buscar cliente por nombre o identificación">
                     </div>
                 </div>
 
@@ -1838,9 +1903,17 @@
                         <div class="col-md-4">
                             <label for="cliente-tipo-identificacion" class="form-label"><i class="fas fa-id-card"></i> Tipo Identificación</label>
                             <select class="form-select" id="cliente-tipo-identificacion" required>
-                                <option value="Cédula">Cédula de Ciudadanía</option>
+                                <option value="Registro civil">Registro civil</option>
+                                <option value="Tarjeta de identidad">Tarjeta de identidada</option>
+                                <option value="Cédula ciudadanía">Cédula de Ciudadanía</option>
+                                <option value="Cédula de extranjería">Cédula de extranjería</option>
                                 <option value="NIT">NIT</option>
                                 <option value="Pasaporte">Pasaporte</option>
+                                <option value="Documento de identificación extranjero">Documento de identificación extranjero</option>
+                                <option value="PEP">PEP</option>
+                                <option value="NIT otro país">NIT otro país</option>
+                                <option value="NUIP *">NUIP *</option>
+
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -1946,13 +2019,13 @@
                                     <h6 class="mb-0 small"><i class="fas fa-user-check"></i> Información del Cliente</h6>
                                     <div class="badge bg-primary" id="factura-status">PENDIENTE</div>
                                 </div>
-                                <div class="card-body py-1 px-2">
+                                <div class="card-body py-3 px-2">
                                     <div class="row g-1">
                                         <div class="col-md-6">
                                             <div class="form-group mb-1">
                                                 <label for="factura-cliente" class="form-label small mb-0"><i class="fas fa-user-circle"></i> Cliente</label>
-                                                <select class="form-select form-select-sm" id="factura-cliente" required>
-                                                    <!-- Se llenará con JavaScript -->
+                                                <select class="form-select form-select-sm" id="factura-cliente" name="factura-cliente" required>
+                                                    <option value="">Buscar cliente por nombre o identificación </option>
                                                 </select>
                                             </div>
                                         </div>
@@ -2086,13 +2159,13 @@
                                             <thead class="table-dark">
                                             <tr>
                                                 <th class="small">Producto</th>
-                                                <th class="small">Cant.</th>
+                                                <th class="small">Unidad </th>
                                                 <th class="small">Precio</th>
-                                                <th class="small">Desc. %</th>
+                                                <th class="small">Descu%</th>
                                                 <th class="small">Subtotal</th>
                                                 <th class="small">IVA</th>
                                                 <th class="small">Total</th>
-                                                <th class="small text-center">Acciones</th>
+                                                <th class="small text-center">Del</th>
                                             </tr>
                                             </thead>
                                             <tbody id="factura-items"></tbody>
@@ -2675,7 +2748,7 @@
 
 
 
-        function loadClientes(page = 1, itemsPerPage = 6) {
+        function loadClientes(page = 1, itemsPerPage = 9) {
             $.ajax({
                 url: '/api/clientes',
                 method: 'GET',
@@ -2757,9 +2830,7 @@
         $('#buscar-clientes').on('keyup', function() {
             loadClientes(1);
         });
-
-
-        function loadFacturas(page = 1, itemsPerPage = 6) {
+        function loadFacturas(page = 1, itemsPerPage = 9) {
             $.ajax({
                 url: '/api/facturas/listar',
                 method: 'GET',
@@ -2792,7 +2863,6 @@
 
                     paginatedData.forEach(function(factura) {
                         const clienteNombre = factura.cliente ? factura.cliente.nombre : 'N/A';
-
                         const fecha = factura.createdAt ? new Date(factura.createdAt).toLocaleDateString() : 'N/A';
                         const hasCliente = factura.cliente && factura.cliente.nombre;
 
@@ -2804,6 +2874,10 @@
                             console.error("Error al convertir cliente a JSON:", error);
                             clienteData = '{}'; // Valor por defecto si falla
                         }
+
+                        // Obtener el CUFE de la factura (ajusta el nombre del campo según tu API)
+                        const cufe = factura.cufe || ''; // Usa 'cierto' como fallback si no hay CUFE
+                        const dianUrl = `https://catalogo-vpfe-hab.dian.gov.co/User/SearchDocument?DocumentKey=${encodeURIComponent(cufe)}`;
 
                         tbody.append(`
                     <tr>
@@ -2817,48 +2891,54 @@
                         <td>${fecha}</td>
                         <td>$${factura.total?.toFixed(2) || '0.00'}</td>
                         <td>
-                <div class="dropdown position-static">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-cog"></i> Opciones
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" data-bs-popper="static">
-                        <li>
-                            <a class="dropdown-item edit-factura" href="#" data-id="${factura.id}">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item view-factura" href="#" data-id="${factura.id}" data-numero="${factura.numero || 'N/A'}" data-cliente='${clienteData}' ${hasCliente ? '' : 'style="pointer-events: none; opacity: 0.5;" title="No hay cliente asociado"'}>
-                                <i class="fas fa-eye"></i> Detalles
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item download-factura" href="#" data-id="${factura.numero}">
-                                <i class="fas fa-download"></i> Pdf
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item validate-factura-btn" href="#" data-id="${factura.numero}">
-                                <i class="bi bi-check-circle"></i> Validar
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item download-xml-btn" href="#" data-id="${factura.numero}">
-                                <i class="bi bi-file-earmark-code"></i> XML
-                            </a>
-                        </li>
-                        <li class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item delete-factura-btn text-danger" href="#" data-id="${factura.referenceCode || 'N/A'}">
-                                <i class="bi bi-trash"></i> Eliminar
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </td>
-        </tr>
-    `);
+                            <div class="dropdown position-static">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-cog"></i> Opciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" data-bs-popper="static">
+                                    <li>
+                                        <a class="dropdown-item edit-factura" href="#" data-id="${factura.id}">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item view-factura" href="#" data-id="${factura.id}" data-numero="${factura.numero || 'N/A'}" data-cliente='${clienteData}' ${hasCliente ? '' : 'style="pointer-events: none; opacity: 0.5;" title="No hay cliente asociado"'}>
+                                            <i class="fas fa-eye"></i> Detalles
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item download-factura" href="#" data-id="${factura.numero}">
+                                            <i class="fas fa-download"></i> Pdf
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item validate-factura-btn" href="#" data-id="${factura.numero}">
+                                            <i class="bi bi-check-circle"></i> Validar
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item download-xml-btn" href="#" data-id="${factura.numero}">
+                                            <i class="bi bi-file-earmark-code"></i> XML
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item dian-redirect" href="#" data-url="${dianUrl}">
+                                            <i class="fas fa-globe"></i> DIAN
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item delete-factura-btn text-danger" href="#" data-id="${factura.referenceCode || 'N/A'}">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                `);
                     });
+
                     if (paginatedData.length === 0) {
                         tbody.append(`
                     <tr>
@@ -2925,6 +3005,38 @@
                         const referenceCode = $(this).data('id');
                         eliminarFactura(referenceCode);
                     });
+
+                    // Evento para el botón DIAN
+                    $('.dian-redirect').click(function(e) {
+                        e.preventDefault();
+                        const url = $(this).data('url');
+
+                        // Mostrar modal con el código QR
+                        Swal.fire({
+                            title: 'Código QR para DIAN',
+                            html: `
+                        <div style="text-align: center;">
+                            <p>Escanea el código QR para verificar en la DIAN</p>
+                            <img src="https://i.ibb.co/5x1HysZ9/image.png" alt="Código QR" style="width: 200px; height: 200px; margin: 10px 0;" />
+                        </div>
+                    `,
+                            showCancelButton: true,
+                            confirmButtonText: 'Ir a la DIAN',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            width: '400px',
+                            didRender: () => {
+                                const qrImage = Swal.getHtmlContainer().querySelector('img');
+                                qrImage.style.display = 'block';
+                                qrImage.style.margin = '0 auto';
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.open(url, '_blank');
+                            }
+                        });
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error("Error cargando facturas:", error);
@@ -2932,7 +3044,6 @@
                 }
             });
         }
-
         $('#buscar-facturas').on('keyup', function() {
             loadFacturas(1);
         });
@@ -3806,33 +3917,55 @@
         // Manejo de facturas
         var itemCount = 0;
         var facturaItems = [];
+        // Variable global para almacenar la lista de clientes
+        let clientesList = [];
 
+        // Cargar clientes para el modal de factura
         function loadClientesFactura(callback) {
             $.ajax({
                 url: '/api/clientes',
                 method: 'GET',
                 success: function(clientes) {
-                    // Guardar la lista de clientes en la variable global
+                    // Guardar la lista de clientes
                     clientesList = clientes;
 
+                    // Configurar el select con Select2
                     const select = $('#factura-cliente');
                     select.empty();
-                    select.append('<option value="">Seleccionar cliente...</option>');
+                    select.append('<option value="">Buscar cliente por nombre o identificación...</option>');
 
                     clientes.forEach(function(cliente) {
-                        select.append(`<option value="${cliente.id}">${cliente.nombre}</option>`);
+                        select.append(
+                            `<option value="${cliente.id}" data-identificacion="${cliente.identificacion}">
+                            ${cliente.nombre} (${cliente.identificacion})
+                        </option>`
+                        );
                     });
 
-                    // Ejecutar el callback si existe
+                    // Inicializar Select2
+                    select.select2({
+                        placeholder: "Buscar cliente por nombre o identificación...",
+                        allowClear: true,
+                        width: '100%',
+                        minimumInputLength: 0, // Permite buscar desde el primer carácter
+                        dropdownParent: $('#facturaModal'), // Evita problemas con el modal
+                        templateResult: formatCliente, // Formato para los resultados
+                        templateSelection: formatClienteSelection, // Formato para la selección
+                        matcher: customMatcher // Lógica de búsqueda personalizada
+                    });
+
+                    // Ejecutar callback si existe
                     if (typeof callback === 'function') {
                         callback();
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Error loading clientes:", error);
-                    alert('Error al cargar la lista de clientes');
-
-                    // Ejecutar el callback incluso en caso de error
+                    console.error("Error cargando clientes:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo cargar la lista de clientes'
+                    });
                     if (typeof callback === 'function') {
                         callback();
                     }
@@ -3840,12 +3973,46 @@
             });
         }
 
+        // Formato para los resultados de búsqueda
+        function formatCliente(cliente) {
+            if (!cliente.id) return cliente.text; // Para el placeholder
+            return $(
+                `<span>${cliente.text}</span>`
+            );
+        }
+
+        // Formato para el cliente seleccionado
+        function formatClienteSelection(cliente) {
+            if (!cliente.id) return cliente.text; // Para el placeholder
+            return cliente.text;
+        }
+
+        // Lógica de búsqueda personalizada (por nombre o identificación)
+        function customMatcher(params, data) {
+            // Si no hay término de búsqueda, mostrar todos los resultados
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+
+            const term = params.term.toLowerCase();
+            const nombre = data.text.toLowerCase();
+            const identificacion = $(data.element).data('identificacion')?.toString().toLowerCase() || '';
+
+            // Filtrar por nombre o identificación
+            if (nombre.indexOf(term) > -1 || identificacion.indexOf(term) > -1) {
+                return data;
+            }
+
+            return null;
+        }
+
+        // Función para manejar la selección de cliente
         function onClienteSelected() {
             const clienteId = $('#factura-cliente').val();
 
             if (!clienteId) {
                 clearClienteInfo();
-                $('#factura-municipio-id').val(''); // Limpiar municipioId
+                $('#factura-municipio-id').val('');
                 return;
             }
 
@@ -3864,7 +4031,7 @@
                 $('#factura-identification').val(clienteSeleccionado.identificacion || '');
                 $('#factura-api-client-name').val(clienteSeleccionado.nombre || '');
                 $('#factura-graphic-representation').val('PDF');
-                $('#factura-municipio-id').val(clienteSeleccionado.municipioId || ''); // Asignar municipioId
+                $('#factura-municipio-id').val(clienteSeleccionado.municipioId || '');
 
                 // Generar campos automáticos
                 generateAutoFields();
@@ -3875,32 +4042,29 @@
             }
         }
 
-// Limpiar información del cliente
+        // Limpiar información del cliente
         function clearClienteInfo() {
-            $('#cliente-nombre, #cliente-tipo, #cliente-correo, #cliente-telefono, #cliente-direccion, #cliente-municipio').text('-');
+            $('#cliente-nombres, #cliente-tipos, #cliente-correos, #cliente-telefonos, #cliente-direcciones, #cliente-municipios').text('-');
             $('#factura-identification, #factura-api-client-name, #factura-graphic-representation').val('');
         }
+
         // Generar campos automáticos
         function generateAutoFields() {
-            // Generar número de factura
             const facturaNumero = "FAC" + Math.random().toString(36).substring(2, 10).toUpperCase();
             $('#factura-numero').text(facturaNumero);
 
-            // Generar código de referencia único
             const referenceCode = "REF-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
             $('#factura-reference-code').val(referenceCode);
             $('#factura-reference-code-display').text(referenceCode);
 
-            // Generar ID de rango de numeración
             const numberingRangeId = Math.floor(Math.random() * 10000) + 1;
             $('#factura-numbering-range-id').val(numberingRangeId);
 
-            // Generar due_date
             const formaPago = $('#factura-forma-pago').val();
             const today = new Date();
             let dueDate = today;
             if (formaPago === 'Crédito') {
-                dueDate = new Date(today.setDate(today.getDate() + 30)); // 30 días para crédito
+                dueDate = new Date(today.setDate(today.getDate() + 30));
             }
             const yyyy = dueDate.getFullYear();
             let mm = dueDate.getMonth() + 1;
@@ -3910,7 +4074,36 @@
             $('#factura-due-date').val(`${yyyy}-${mm}-${dd}`);
         }
 
-        function loadProductos(page = 1, itemsPerPage = 6) {
+        // Inicializar el modal de factura
+        $('#facturaModal').on('show.bs.modal', function(e) {
+            if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-factura')) {
+                $('#facturaModalLabel').text('Nueva Factura');
+                $('#factura-form').trigger('reset');
+                $('#factura-id').val('');
+                $('#factura-items').empty();
+                facturaItems = [];
+                itemCount = 0;
+                updateFacturaTotals();
+                clearClienteInfo();
+
+                // Cargar clientes y configurar Select2
+                loadClientesFactura(function() {
+                    $('#factura-cliente').off('change').on('change', function() {
+                        onClienteSelected();
+                    });
+                });
+
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1;
+                let dd = today.getDate();
+                if (dd < 10) dd = '0' + dd;
+                if (mm < 10) mm = '0' + mm;
+                $('#factura-fecha').val(yyyy + '-' + mm + '-' + dd);
+            }
+        });
+
+        function loadProductos(page = 1, itemsPerPage = 9) {
             $.ajax({
                 url: '/api/productos',
                 method: 'GET',
@@ -4189,7 +4382,7 @@
             <td class="item-tax">$${taxValue.toFixed(2)}</td>
             <td class="item-total">$${total.toFixed(2)}</td>
             <td>
-                <button class="btn btn-sm btn-danger remove-item" data-index="${facturaItems.length - 1}">
+                <button class="btn btn-sm btn-dangers remove-item" data-index="${facturaItems.length - 1}">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -4330,7 +4523,7 @@
                 totalDescuento: parseFloat($('#factura-descuento-total').text().replace('$', '')),
                 total: parseFloat($('#factura-total').text().replace('$', '')),
                 municipio: parseInt($('#factura-municipio-id').val()) || null, // Usar el valor del campo oculto
-                fechaVencimiento: $('#factura-due-date').val(), // Enviar due_date
+                fechaVencimiento: $('#factura-due-date').val() || "2025-05-01", // Forzamos para probar
                 linesCount: facturaItems.length, // Enviar número de líneas
                 tributes: tributes, // Enviar tributos
                 items: facturaItems.map(item => ({
@@ -4386,7 +4579,6 @@
                     }
                 });
             } else {
-                // Crear nueva factura
                 $.ajax({
                     url: '/api/facturas/crear',
                     method: 'POST',
@@ -4395,13 +4587,17 @@
                     success: function(response) {
                         $('#facturaModal').modal('hide');
                         loadFacturas();
+
+                        // Obtener el reference_code de la respuesta o del objeto factura
+                        let referenceCode = response.referenceCode || factura.referenceCode || 'desconocido';
+
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'success',
                             title: 'Éxito',
-                            text: 'Documento con el código de referencia registrado y validado con éxito',
-                            timer: 3000,
+                            text: `Documento con el código de referencia ${referenceCode} registrado y validado con éxito`,
+                            timer: 5000,
                             showConfirmButton: false
                         });
                     },
@@ -4552,30 +4748,7 @@
                 }
             });
         }
-// Helper function to format currency values
-        function formatCurrency(value) {
-            return '$' + Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-        }
 
-
-        function obtenerItems() {
-            var items = [];
-            $('#factura-items tr').each(function() {
-                var item = {
-                    producto: {
-                        id: $(this).data('producto-id')
-                    },
-                    cantidad: parseFloat($(this).find('.item-cantidad').text()),
-                    precio: parseFloat($(this).find('.item-precio').text()),
-                    porcentajeDescuento: parseFloat($(this).find('.item-descuento').text()),
-                    subtotal: parseFloat($(this).find('.item-subtotal').text()),
-                    iva: parseFloat($(this).find('.item-iva').text()),
-                    total: parseFloat($(this).find('.item-total').text())
-                };
-                items.push(item);
-            });
-            return items;
-        }
 
         // Eliminar elementos
         function openDeleteModal(type, id) {

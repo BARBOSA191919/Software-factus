@@ -161,6 +161,7 @@ public class FactusApiClient {
 
             // Asegurar numbering_range_id
             dto.setNumbering_range_id(factura.getNumberingRangeId() != null ? factura.getNumberingRangeId().intValue() : 128);
+            System.out.println("numbering_range_id: " + dto.getNumbering_range_id());
 
             dto.setReference_code(factura.getReferenceCode() != null ? factura.getReferenceCode() : "REF-" + System.currentTimeMillis());
             dto.setObservation(factura.getObservation() != null ? factura.getObservation() : "");
@@ -171,18 +172,24 @@ public class FactusApiClient {
             if (factura.getFechaVencimiento() != null) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 dto.setDue_date(sdf.format(factura.getFechaVencimiento()));
+                System.out.println("Fecha de vencimiento (desde factura): " + sdf.format(factura.getFechaVencimiento()));
             } else {
                 dto.setDue_date(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                System.out.println("Fecha de vencimiento (por defecto): " + dto.getDue_date());
             }
 
             // Número de líneas (lines_count)
             dto.setLines_count(factura.getNumeroLineas());
+            System.out.println("Número de líneas: " + dto.getLines_count());
 
             // Descuento total (discount_total)
             dto.setDiscount_total(factura.getTotalDescuento() != null ? factura.getTotalDescuento().doubleValue() : 0.0);
+            System.out.println("Descuento total: " + dto.getDiscount_total());
 
             // Tributos (IVA e INC)
             List<FactusFacturaDTO.TributeDTO> tributes = new ArrayList<>();
+
+            // Agregar IVA si existe en los tributos de la factura
             if (factura.getTributos() != null && !factura.getTributos().isEmpty()) {
                 for (Tributo tributo : factura.getTributos()) {
                     FactusFacturaDTO.TributeDTO tributeDTO = new FactusFacturaDTO.TributeDTO();
@@ -191,14 +198,38 @@ public class FactusApiClient {
                     tributeDTO.setAmount(tributo.getAmount() != null ? tributo.getAmount().doubleValue() : 0.0);
                     tributes.add(tributeDTO);
                 }
+                System.out.println("Tributos desde factura: " + tributes);
+            } else {
+                System.out.println("No hay tributos en factura.getTributos()");
             }
-            if (factura.getInc() != null && factura.getInc().compareTo(BigDecimal.ZERO) > 0) {
-                FactusFacturaDTO.TributeDTO incTribute = new FactusFacturaDTO.TributeDTO();
-                incTribute.setTribute_id("03");
-                incTribute.setRate(8.0); // Ajusta según tu configuración
-                incTribute.setAmount(factura.getInc().doubleValue());
-                tributes.add(incTribute);
+
+            // Agregar INC por defecto (tribute_id: "03", rate: 8.0)
+            double baseTaxable = 0.0;
+            if (factura.getItems() != null && !factura.getItems().isEmpty()) {
+                System.out.println("Ítems encontrados: " + factura.getItems().size());
+                for (Item item : factura.getItems()) {
+                    if (item != null && item.getProducto() != null) {
+                        double itemSubtotal = (item.getPrecio() != null ? item.getPrecio().doubleValue() : 0.0) *
+                                (item.getCantidad() != null ? item.getCantidad().intValue() : 1);
+                        double itemDiscount = itemSubtotal * ((item.getPorcentajeDescuento() != null ? item.getPorcentajeDescuento().doubleValue() : 0.0) / 100);
+                        baseTaxable += (itemSubtotal - itemDiscount);
+                        System.out.println("Ítem: " + item.getProducto().getName() + ", Subtotal: " + itemSubtotal + ", Descuento: " + itemDiscount);
+                    } else {
+                        System.out.println("Ítem o producto nulo");
+                    }
+                }
+            } else {
+                System.out.println("No hay ítems en la factura");
             }
+            double incAmount = baseTaxable * 0.08; // 8% INC
+            System.out.println("Base imponible para INC: " + baseTaxable + ", Monto INC: " + incAmount);
+            FactusFacturaDTO.TributeDTO incTribute = new FactusFacturaDTO.TributeDTO();
+            incTribute.setTribute_id("03");
+            incTribute.setRate(8.0);
+            incTribute.setAmount(incAmount);
+            tributes.add(incTribute);
+            System.out.println("Tributos después de agregar INC: " + tributes);
+
             dto.setTributes(tributes);
 
             // Cliente
@@ -210,10 +241,9 @@ public class FactusApiClient {
                 customerDTO.setNames(cliente.getNombre() != null ? cliente.getNombre() : "");
                 customerDTO.setEmail(cliente.getCorreo() != null && !cliente.getCorreo().isEmpty() ? cliente.getCorreo() : "sin_correo@example.com");
                 customerDTO.setAddress(cliente.getDireccion() != null ? cliente.getDireccion() : "Sin dirección");
-                customerDTO.setPhone(cliente.getTelefono() != null ? cliente.getTelefono() : ""); // Añadir teléfono
+                customerDTO.setPhone(cliente.getTelefono() != null ? cliente.getTelefono() : "");
                 customerDTO.setLegal_organization_id(cliente.getTipoCliente() != null && cliente.getTipoCliente().equalsIgnoreCase("Persona Jurídica") ? "2" : "1");
                 customerDTO.setTribute_id("21");
-                // Usar factura.getMunicipio() y validar que no sea nulo
                 customerDTO.setMunicipality_id(factura.getMunicipio() != null ? factura.getMunicipio() : cliente.getMunicipioId());
                 if (customerDTO.getMunicipality_id() == null) {
                     throw new IllegalArgumentException("El municipioId no puede ser nulo");
