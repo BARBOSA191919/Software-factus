@@ -7,6 +7,7 @@
 	<title>FACTUS - Sistema de Facturación Electrónica</title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
 	<style>
 		* {
@@ -162,8 +163,6 @@
 			font-size: 12px;
 			opacity: 0.7;
 			margin-bottom: 10px;
-
-
 		}
 
 		.legal-links {
@@ -187,18 +186,18 @@
 
 		.social-links {
 			display: flex;
-			justify-content: center; /* Center icons horizontally */
-			align-items: center; /* Align icons vertically */
+			justify-content: center;
+			align-items: center;
 			gap: 15px;
 			margin-top: 15px;
-			width: 100%; /* Ensure it takes full width for centering */
+			width: 100%;
 		}
 
 		.social-links a {
 			color: white;
 			font-size: 18px;
 			transition: color 0.3s ease;
-			text-decoration: none; /* Prevent underlines */
+			text-decoration: none;
 		}
 
 		.social-links a:hover {
@@ -273,6 +272,74 @@
 			top: 50%;
 			transform: translateY(-50%);
 			color: #999;
+		}
+
+		.eye-container {
+			position: absolute;
+			right: 10px;
+			top: 50%;
+			transform: translateY(-50%);
+			cursor: pointer;
+		}
+
+		.eye {
+			width: 31px;
+			height: 21px;
+			background: #fff;
+			border: 1px solid #999;
+			border-radius: 8px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.iris {
+			width: 12px;
+			height: 12px;
+			background: radial-gradient(circle, #4a90e2 30%, #2b5a8c 70%);
+			border-radius: 50%;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		.pupil {
+			width: 4px;
+			height: 4px;
+			background: #000;
+			border-radius: 50%;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		.eyelid-top, .eyelid-bottom {
+			position: absolute;
+			width: 100%;
+			height: 50%;
+			background: #f7d7c2;
+			transition: transform 0.3s ease;
+		}
+
+		.eyelid-top {
+			top: 0;
+			transform-origin: top;
+			transform: translateY(-100%);
+		}
+
+		.eyelid-bottom {
+			bottom: 0;
+			transform-origin: bottom;
+			transform: translateY(100%);
+		}
+
+		.eye.closed .eyelid-top {
+			transform: translateY(0);
+		}
+
+		.eye.closed .eyelid-bottom {
+			transform: translateY(0);
 		}
 
 		.remember-forgot {
@@ -443,14 +510,14 @@
 		</div>
 
 		<div class="footer">
-			<div class="copyright"  style="display: block; text-align: center; width: 95%;">
+			<div class="copyright" style="display: block; text-align: center; width: 95%;">
 				© 2025 Factus. Todos los derechos reservados.
 			</div>
 			<div class="legal-links">
-				<a href="https://www.factus.com.co/terminos-y-condiciones" target="_blank" >Términos y Condiciones</a>
-				<a href="https://www.factus.com.co/politica-de-tratamiento-de-datos" target="_blank" >Política de Privacidad</a>
-				<a href="https://www.factus.com.co/acuerdo-nivel-servicio" target="_blank" style="display: block; text-align: center; width: 90%;">Acuerdo de Nivel de Servicio</a>			</div>
-
+				<a href="https://www.factus.com.co/terminos-y-condiciones" target="_blank">Términos y Condiciones</a>
+				<a href="https://www.factus.com.co/politica-de-tratamiento-de-datos" target="_blank">Política de Privacidad</a>
+				<a href="https://www.factus.com.co/acuerdo-nivel-servicio" target="_blank" style="display: block; text-align: center; width: 90%;">Acuerdo de Nivel de Servicio</a>
+			</div>
 		</div>
 	</div>
 
@@ -485,6 +552,15 @@
 				<div class="input-with-icon">
 					<i class="fas fa-lock input-icon"></i>
 					<input type="password" id="password" name="password" placeholder="Ingrese su contraseña" required>
+					<div class="eye-container">
+						<div class="eye">
+							<div class="iris">
+								<div class="pupil"></div>
+							</div>
+							<div class="eyelid-top"></div>
+							<div class="eyelid-bottom"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -514,7 +590,7 @@
 					<a href="https://www.instagram.com/factusfacturacion/" target="_blank" title="Instagram">
 						<i class="fab fa-instagram"></i>
 					</a>
-					<a href="https://api.whatsapp.com/send?phone=573161331234" target="_blank" title="WhatsApp"  >
+					<a href="https://api.whatsapp.com/send?phone=573161331234" target="_blank" title="WhatsApp">
 						<i class="fab fa-whatsapp"></i>
 					</a>
 				</div>
@@ -522,7 +598,6 @@
 		</form>
 	</div>
 </div>
-
 
 <script>
 	// Animación simple para los mensajes de alerta
@@ -533,6 +608,39 @@
 				alert.style.transition = 'opacity 0.5s ease';
 				alert.style.opacity = '0.9';
 			}, 200);
+		});
+
+		// Password toggle and eye animation
+		const input = document.getElementById('password');
+		const eye = document.querySelector('.eye');
+		const pupil = document.querySelector('.pupil');
+		let isPasswordVisible = false;
+
+		eye.addEventListener('click', () => {
+			isPasswordVisible = !isPasswordVisible;
+			input.type = isPasswordVisible ? 'text' : 'password';
+			eye.classList.toggle('closed');
+		});
+
+		document.addEventListener('mousemove', (e) => {
+			const eyeRect = eye.getBoundingClientRect();
+			const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+			const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+			const deltaX = e.clientX - eyeCenterX;
+			const deltaY = e.clientY - eyeCenterY;
+			const angle = Math.atan2(deltaY, deltaX);
+
+			const maxPupilDistance = 2;
+			const pupilX = Math.cos(angle) * maxPupilDistance;
+			const pupilY = Math.sin(angle) * maxPupilDistance;
+
+			gsap.to(pupil, {
+				x: pupilX,
+				y: pupilY,
+				duration: 0.3,
+				ease: 'power2.out'
+			});
 		});
 	});
 </script>
