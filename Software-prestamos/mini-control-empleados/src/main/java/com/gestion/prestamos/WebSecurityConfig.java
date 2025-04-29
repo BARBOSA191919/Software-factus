@@ -44,6 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/facturas/**").authenticated()
 				.antMatchers("/api/facturas/**").authenticated()
 				.antMatchers("/id/*").authenticated()
+
 				.anyRequest().authenticated()
 				.and()
 				.formLogin()
@@ -60,5 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll()
 				.and()
 				.csrf().disable();
+				http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
 	}
 }

@@ -1,0 +1,304 @@
+/* Facturas-Specific Styles */
+
+/* Variables for Factura Modal */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #1abc9c;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --light-color: #ecf0f1;
+    --dark-color: #2c3e50;
+    --text-color: #333333;
+    --border-radius: 4px;
+    --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* Factura Modal */
+#facturaModal .modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+#facturaModal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border-bottom: none;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+#facturaModal .modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #eaeaea;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+#facturaModal .card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    border: 1px solid #eaeaea;
+}
+
+#facturaModal .card-header {
+    font-weight: 600;
+    border-bottom: 1px solid #eaeaea;
+}
+
+#facturaModal .card-header.bg-light {
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+}
+
+#facturaModal .card-header.bg-dark {
+    background: linear-gradient(to right, var(--primary-color), var(--dark-color));
+}
+
+#facturaModal .form-control-sm,
+#facturaModal .form-select-sm {
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#facturaModal .form-control-sm:focus,
+#facturaModal .form-select-sm:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.15rem rgba(52, 152, 219, 0.25);
+}
+
+#facturaModal .form-control-sm:read-only {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+#facturaModal .form-label {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+#facturaModal .fas {
+    color: var(--secondary-color);
+    margin-right: 4px;
+}
+
+#facturaModal .modal-header .fas,
+#facturaModal .card-header .fas {
+    color: inherit;
+}
+
+#facturaModal .table {
+    margin-bottom: 0;
+}
+
+#facturaModal .table-dark {
+    background: var(--primary-color);
+}
+
+#facturaModal .table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+#facturaModal .table-responsive {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+#facturaModal .btn-sm {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+#facturaModal .btn-info {
+    background: linear-gradient(to right, var(--secondary-color), #2980b9);
+    border: none;
+}
+
+#facturaModal .btn-secondary {
+    background: linear-gradient(to right, #95a5a6, #7f8c8d);
+    border: none;
+}
+
+#facturaModal .btn-success {
+    background: linear-gradient(to right, var(--accent-color), #16a085);
+    border: none;
+}
+
+#facturaModal .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#facturaModal #factura-subtotal,
+#facturaModal #factura-iva-total,
+#facturaModal #factura-descuento-total,
+#facturaModal #factura-total {
+    font-family: 'Roboto Mono', monospace, sans-serif;
+    text-align: right;
+}
+
+#facturaModal #factura-total {
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+}
+
+#facturaModal #cliente-nombres,
+#facturaModal #cliente-correos,
+#facturaModal #cliente-telefonos,
+#facturaModal #cliente-direcciones,
+#facturaModal #cliente-municipios {
+    font-weight: 400;
+    color: var(--text-color);
+}
+
+#facturaModal #factura-status {
+    background-color: var(--warning-color);
+    color: white;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+#facturaModal .summary-card hr {
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+#facturaModal .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(236, 240, 241, 0.5);
+}
+
+#facturaModal .btn-eliminar-item {
+    color: var(--danger-color);
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 0.85rem;
+}
+
+#facturaModal .btn-eliminar-item:hover {
+    color: #c0392b;
+}
+
+#facturaModal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translateY(-20px);
+}
+
+#facturaModal.show .modal-dialog {
+    transform: translateY(0);
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 10px;
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #95a5a6;
+}
+
+@media (max-width: 992px) {
+    #facturaModal .modal-dialog {
+        max-width: 95%;
+    }
+}
+
+/* SweetAlert Invoice Modal */
+.swal-invoice-modal .swal2-popup {
+    font-family: Arial, sans-serif;
+    max-width: 95%;
+    padding: 1rem;
+}
+
+.swal-invoice-modal .invoice-container {
+    padding: 10px;
+    font-size: 13px;
+}
+
+.swal-invoice-modal .card {
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.swal-invoice-modal .card-header {
+    padding: 6px 12px;
+}
+
+.swal-invoice-modal .card-body {
+    padding: 10px;
+}
+
+.swal-invoice-modal .table {
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
+.swal-invoice-modal .table th,
+.swal-invoice-modal .table td {
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+
+.swal-invoice-modal .row {
+    margin-bottom: 10px;
+}
+
+.swal-invoice-modal .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+.swal-invoice-modal .invoice-footer {
+    margin-top: 10px;
+    padding-top: 5px;
+    border-top: 1px solid #dee2e6;
+    font-size: 11px;
+}
+
+.swal-invoice-modal .swal2-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.swal-invoice-modal .swal2-footer {
+    margin-top: 0;
+    padding-top: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.swal-invoice-modal .btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    margin: 0 5px;
+}
+
+.swal-invoice-modal .mb-4 {
+    margin-bottom: 10px !important;
+}
+
+.swal-invoice-modal .mb-1 {
+    margin-bottom: 3px !important;
+}
