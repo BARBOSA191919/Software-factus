@@ -16,18 +16,19 @@ public class Factura {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-        private String status;
-        private String documentName;
-        private String number;
-        private String graphicRepresentationName;
-        private String formaPago;
-        @JsonProperty("metodo")
-        @Column(name = "metodo_pago")
-        private String metodoPago;
-        private Date createdAt;
-    // Nuevos campos
+    private String status;
+    private String documentName;
+    private String number;
+    private String graphicRepresentationName;
+    private String formaPago;
+    @JsonProperty("metodo")
+    @Column(name = "metodo_pago")
+    private String metodoPago;
+    private Date createdAt;
+
+
     @Column(name = "municipio")
-    private Integer municipio; // Código del municipio (ej. "05001" para Medellín)
+    private Integer municipio;
 
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tributo> tributos = new ArrayList<>();
@@ -37,36 +38,35 @@ public class Factura {
     private Date fechaVencimiento;
 
     @Column(name = "inc")
-    private BigDecimal inc; // Impuesto Nacional al Consumo, si aplica
+    private BigDecimal inc;
 
-        // Campos para Factus
-        private String document; // Factura electrónica de venta
-        @Column(name = "numbering_range_id") // Asegúrate de que el nombre coincida
-        private Long numberingRangeId; // Debe ser Long para coincidir con el frontend
-        private String referenceCode;
-        private String observation;
 
-        // Totales
-        private BigDecimal subtotal;
-        private BigDecimal totalIva;
-        private BigDecimal totalDescuento;
-        private BigDecimal total;
+    private String document;
+    @Column(name = "numbering_range_id")
+    private Long numberingRangeId;
+    private String referenceCode;
+    private String observation;
 
-        @ManyToOne
-        @JoinColumn(name = "cliente_id")
-        private Cliente cliente;
+    // Totales
+    private BigDecimal subtotal;
+    private BigDecimal totalIva;
+    private BigDecimal totalDescuento;
+    private BigDecimal total;
 
-        @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
-        @JsonManagedReference
-        private List<Item> items = new ArrayList<>(); // Inicializamos la lista
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
 
-        public Factura() {
-            this.number = "FAC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-            this.status = "PENDIENTE";
-            this.createdAt = new Date();
-        }
+    @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Item> items = new ArrayList<>();
 
-    // Asegúrate de tener este metodo helper
+    public Factura() {
+        this.number = "FAC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        this.status = "PENDIENTE";
+        this.createdAt = new Date();
+    }
+
     public void addItem(Item item) {
         items.add(item);
         item.setFactura(this);

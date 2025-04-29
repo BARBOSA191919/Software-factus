@@ -1,18 +1,18 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Product search
-    $('#buscar-productos').on('keyup', function() {
+    $('#buscar-productos').on('keyup', function () {
         loadProductos(1);
     });
 
     // Navigation: Show productos section on link or card click
-    $('#productos-link').click(function(e) {
+    $('#productos-link').click(function (e) {
         e.preventDefault();
         $('.content-section').hide();
         $('#productos-content').show();
         loadProductos();
     });
 
-    $('.clickable-card[data-section="productos"]').click(function() {
+    $('.clickable-card[data-section="productos"]').click(function () {
         $('.content-section').hide();
         $('#productos-content').show();
         loadProductos();
@@ -23,7 +23,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/productos',
             method: 'GET',
-            success: function(data) {
+            success: function (data) {
                 data.sort((a, b) => b.id - a.id);
                 const tbody = $('#productos-table-body');
                 tbody.empty();
@@ -40,7 +40,7 @@ $(document).ready(function() {
                 const endIndex = startIndex + itemsPerPage;
                 const paginatedData = filteredData.slice(startIndex, endIndex);
 
-                paginatedData.forEach(function(producto) {
+                paginatedData.forEach(function (producto) {
                     tbody.append(`
                         <tr>
                             <td>${producto.id}</td>
@@ -79,19 +79,19 @@ $(document).ready(function() {
 
                 renderPagination(totalPages, page, 'productos');
 
-                $('.edit-producto').click(function(e) {
+                $('.edit-producto').click(function (e) {
                     e.preventDefault();
                     const id = $(this).data('id');
                     editProducto(id);
                 });
 
-                $('.delete-producto').click(function(e) {
+                $('.delete-producto').click(function (e) {
                     e.preventDefault();
                     const id = $(this).data('id');
                     openDeleteModal('producto', id);
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 $('#productos-table-body').html(`
                     <tr>
                         <td colspan="7" class="text-center text-danger">
@@ -172,7 +172,7 @@ $(document).ready(function() {
             </li>
         `);
 
-        $(`#${section}-pagination .page-link`).click(function(e) {
+        $(`#${section}-pagination .page-link`).click(function (e) {
             e.preventDefault();
             const page = $(this).data('page');
             if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
@@ -184,7 +184,7 @@ $(document).ready(function() {
     }
 
     // Save product
-    $('#guardar-producto').click(function() {
+    $('#guardar-producto').click(function () {
         const id = $('#producto-id').val();
         const currentTime = new Date().getTime();
         const nameSanitized = $('#producto-nombre').val().replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
@@ -214,7 +214,7 @@ $(document).ready(function() {
                 method: 'PUT',
                 data: JSON.stringify(producto),
                 contentType: 'application/json',
-                success: function() {
+                success: function () {
                     $('#productoModal').modal('hide');
                     loadProductos();
                     Swal.fire({
@@ -227,7 +227,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -241,7 +241,7 @@ $(document).ready(function() {
                 method: 'POST',
                 data: JSON.stringify(producto),
                 contentType: 'application/json',
-                success: function() {
+                success: function () {
                     $('#productoModal').modal('hide');
                     loadProductos();
                     Swal.fire({
@@ -254,7 +254,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -270,7 +270,7 @@ $(document).ready(function() {
         $.ajax({
             url: `/api/productos/${id}`,
             method: 'GET',
-            success: function(producto) {
+            success: function (producto) {
                 $('#producto-id').val(producto.id);
                 $('#producto-nombre').val(producto.name);
                 $('#producto-precio').val(producto.price);
@@ -282,7 +282,7 @@ $(document).ready(function() {
                 $('#productoModalLabel').text('Editar Producto');
                 $('#productoModal').modal('show');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 let errorMsg = 'Error al cargar el producto';
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMsg += ': ' + xhr.responseJSON.message;
@@ -301,7 +301,7 @@ $(document).ready(function() {
         $('#confirmDeleteModal').modal('show');
     }
 
-    $('#confirmar-eliminacion').click(function() {
+    $('#confirmar-eliminacion').click(function () {
         const type = $('#delete-type').val();
         const id = $('#delete-id').val();
 
@@ -309,7 +309,7 @@ $(document).ready(function() {
             $.ajax({
                 url: `/api/productos/${id}`,
                 method: 'DELETE',
-                success: function() {
+                success: function () {
                     $('#confirmDeleteModal').modal('hide');
                     loadProductos();
                     Swal.fire({
@@ -322,7 +322,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(error) {
+                error: function (error) {
                     alert(`Error al eliminar producto: ${error.responseJSON.message}`);
                 }
             });
@@ -330,7 +330,7 @@ $(document).ready(function() {
     });
 
     // Initialize modal
-    $('#productoModal').on('show.bs.modal', function(e) {
+    $('#productoModal').on('show.bs.modal', function (e) {
         if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-producto')) {
             $('#productoModalLabel').text('Nuevo Producto');
             $('#producto-form').trigger('reset');

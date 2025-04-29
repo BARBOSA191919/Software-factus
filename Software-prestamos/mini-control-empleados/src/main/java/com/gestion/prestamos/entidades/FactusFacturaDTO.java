@@ -4,26 +4,24 @@ import java.util.List;
 
 public class FactusFacturaDTO {
 
-    private String document; // "01" para factura electrónica
+    private String document;
     private Integer numbering_range_id;
     private String reference_code;
     private String observation;
-    private String payment_form; // "1" Contado, "2" Crédito
-    private String payment_method_code; // "10" Efectivo, "31" Transferencia
+    private String payment_form;
+    private String payment_method_code;
     private CustomerDTO customer;
     private List<ItemDTO> items;
 
-    // Nuevos campos
-    private String due_date; // Fecha de vencimiento en formato ISO (ej. "2025-05-01")
-    private Integer lines_count; // Número de líneas
-    private Double discount_total; // Descuento total de la factura
-    private List<TributeDTO> tributes; // Tributos adicionales, como INC
+    private String due_date;
+    private Integer lines_count;
+    private Double discount_total;
+    private List<TributeDTO> tributes;
 
-    // Clase interna para tributos
     public static class TributeDTO {
-        private String tribute_id; // Ej. "03" para INC
-        private Double rate; // Tasa del tributo
-        private Double amount; // Monto del tributo
+        private String tribute_id;
+        private Double rate;
+        private Double amount;
 
         public String getTribute_id() {
             return tribute_id;
@@ -57,21 +55,16 @@ public class FactusFacturaDTO {
     }
 
 
-
-    // Nested CustomerDTO class
     public static class CustomerDTO {
-        private String identification_document_id; // "3" Cédula
+        private String identification_document_id;
         private String identification;
         private String names;
         private String email;
         private String address;
-        private String legalOrganizationId; // ID de organización legal
+        private String legalOrganizationId;
         private String tribute_id;
-        private Integer municipality_id; // Código DANE del municipio (ej. "05001" para Medellín)
-        private String phone; // Código DANE del municipio (ej. "05001" para Medellín)
-
-        // Getters y setters
-
+        private Integer municipality_id;
+        private String phone;
 
         public Integer getMunicipality_id() {
             return municipality_id;
@@ -89,7 +82,6 @@ public class FactusFacturaDTO {
             this.phone = phone;
         }
 
-        // Resto de getters y setters sin cambios
         public String getIdentification_document_id() {
             return identification_document_id;
         }
@@ -156,20 +148,19 @@ public class FactusFacturaDTO {
 
     }
 
-    // Nested ItemDTO class
     public static class ItemDTO {
-        private String code_reference; // ID o código del producto
+        private String code_reference;
         private String name;
         private Double price;
         private Integer quantity;
-        private Double discount_rate; // Porcentaje de descuento
-        private Double tax_rate; // Porcentaje de IVA
-        private String unit_measure_id; // "70" Unidad
-        private String standard_code_id; // "1" por defecto
-        private Integer is_excluded; // 0 No excluido, 1 Excluido
-        private String tribute_id; // "1" IVA
+        private Double discount_rate;
+        private Double tax_rate;
+        private String unit_measure_id;
+        private String standard_code_id;
+        private Integer is_excluded;
+        private String tribute_id;
 
-        // Getters and setters
+
         public String getCode_reference() {
             return code_reference;
         }
@@ -242,18 +233,15 @@ public class FactusFacturaDTO {
             this.is_excluded = is_excluded;
         }
 
-        // Getter
         public String getTribute_id() {
             return tribute_id;
         }
 
-        // Setter
         public void setTribute_id(String tribute_id) {
             this.tribute_id = tribute_id;
         }
     }
 
-    // Getters and setters for the main class
     public String getDocument() {
         return document;
     }

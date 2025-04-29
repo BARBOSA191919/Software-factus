@@ -2,10 +2,10 @@ package com.gestion.prestamos.servicio;
 
 
 import com.gestion.prestamos.entidades.Cliente;
-import com.gestion.prestamos.entidades.Producto;
 import com.gestion.prestamos.repositorios.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 

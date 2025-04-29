@@ -10,13 +10,11 @@ public class Producto {
     private Long id;
     private String name;
     private BigDecimal price;
-    private String unitMeasureId; // "70" para unidad, según Factus
-    private String standardCodeId; // "1" por defecto
-    private Double taxRate; // Porcentaje de IVA (ej. 19.0)
-    private Boolean excluded; // Excluido de IVA
+    private String unitMeasureId;
+    private String standardCodeId;
+    private Double taxRate;
+    private Boolean excluded;
 
-
-    // Getters y Setters
     public Long getId() {
         return id;
     }

@@ -32,11 +32,13 @@ public class FactusApiClient {
         this.restTemplate = restTemplate;
         this.factusConfig = factusConfig;
     }
+
     // Define el logger
     private static final Logger logger = LoggerFactory.getLogger(FactusApiClient.class);
 
     @Autowired
     private FacturaRepository facturaRepository;
+
     public String obtenerTokenDeAcceso() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -88,6 +90,7 @@ public class FactusApiClient {
             throw new RuntimeException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
     }
+
 
     @Transactional
     public String crearFacturaEnFactus(Factura factura) {
@@ -320,6 +323,7 @@ public class FactusApiClient {
             throw new RuntimeException("Error al validar la factura: " + e.getMessage());
         }
     }
+
 
     public byte[] descargarFacturaPdf(String number) {
         try {
@@ -592,7 +596,6 @@ public class FactusApiClient {
             throw new RuntimeException("Error al obtener detalle de la factura: " + e.getMessage());
         }
     }
-
 
     public String eliminarFacturaPendiente(String referenceCode) {
         try {

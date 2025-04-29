@@ -57,13 +57,21 @@
 }
 
 @keyframes typing {
-    from { width: 0 }
-    to { width: 100% }
+    from {
+        width: 0
+    }
+    to {
+        width: 100%
+    }
 }
 
 @keyframes blink-caret {
-    from, to { border-color: transparent }
-    50% { border-color: #3b82f6 }
+    from, to {
+        border-color: transparent
+    }
+    50% {
+        border-color: #3b82f6
+    }
 }
 
 @keyframes rotation {
@@ -130,7 +138,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
     transform: rotate(30deg);
     transition: transform 0.8s ease;
     pointer-events: none;
@@ -291,6 +299,7 @@
         font-size: 0.85rem;
         max-width: 100px;
     }
+
     .table th:nth-child(1), .table td:nth-child(1) {
         max-width: 60px;
     }
@@ -457,6 +466,7 @@
         padding: 3px 6px;
         font-size: 12px;
     }
+
     .action-buttons.factura-actions .btn {
         width: 20px;
         height: 20px;
@@ -725,6 +735,7 @@
         max-width: 300px;
         margin: 0 auto;
     }
+
     .dropdown-menu {
         z-index: 9999 !important;
         position: fixed !important;

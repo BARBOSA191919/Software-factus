@@ -36,8 +36,6 @@ public class FacturaController {
     // Define el logger
     private static final Logger logger = LoggerFactory.getLogger(FacturaController.class);
 
-
-
     @GetMapping("/listar")
     @ResponseBody
     public ResponseEntity<?> listarFacturas() {
@@ -203,6 +201,7 @@ public class FacturaController {
                     .body(Map.of("error", "Error al obtener la factura: " + e.getMessage()));
         }
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarFacturaRest(@PathVariable Long id, @RequestBody Map<String, Object> facturaData) {
         try {

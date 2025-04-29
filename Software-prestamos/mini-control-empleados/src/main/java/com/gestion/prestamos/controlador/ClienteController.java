@@ -1,11 +1,12 @@
 package com.gestion.prestamos.controlador;
+
 import com.gestion.prestamos.entidades.Cliente;
 import com.gestion.prestamos.servicio.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")

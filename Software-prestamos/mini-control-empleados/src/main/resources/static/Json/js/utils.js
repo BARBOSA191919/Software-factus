@@ -1,5 +1,3 @@
-
-
 /* ------------------Glassmorphism Sidebar------------------ */
 const GlassmorphismSidenav = document.getElementById("GlassmorphismSidenav");
 const GlassmorphismPname = document.getElementById("GlassmorphismPname");
@@ -59,12 +57,12 @@ function launchConfetti() {
     confetti({
         particleCount: 100,
         spread: 70,
-        origin: { y: 0.6 }
+        origin: {y: 0.6}
     });
 }
 
 // Ajustar posición de dropdowns en tablas
-document.addEventListener('shown.bs.dropdown', function(event) {
+document.addEventListener('shown.bs.dropdown', function (event) {
     const dropdown = event.target;
 
     if (dropdown.closest('.table')) {
@@ -97,24 +95,24 @@ document.addEventListener('click', (e) => {
     }
 });
 
-    // Hide all content sections except dashboard by default
+// Hide all content sections except dashboard by default
+$('.content-section').hide();
+$('#dashboard-content').show();
+
+// Dashboard link navigation
+$('#dashboard-link').click(function (e) {
+    e.preventDefault();
     $('.content-section').hide();
     $('#dashboard-content').show();
+});
 
-    // Dashboard link navigation
-    $('#dashboard-link').click(function(e) {
-        e.preventDefault();
-        $('.content-section').hide();
-        $('#dashboard-content').show();
-    });
-
-    $('.clickable-card[data-section="dashboard"]').click(function() {
-        $('.content-section').hide();
-        $('#dashboard-content').show();
-    });
+$('.clickable-card[data-section="dashboard"]').click(function () {
+    $('.content-section').hide();
+    $('#dashboard-content').show();
+});
 
 // Confirmar logout
-window.confirmLogout = function() {
+window.confirmLogout = function () {
     Swal.fire({
         title: '¿Estás seguro?',
         text: "¿Quieres cerrar sesión?",

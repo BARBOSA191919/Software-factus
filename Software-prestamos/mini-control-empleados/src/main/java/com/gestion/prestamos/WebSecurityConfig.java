@@ -16,52 +16,53 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Override
-	@Bean
-	protected UserDetailsService userDetailsService() {
-		UserDetails admin = User
-				.withUsername("admin")
-				.password(passwordEncoder().encode("admin"))
-				.roles("ADMIN")
-				.build();
+    @Override
+    @Bean
+    protected UserDetailsService userDetailsService() {
+        UserDetails admin = User
+                .withUsername("admin")
+                .password(passwordEncoder().encode("admin"))
+                .roles("ADMIN")
+                .build();
 
-		return new InMemoryUserDetailsManager(admin);
-	}
+        return new InMemoryUserDetailsManager(admin);
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.headers().frameOptions().sameOrigin();
-		http
-				.authorizeRequests()
-				.antMatchers("/", "/login").permitAll()
-				.antMatchers("/api/productos/**").authenticated()
-				.antMatchers("/api/clientes/**").authenticated()
-				.antMatchers("/facturas/**").authenticated()
-				.antMatchers("/api/facturas/**").authenticated()
-				.antMatchers("/id/*").authenticated()
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.headers().frameOptions().sameOrigin();
+        http
+                .authorizeRequests()
+                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/api/productos/**").authenticated()
+                .antMatchers("/api/clientes/**").authenticated()
+                .antMatchers("/facturas/**").authenticated()
+                .antMatchers("/api/facturas/**").authenticated()
+                .antMatchers("/", "/login", "/css/**", "/js/**").permitAll()
+                .antMatchers("/id/*").authenticated()
 
-				.anyRequest().authenticated()
-				.and()
-				.formLogin()
-				.loginPage("/login")
-				.defaultSuccessUrl("/api/facturas/crear", true)
-				.permitAll()
-				.and()
-				.oauth2Login()
-				.loginPage("/login")
-				.defaultSuccessUrl("/api/facturas/crear", true)
-				.and()
-				.logout()
-				.logoutSuccessUrl("/login?logout")
-				.permitAll()
-				.and()
-				.csrf().disable();
-				http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+                .loginPage("/login")
+                .defaultSuccessUrl("/api/facturas/crear", true)
+                .permitAll()
+                .and()
+                .oauth2Login()
+                .loginPage("/login")
+                .defaultSuccessUrl("/api/facturas/crear", true)
+                .and()
+                .logout()
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+                .and()
+                .csrf().disable();
+        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
-	}
+    }
 }

@@ -8,20 +8,19 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipoCliente;     // Tipo cliente (Persona Natural, etc.)
-    private String tipoIdentificacion; // Tipo identificación (Cédula de ciudadanía, etc.)
-    private String identificacion;  // Número de identificación
-    private String nombre;          // Nombre del cliente
-    private String telefono;        // Teléfono
-    private String correo;          // Correo electrónico
-    private String municipio;       // Municipio
-    private Integer municipioId; // For the municipality ID
-    private String direccion;       // Dirección
-    @Column(name = "aplicaiva") // Mapea el campo aplicaIVA a la columna aplicaiva en la base de datos
-    private String aplicaIVA;     // Nuevos campos
-    private String legalOrganizationId; // ID de organización legal
-    private String tributeId;  // ID de tributo
-    // Mantenemos algunos campos originales que podrían ser útiles
+    private String tipoCliente;
+    private String tipoIdentificacion;
+    private String identificacion;
+    private String nombre;
+    private String telefono;
+    private String correo;
+    private String municipio;
+    private Integer municipioId;
+    private String direccion;
+    @Column(name = "aplicaiva")
+    private String aplicaIVA;
+    private String legalOrganizationId;
+    private String tributeId;
 
     private String company;
     private String tradeName;

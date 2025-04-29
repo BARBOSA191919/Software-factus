@@ -1,23 +1,23 @@
-$(document).ready(function() {
+$(document).ready(function () {
     let clientesList = [];
 
 
 // Navigation: Show facturas section on link or card click
-    $('#facturas-link').click(function(e) {
+    $('#facturas-link').click(function (e) {
         e.preventDefault();
         $('.content-section').hide();
         $('#facturas-content').show();
         loadFacturas();
     });
 
-    $('.clickable-card[data-section="facturas"]').click(function() {
+    $('.clickable-card[data-section="facturas"]').click(function () {
         $('.content-section').hide();
         $('#facturas-content').show();
         loadFacturas();
     });
 
     // Invoice search
-    $('#buscar-facturas').on('keyup', function() {
+    $('#buscar-facturas').on('keyup', function () {
         loadFacturas(1);
     });
 
@@ -26,7 +26,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/facturas/listar',
             method: 'GET',
-            success: function(data) {
+            success: function (data) {
                 data.sort((a, b) => {
                     if (a.createdAt && b.createdAt) {
                         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -50,7 +50,7 @@ $(document).ready(function() {
                 const currentPage = Math.min(Math.max(1, page), totalPages);
                 const paginatedData = filteredData.slice(startIndex, endIndex);
 
-                paginatedData.forEach(function(factura) {
+                paginatedData.forEach(function (factura) {
                     const clienteNombre = factura.cliente ? factura.cliente.nombre : 'N/A';
                     const fecha = factura.createdAt ? new Date(factura.createdAt).toLocaleDateString() : 'N/A';
                     const hasCliente = factura.cliente && factura.cliente.nombre;
@@ -143,13 +143,13 @@ $(document).ready(function() {
 
                 renderPagination(totalPages, currentPage, 'facturas');
 
-                $('.edit-factura').click(function(e) {
+                $('.edit-factura').click(function (e) {
                     e.preventDefault();
                     const id = $(this).data('id');
                     editFactura(id);
                 });
 
-                $(document).on('click', '.view-factura', function(e) {
+                $(document).on('click', '.view-factura', function (e) {
                     e.preventDefault();
                     const id = $(this).data('id');
                     const numero = $(this).data('numero');
@@ -168,31 +168,31 @@ $(document).ready(function() {
                     viewFactura(id, numero, cliente);
                 });
 
-                $('.download-factura').click(function(e) {
+                $('.download-factura').click(function (e) {
                     e.preventDefault();
                     const number = $(this).data('id');
                     showDownloadAnimation('PDF', () => descargarFactura(number));
                 });
 
-                $('.validate-factura-btn').click(function(e) {
+                $('.validate-factura-btn').click(function (e) {
                     e.preventDefault();
                     const number = $(this).data('id');
                     validateFactura(number);
                 });
 
-                $('.download-xml-btn').click(function(e) {
+                $('.download-xml-btn').click(function (e) {
                     e.preventDefault();
                     const number = $(this).data('id');
                     showDownloadAnimation('XML', () => descargarXml(number));
                 });
 
-                $('.delete-factura-btn').click(function(e) {
+                $('.delete-factura-btn').click(function (e) {
                     e.preventDefault();
                     const referenceCode = $(this).data('id');
                     eliminarFactura(referenceCode);
                 });
 
-                $('.dian-redirect').click(function(e) {
+                $('.dian-redirect').click(function (e) {
                     e.preventDefault();
                     const url = $(this).data('url');
 
@@ -222,7 +222,7 @@ $(document).ready(function() {
                     });
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 $('#facturas-table-body').html('<tr><td colspan="10" class="text-center text-danger">Error al cargar facturas</td></tr>');
             }
         });
@@ -297,7 +297,7 @@ $(document).ready(function() {
             </li>
         `);
 
-        $(`#${section}-pagination .page-link`).click(function(e) {
+        $(`#${section}-pagination .page-link`).click(function (e) {
             e.preventDefault();
             const page = $(this).data('page');
             if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
@@ -333,15 +333,15 @@ $(document).ready(function() {
                 const lines = Swal.getHtmlContainer().querySelector('.parachute-lines');
                 const progressText = Swal.getHtmlContainer().querySelector('.progress-text');
 
-                gsap.set(circle, { strokeDashoffset: 188.5 });
-                gsap.set(lines, { opacity: 0, y: 0 });
+                gsap.set(circle, {strokeDashoffset: 188.5});
+                gsap.set(lines, {opacity: 0, y: 0});
                 progressText.textContent = '0%';
 
                 gsap.to(circle, {
                     strokeDashoffset: 0,
                     duration: 2,
                     ease: 'power2.inOut',
-                    onUpdate: function() {
+                    onUpdate: function () {
                         const progress = Math.round((1 - this.ratio) * 100);
                         progressText.textContent = `${progress}%`;
                     },
@@ -376,7 +376,7 @@ $(document).ready(function() {
         $.ajax({
             url: `/api/facturas/ver/${id}`,
             method: 'GET',
-            success: function(data) {
+            success: function (data) {
                 Swal.close();
 
                 if (data.error) {
@@ -544,14 +544,14 @@ $(document).ready(function() {
                     confirmButtonColor: '#3085d6',
                     footer: `<button id="download-btn-modal" class="btn btn-secondary" data-id="${data.numero}"><i class="fas fa-download"></i> Descargar PDF</button>`,
                     didOpen: () => {
-                        $('#download-btn-modal').off('click').on('click', function() {
+                        $('#download-btn-modal').off('click').on('click', function () {
                             const number = $(this).data('id');
                             descargarFactura(number);
                         });
                     }
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 Swal.close();
                 Swal.fire({
                     icon: 'error',
@@ -654,10 +654,11 @@ $(document).ready(function() {
                     showCancelButton: true,
                     cancelButtonText: 'Descargar',
                     cancelButtonColor: '#28a745',
-                    didOpen: () => {}
+                    didOpen: () => {
+                    }
                 }).then((result) => {
                     if (result.dismiss === Swal.DismissReason.cancel) {
-                        const blob = new Blob([xmlText], { type: 'application/xml' });
+                        const blob = new Blob([xmlText], {type: 'application/xml'});
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.style.display = 'none';
@@ -718,7 +719,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: `/api/facturas/eliminar/${referenceCode}`,
                     method: 'DELETE',
-                    success: function() {
+                    success: function () {
                         Swal.fire({
                             icon: 'success',
                             title: 'Éxito',
@@ -728,7 +729,7 @@ $(document).ready(function() {
                             loadFacturas();
                         });
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         Swal.close();
                         let errorMessage = xhr.responseJSON?.error || `Error ${xhr.status}: ${xhr.statusText}`;
                         Swal.fire({
@@ -781,11 +782,11 @@ $(document).ready(function() {
                     xhrFields: {
                         responseType: 'blob'
                     },
-                    success: function(data, status, xhr) {
+                    success: function (data, status, xhr) {
                         Swal.close();
                         const contentType = xhr.getResponseHeader('Content-Type');
                         if (contentType.includes('application/pdf')) {
-                            const blob = new Blob([data], { type: 'application/pdf' });
+                            const blob = new Blob([data], {type: 'application/pdf'});
                             const url = window.URL.createObjectURL(blob);
                             Swal.fire({
                                 title: `Vista Previa del PDF - Factura ${number}`,
@@ -822,7 +823,7 @@ $(document).ready(function() {
                             });
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         Swal.close();
                         let errorMessage = xhr.responseJSON?.error || `Error ${xhr.status}: ${xhr.statusText}`;
                         Swal.fire({
@@ -842,13 +843,13 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/clientes',
             method: 'GET',
-            success: function(clientes) {
+            success: function (clientes) {
                 clientesList = clientes;
                 const select = $('#factura-cliente');
                 select.empty();
                 select.append('<option value="">Buscar cliente por nombre o identificación...</option>');
 
-                clientes.forEach(function(cliente) {
+                clientes.forEach(function (cliente) {
                     select.append(
                         `<option value="${cliente.id}" data-identificacion="${cliente.identificacion}">
                             ${cliente.nombre} (${cliente.identificacion})
@@ -871,7 +872,7 @@ $(document).ready(function() {
                     callback();
                 }
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -966,7 +967,7 @@ $(document).ready(function() {
 
     // Initialize invoice modal
 // Initialize invoice modal
-    $('#facturaModal').on('show.bs.modal', function(e) {
+    $('#facturaModal').on('show.bs.modal', function (e) {
         if (!$(e.relatedTarget).hasClass('edit-factura')) {
             $('#facturaModalLabel').text('Nueva Factura');
             $('#factura-form').trigger('reset');
@@ -975,7 +976,7 @@ $(document).ready(function() {
             facturaItems = [];
             itemCount = 0;
             updateFacturaTotals();
-            loadClientesFactura(function() {
+            loadClientesFactura(function () {
                 $('#factura-cliente').off('change').on('change', onClienteSelected);
             });
             const today = new Date();
@@ -988,14 +989,14 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on('click', '.seleccionar-producto', function() {
+    $(document).on('click', '.seleccionar-producto', function () {
         const id = $(this).data('id');
         const name = $(this).data('name');
         const price = $(this).data('price');
         const taxRate = $(this).data('tax-rate');
-        console.log('Producto seleccionado:', { id, name, price, taxRate });
+        console.log('Producto seleccionado:', {id, name, price, taxRate});
         if (!id || id === undefined || !name || price == null || taxRate == null || isNaN(taxRate)) {
-            console.error('Datos inválidos en selección:', { id, name, price, taxRate });
+            console.error('Datos inválidos en selección:', {id, name, price, taxRate});
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -1037,11 +1038,11 @@ $(document).ready(function() {
       </tr>
     `);
         updateFacturaTotals();
-        $('.item-quantity, .item-discount').off('change').on('change', function() {
+        $('.item-quantity, .item-discount').off('change').on('change', function () {
             const index = $(this).data('index');
             updateItemCalculations(index);
         });
-        $('.remove-item').off('click').on('click', function() {
+        $('.remove-item').off('click').on('click', function () {
             const index = $(this).data('index');
             removeFacturaItem(index);
         });
@@ -1065,7 +1066,7 @@ $(document).ready(function() {
     function removeFacturaItem(index) {
         facturaItems.splice(index, 1);
         $(`#factura-items tr:eq(${index})`).remove();
-        $('#factura-items tr').each(function(i) {
+        $('#factura-items tr').each(function (i) {
             $(this).find('.item-quantity').data('index', i);
             $(this).find('.item-discount').data('index', i);
             $(this).find('.remove-item').data('index', i);
@@ -1078,7 +1079,7 @@ $(document).ready(function() {
         let totalIva = 0;
         let totalDescuento = 0;
         let total = 0;
-        facturaItems.forEach(function(item) {
+        facturaItems.forEach(function (item) {
             const itemSubtotal = item.price * item.quantity;
             const itemDiscount = itemSubtotal * (item.discount / 100);
             const itemTax = (itemSubtotal - itemDiscount) * (item.taxRate / 100);
@@ -1092,6 +1093,7 @@ $(document).ready(function() {
         $('#factura-descuento-total').text(`$${totalDescuento.toFixed(2)}`);
         $('#factura-total').text(`$${total.toFixed(2)}`);
     }
+
     function renderFacturaItems() {
         const itemsContainer = $('#factura-items');
         console.log('Rendering facturaItems:', facturaItems); // Debug
@@ -1126,10 +1128,8 @@ $(document).ready(function() {
     }
 
 
-
-
 // Save invoice
-    $('#guardar-factura').click(function() {
+    $('#guardar-factura').click(function () {
         if (facturaItems.length === 0) {
             Swal.fire({
                 icon: 'error',
@@ -1150,7 +1150,7 @@ $(document).ready(function() {
         const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
         const id = $('#factura-id').val();
         const totalIva = parseFloat($('#factura-iva-total').text().replace('$', ''));
-        const tributes = totalIva > 0 ? [{ tribute_id: "01", rate: 19.0, amount: totalIva }] : [];
+        const tributes = totalIva > 0 ? [{tribute_id: "01", rate: 19.0, amount: totalIva}] : [];
         const factura = {
             cliente: {
                 id: clienteSeleccionado.id,
@@ -1201,7 +1201,7 @@ $(document).ready(function() {
             method: method,
             data: JSON.stringify(factura),
             contentType: 'application/json',
-            success: function(response) {
+            success: function (response) {
                 $('#facturaModal').modal('hide');
                 loadFacturas();
                 Swal.fire({
@@ -1214,7 +1214,7 @@ $(document).ready(function() {
                     showConfirmButton: false
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -1230,7 +1230,7 @@ $(document).ready(function() {
         $.ajax({
             url: `/api/facturas/ver/${id}`,
             method: 'GET',
-            success: function(factura) {
+            success: function (factura) {
                 $('#facturaModalLabel').text('Editar Factura');
                 $('#factura-id').val(factura.id);
                 $('#factura-numero').text(factura.numero);
@@ -1246,15 +1246,19 @@ $(document).ready(function() {
                 $('#factura-graphic-representation').val(factura.graphicRepresentation);
                 $('#factura-municipio-id').val(factura.municipioId);
 
-                loadClientesFactura(function() {
+                loadClientesFactura(function () {
                     $('#factura-cliente').val(factura.clienteId).trigger('change');
-                    $('#factura-cliente').off('change').on('change', function() {
+                    $('#factura-cliente').off('change').on('change', function () {
                         onClienteSelected();
                     });
                 });
 
                 facturaItems = factura.items.map((item, index) => {
-                    const producto = productosList.find(p => p.id === item.productoId) || { name: item.producto || 'Desconocido', price: item.precio, taxRate: item.taxRate };
+                    const producto = productosList.find(p => p.id === item.productoId) || {
+                        name: item.producto || 'Desconocido',
+                        price: item.precio,
+                        taxRate: item.taxRate
+                    };
                     return {
                         id: index,
                         productoId: item.productoId,
@@ -1274,7 +1278,7 @@ $(document).ready(function() {
                 updateFacturaTotals();
                 $('#facturaModal').modal('show');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -1304,12 +1308,12 @@ function loadProductosSeleccion(page = 1) {
     $.ajax({
         url: '/api/productos',
         method: 'GET',
-        success: function(data) {
+        success: function (data) {
             productosList = data.sort((a, b) => b.id - a.id); // Ordenar por ID descendente
             currentPage = page;
             applyFiltersAndRender(page);
         },
-        error: function() {
+        error: function () {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -1410,7 +1414,7 @@ function renderPaginations(totalPages, currentPage) {
     `);
 
     // Evento de cambio de página
-    pagination.find('.page-link').click(function(e) {
+    pagination.find('.page-link').click(function (e) {
         e.preventDefault();
         const page = $(this).data('page');
         if (page && !$(this).parent().hasClass('disabled')) {
@@ -1421,13 +1425,13 @@ function renderPaginations(totalPages, currentPage) {
 }
 
 // Evento de búsqueda
-$('#buscar-producto').on('input', function() {
+$('#buscar-producto').on('input', function () {
     currentPage = 1;
     applyFiltersAndRender(currentPage);
 });
 
 // Abrir modal de productos
-$('#agregar-item').click(function() {
+$('#agregar-item').click(function () {
     currentPage = 1;
     loadProductosSeleccion(currentPage);
     $('#seleccionarProductoModal').modal('show');

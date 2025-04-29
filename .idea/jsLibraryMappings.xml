@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$/Software-prestamos/mini-control-empleados" libraries="{canvas-confetti, jquery-3.6.0, select2}" />
+    <file url="file://$PROJECT_DIR$/Software-prestamos/mini-control-empleados" libraries="{canvas-confetti, gsap, jquery-3.6.0, select2}" />
   </component>
 </project>

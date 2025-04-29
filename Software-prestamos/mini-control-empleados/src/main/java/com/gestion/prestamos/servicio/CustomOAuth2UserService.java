@@ -13,6 +13,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
+
         // Cargar el usuario usando el servicio predeterminado
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
         return oAuth2User; // Devolver el usuario tal cual, sin necesidad de modificar roles

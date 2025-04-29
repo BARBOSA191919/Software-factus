@@ -24,7 +24,7 @@ public class Item {
     private BigDecimal precio;
     private BigDecimal porcentajeDescuento;
     private BigDecimal subtotal;
-    private BigDecimal iva; // Valor del IVA
+    private BigDecimal iva;
     private BigDecimal total;
 
     public Long getId() {

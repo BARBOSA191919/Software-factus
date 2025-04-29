@@ -9,7 +9,7 @@ public class Tributo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tributeId; // "01" para IVA, "03" para INC
+    private String tributeId;
     private Double rate;
     private BigDecimal amount;
 

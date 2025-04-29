@@ -1,15 +1,15 @@
-$(document).ready(function() {
+$(document).ready(function () {
     let municipiosData = [];
 
     // Navigation: Show clientes section on link or card click
-    $('#clientes-link').click(function(e) {
+    $('#clientes-link').click(function (e) {
         e.preventDefault();
         $('.content-section').hide();
         $('#clientes-content').show();
         loadClientes(); // Load client table
     });
 
-    $('.clickable-card[data-section="clientes"]').click(function() {
+    $('.clickable-card[data-section="clientes"]').click(function () {
         $('.content-section').hide();
         $('#clientes-content').show();
         loadClientes(); // Load client table
@@ -58,7 +58,7 @@ $(document).ready(function() {
     // Handle municipality input
     const municipioInput = document.getElementById('cliente-municipio');
     const municipioIdInput = document.getElementById('cliente-municipio-id');
-    municipioInput.addEventListener('input', function() {
+    municipioInput.addEventListener('input', function () {
         const searchTerm = this.value;
         loadMunicipios(searchTerm);
 
@@ -69,7 +69,7 @@ $(document).ready(function() {
     });
 
     // Client modal handling
-    document.getElementById('clienteModal').addEventListener('show.bs.modal', async function(e) {
+    document.getElementById('clienteModal').addEventListener('show.bs.modal', async function (e) {
         await loadMunicipios();
         const form = document.getElementById('cliente-form');
         const municipioInput = document.getElementById('cliente-municipio');
@@ -110,7 +110,7 @@ $(document).ready(function() {
     });
 
     // Toggle juridical fields
-    document.getElementById('cliente-tipo').addEventListener('change', function() {
+    document.getElementById('cliente-tipo').addEventListener('change', function () {
         const camposJuridica = document.getElementById('campos-juridica');
         if (this.value === 'Persona Jurídica') {
             camposJuridica.style.display = 'block';
@@ -121,7 +121,7 @@ $(document).ready(function() {
     });
 
     // Client search
-    $('#buscar-clientes').on('keyup', function() {
+    $('#buscar-clientes').on('keyup', function () {
         loadClientes(1);
     });
 
@@ -130,7 +130,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/clientes',
             method: 'GET',
-            success: function(data) {
+            success: function (data) {
                 // Ordenar clientes por ID descendente
                 data.sort((a, b) => b.id - a.id);
                 const tbody = $('#clientes-table-body');
@@ -150,7 +150,7 @@ $(document).ready(function() {
                 const currentPage = Math.min(Math.max(1, page), totalPages);
                 const paginatedData = filteredData.slice(startIndex, endIndex);
 
-                paginatedData.forEach(function(cliente) {
+                paginatedData.forEach(function (cliente) {
                     tbody.append(`
                         <tr>
                             <td>${cliente.id}</td>
@@ -192,17 +192,17 @@ $(document).ready(function() {
 
                 renderPagination(totalPages, currentPage, 'clientes');
 
-                $('.edit-cliente').click(function() {
+                $('.edit-cliente').click(function () {
                     const id = $(this).data('id');
                     editCliente(id);
                 });
 
-                $('.delete-cliente').click(function() {
+                $('.delete-cliente').click(function () {
                     const id = $(this).data('id');
                     openDeleteModal('cliente', id);
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 console.error('Error loading clients:', xhr);
                 Swal.fire({
                     icon: 'error',
@@ -282,7 +282,7 @@ $(document).ready(function() {
             </li>
         `);
 
-        $(`#${section}-pagination .page-link`).click(function(e) {
+        $(`#${section}-pagination .page-link`).click(function (e) {
             e.preventDefault();
             const page = $(this).data('page');
             if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
@@ -294,7 +294,7 @@ $(document).ready(function() {
     }
 
     // Save client
-    $('#guardar-cliente').click(function() {
+    $('#guardar-cliente').click(function () {
         const id = $('#cliente-id').val();
         const tipoCliente = $('#cliente-tipo').val();
         const tipoIdentificacion = $('#cliente-tipo-identificacion').val();
@@ -350,7 +350,7 @@ $(document).ready(function() {
                 method: 'PUT',
                 data: JSON.stringify(cliente),
                 contentType: 'application/json',
-                success: function() {
+                success: function () {
                     $('#clienteModal').modal('hide');
                     loadClientes();
                     Swal.fire({
@@ -363,7 +363,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -377,7 +377,7 @@ $(document).ready(function() {
                 method: 'POST',
                 data: JSON.stringify(cliente),
                 contentType: 'application/json',
-                success: function() {
+                success: function () {
                     $('#clienteModal').modal('hide');
                     loadClientes();
                     Swal.fire({
@@ -390,7 +390,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -407,7 +407,7 @@ $(document).ready(function() {
         $.ajax({
             url: `/api/clientes/${id}`,
             method: 'GET',
-            success: function(cliente) {
+            success: function (cliente) {
                 $('#cliente-form').trigger('reset');
                 $('#clienteModalLabel').text('Editar Cliente');
                 $('#cliente-id').val(cliente.id);
@@ -435,7 +435,7 @@ $(document).ready(function() {
 
                 $('#clienteModal').modal('show');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 let errorMsg = 'Error al cargar el cliente';
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMsg += ': ' + xhr.responseJSON.message;
@@ -454,7 +454,7 @@ $(document).ready(function() {
         $('#confirmDeleteModal').modal('show');
     }
 
-    $('#confirmar-eliminacion').click(function() {
+    $('#confirmar-eliminacion').click(function () {
         const type = $('#delete-type').val();
         const id = $('#delete-id').val();
 
@@ -462,7 +462,7 @@ $(document).ready(function() {
             $.ajax({
                 url: `/api/clientes/${id}`,
                 method: 'DELETE',
-                success: function() {
+                success: function () {
                     $('#confirmDeleteModal').modal('hide');
                     loadClientes();
                     Swal.fire({
@@ -475,7 +475,7 @@ $(document).ready(function() {
                         showConfirmButton: false
                     });
                 },
-                error: function(error) {
+                error: function (error) {
                     alert(`Error al eliminar cliente: ${error.responseJSON.message}`);
                 }
             });
@@ -483,7 +483,7 @@ $(document).ready(function() {
     });
 
     // Initialize modal
-    $('#clienteModal').on('show.bs.modal', function(e) {
+    $('#clienteModal').on('show.bs.modal', function (e) {
         if (e.relatedTarget && !$(e.relatedTarget).hasClass('edit-cliente')) {
             $('#clienteModalLabel').text('Nuevo Cliente');
             $('#cliente-form').trigger('reset');

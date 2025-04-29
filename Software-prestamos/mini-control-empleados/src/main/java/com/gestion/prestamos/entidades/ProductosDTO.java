@@ -14,7 +14,6 @@ public class ProductosDTO {
     private String withholdingTaxRate;
     private Double taxRate;
 
-    // Getters y Setters
     public Long getId() {
         return id;
     }
