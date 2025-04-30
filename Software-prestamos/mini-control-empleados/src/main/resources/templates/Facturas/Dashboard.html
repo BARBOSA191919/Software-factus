@@ -51,7 +51,7 @@
             <div id="GlassmorphismSidenav"
                  class="w-52 h-full bg-gray-500/10 backdrop-blur-md border border-gray-400 flex flex-col transition-all duration-700 relative dark:bg-gray-800/10 dark:border-gray-700 ">
                 <!-- Header -->
-                <div class="flex items-center justify-between px-4 py-6">
+                <div class="flex items-center justify-between px-8 py-6">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                             <img th:if="${userPicture != null && !userPicture.isEmpty()}" th:src="${userPicture}"
@@ -82,10 +82,10 @@
                 </button>
 
                 <!-- Menus -->
-                <div class="flex-1 flex flex-col px-4 overflow-scroll scrollbar-hide">
+                <div class="flex-1 flex flex-col px-8 overflow-scroll scrollbar-hide">
                     <p class="text-xs font-semibold text-gray-600 mb-4 dark:text-dark-600">Menú</p>
 
-                    <div class="space-y-10  ">
+                    <div class="space-y-12  ">
                         <a href="#" id="dashboard-link"
                            class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
@@ -145,33 +145,31 @@
                     </div>
                     <p class="text-xs font-semibold text-gray-600 mt-4 mb-4 dark:text-dark-400">Modo</p>
                     <div class="space-y-3">
-
-                        <!-- Theme Toggle -->
-                        <div class="px-1 py-4 mt-auto">
+                        <!-- Theme Toggle and Logout -->
+                        <div class="px-1 py-1 mt-auto flex flex-col items-center">
+                            <!-- Theme Toggle -->
                             <button id="theme-toggle"
-                                    class="w-full flex items-center space-x-3 p-2 rounded-lg bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 transition-all duration-300"
+                                    class="w-31 flex items-center space-x-4 p-1 rounded-lg bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 transition-all duration-300"
                                     onclick="toggleDarkMode()">
-                                <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     stroke-width="1.5" stroke="currentColor"
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                      class="size-6 text-gray-800 dark:text-white">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M12 3v1m0 16v1m8.485-8.485h1M3.515 12H2.5m15.364-6.364l.707.707M5.636 18.364l.707.707m12.02 0l-.707.707M5.636 5.636l-.707.707M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/>
+                                          d="M12 3v2.25m0 16.5V19.5m8.25-7.5h2.25m-16.5 0H3.75m14.835-6.585l-1.59-1.59M6.915 18.915l-1.59-1.59m0-10.65l1.59-1.59m10.65 10.65l1.59-1.59M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
                                 </svg>
                                 <span id="theme-text"
                                       class="text-sm font-medium text-gray-800 dark:text-white GlassmorphismMenuText">Light Mode</span>
                             </button>
 
                             <!-- Logout -->
-
-                            <form id="logoutForm" class="mt-4" th:action="@{/logout}" method="post">
+                            <form id="logoutForm" class="mt-2 w-full flex justify-center" th:action="@{/logout}" method="post">
                                 <button type="button" onclick="confirmLogout()"
-                                        class="w-full flex items-center space-x-3 p-2 rounded-md bg-red-600 text-white hover:bg-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        class="w-32 flex items-center space-x-4 p-1 rounded-lg bg-red-600 hover:bg-red-700 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                         class="size-6 text-white">
                                         <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+                                              d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m6 0l-3-3m0 0l-3 3m3-3H15"/>
                                     </svg>
-                                    <span class="GlassmorphismMenuText">Log out</span>
+                                    <span class="text-sm font-medium text-white GlassmorphismMenuText">Log Out</span>
                                 </button>
                             </form>
                         </div>
@@ -179,6 +177,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Contenido principal -->
         <div class="col-md-10 content">
@@ -286,7 +285,8 @@
                 </div>
             </div>
 
-            <!-- Sección productos -->
+
+        <!-- Sección productos -->
             <div id="productos-content" class="content-section" style="display:none;">
                 <div class="header-section mb-6">
                     <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200">Gestión de

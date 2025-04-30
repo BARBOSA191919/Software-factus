@@ -128,3 +128,39 @@ window.confirmLogout = function () {
         }
     });
 };
+
+// Animación para los números
+document.addEventListener('DOMContentLoaded', function() {
+    // Valores simulados para demostración
+    animateNumber('total-clientes', 243);
+    animateNumber('total-productos', 158);
+    animateNumber('total-facturas', 427);
+
+    // Añadir efecto de clic a las tarjetas
+    document.querySelectorAll('.clickable-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            console.log(`Navegando a sección: ${section}`);
+            // Aquí iría la lógica para navegar a la sección correspondiente
+        });
+    });
+});
+
+function animateNumber(id, end) {
+    const element = document.getElementById(id);
+    const duration = 1500;
+    const start = 0;
+    const range = end - start;
+
+    let current = start;
+    const increment = end > start ? 1 : -1;
+    const stepTime = Math.abs(Math.floor(duration / range));
+
+    const timer = setInterval(function() {
+        current += increment;
+        element.textContent = current.toLocaleString();
+        if (current == end) {
+            clearInterval(timer);
+        }
+    }, stepTime);
+}
