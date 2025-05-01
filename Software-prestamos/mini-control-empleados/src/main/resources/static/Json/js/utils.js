@@ -129,38 +129,355 @@ window.confirmLogout = function () {
     });
 };
 
-// Animación para los números
-document.addEventListener('DOMContentLoaded', function() {
-    // Valores simulados para demostración
-    animateNumber('total-clientes', 243);
-    animateNumber('total-productos', 158);
-    animateNumber('total-facturas', 427);
+document.addEventListener('DOMContentLoaded', function () {
+    // Función para animar los contadores
+    function animateCounter(elementId, finalValue, duration = 2000) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
 
-    // Añadir efecto de clic a las tarjetas
-    document.querySelectorAll('.clickable-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const section = this.getAttribute('data-section');
-            console.log(`Navegando a sección: ${section}`);
-            // Aquí iría la lógica para navegar a la sección correspondiente
+        let startValue = 0;
+        const increment = finalValue / (duration / 16);
+        const timer = setInterval(() => {
+            startValue += increment;
+            if (startValue >= finalValue) {
+                clearInterval(timer);
+                element.textContent = finalValue;
+            } else {
+                element.textContent = Math.floor(startValue);
+            }
+        }, 16);
+    }
+
+    // Agregar efecto hover a las tarjetas
+    const cards = document.querySelectorAll('.clickable-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+            this.style.transition = 'all 0.3s ease';
         });
     });
-});
 
-function animateNumber(id, end) {
-    const element = document.getElementById(id);
-    const duration = 1500;
-    const start = 0;
-    const range = end - start;
+    // Cargar datos de resumen (clientes, productos y facturas)
+    function loadDashboardSummary() {
+        // Contador de clientes
+        $.ajax({
+            url: '/api/clientes/count',
+            method: 'GET',
+            success: function (totalClientes) {
+                setTimeout(() => {
+                    animateCounter('total-clientes', totalClientes || 0);
+                }, 500);
+            },
+            error: function (xhr) {
+                console.error('Error loading client count:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudo cargar el conteo de clientes'
+                });
+            }
+        });
 
-    let current = start;
-    const increment = end > start ? 1 : -1;
-    const stepTime = Math.abs(Math.floor(duration / range));
+        // Contador de productos
+        $.ajax({
+            url: '/api/productos/count',
+            method: 'GET',
+            success: function (totalProductos) {
+                setTimeout(() => {
+                    animateCounter('total-productos', totalProductos || 0);
+                }, 500);
+            },
+            error: function (xhr) {
+                console.error('Error loading product count:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudo cargar el conteo de productos'
+                });
+            }
+        });
 
-    const timer = setInterval(function() {
-        current += increment;
-        element.textContent = current.toLocaleString();
-        if (current == end) {
-            clearInterval(timer);
+        // Contador de facturas
+        $.ajax({
+            url: '/api/facturas/count',
+            method: 'GET',
+            success: function (totalFacturas) {
+                setTimeout(() => {
+                    animateCounter('total-facturas', totalFacturas || 0);
+                }, 500);
+            },
+            error: function (xhr) {
+                console.error('Error loading invoice count:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudo cargar el conteo de facturas'
+                });
+            }
+        });
+    }
+
+    // Variables para la paginación de clientes
+    let currentClientPage = 1;
+    const clientsPerPage = 8;
+    let allClients = [];
+
+    // Variables para la paginación de productos
+    let currentProductPage = 1;
+    const productsPerPage = 8;
+    let allProducts = [];
+
+    // Variables para la paginación de facturas
+    let currentFacturaPage = 1;
+    const facturasPerPage = 8;
+    let allFacturas = [];
+
+    // Función para renderizar clientes con paginación
+    function renderClients(clients, page) {
+        const tbody = $('#ultimos-clientes tbody');
+        tbody.empty();
+
+        if (clients.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="4" class="text-center">No hay clientes recientes</td>
+                </tr>
+            `);
+            updatePaginationControls('client', clients.length, page);
+            return;
         }
-    }, stepTime);
-}
+
+        const start = (page - 1) * clientsPerPage;
+        const end = start + clientsPerPage;
+        const paginatedClients = clients.slice(start, end);
+
+        paginatedClients.forEach(cliente => {
+            const facturaCount = cliente.facturaCount || 0;
+            tbody.append(`
+                <tr>
+                    <td>${cliente.nombre}</td>
+                    <td>${cliente.correo || 'N/A'}</td>
+                    <td>${facturaCount}</td>
+                    <td>
+                        <div class="dropdown">
+                          
+                        </div>
+                    </td>
+                </tr>
+            `);
+        });
+
+        updatePaginationControls('client', clients.length, page);
+
+        $('.edit-cliente').click(function () {
+            const id = $(this).data('id');
+            editCliente(id);
+        });
+        $('.delete-cliente').click(function () {
+            const id = $(this).data('id');
+            openDeleteModal('cliente', id);
+        });
+    }
+
+    // Función para renderizar productos con paginación
+    function renderProducts(products, page) {
+        const tbody = $('#productos-mas-vendidos tbody');
+        tbody.empty();
+
+        if (products.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="4" class="text-center">No hay productos disponibles</td>
+                </tr>
+            `);
+            updatePaginationControls('product', products.length, page);
+            return;
+        }
+
+        const start = (page - 1) * productsPerPage;
+        const end = start + productsPerPage;
+        const paginatedProducts = products.slice(start, end);
+
+        paginatedProducts.forEach(producto => {
+            tbody.append(`
+                <tr>
+                    <td>${producto.name}</td>
+                    <td>$${parseFloat(producto.price).toFixed(2)}</td>
+                    <td>${producto.salesCount || 0}</td>
+                    <td><span class="badge bg-${producto.excluded ? 'success' : 'danger'}">${producto.excluded ? 'Activo' : 'Inactivo'}</span></td>
+                </tr>
+            `);
+        });
+
+        updatePaginationControls('product', products.length, page);
+    }
+
+    // Función para renderizar facturas con paginación
+    function renderFacturas(facturas, page) {
+        const tbody = $('#facturas-recientes tbody');
+        tbody.empty();
+
+        if (facturas.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="4" class="text-center">No hay facturas recientes</td>
+                </tr>
+            `);
+            updatePaginationControls('factura', facturas.length, page);
+            return;
+        }
+
+        const start = (page - 1) * facturasPerPage;
+        const end = start + facturasPerPage;
+        const paginatedFacturas = facturas.slice(start, end);
+
+        paginatedFacturas.forEach(factura => {
+            const clienteNombre = factura.cliente ? factura.cliente.nombre : 'N/A';
+            const clienteCorreo = factura.cliente ? factura.cliente.correo || 'N/A' : 'N/A';
+            tbody.append(`
+                <tr>
+                    <td>${clienteNombre}</td>
+                    <td>${clienteCorreo}</td>
+                    <td>${factura.numero}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Acciones
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/api/facturas/descargar/${factura.id}" target="_blank">Descargar PDF</a></li>
+                                <li><a class="dropdown-item" href="/api/facturas/descargar-xml/${factura.numero}" target="_blank">Descargar XML</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `);
+        });
+
+        updatePaginationControls('factura', facturas.length, page);
+    }
+
+    // Función para crear controles de paginación
+    function updatePaginationControls(type, totalItems, currentPage) {
+        const totalPages = Math.ceil(totalItems / (type === 'client' ? clientsPerPage : type === 'product' ? productsPerPage : facturasPerPage));
+        const paginationContainer = $(`#${type}-pagination`);
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let pageLinks = '';
+        for (let i = 1; i <= totalPages; i++) {
+            pageLinks += `
+                <li class="page-item ${currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-type="${type}" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+
+        paginationContainer.append(`
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-type="${type}" data-page="${currentPage - 1}">Anterior</a>
+                    </li>
+                    ${pageLinks}
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-type="${type}" data-page="${currentPage + 1}">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        `);
+
+        paginationContainer.find('.page-link').click(function (e) {
+            e.preventDefault();
+            const page = parseInt($(this).data('page'));
+            const linkType = $(this).data('type');
+
+            if (linkType === 'client' && page > 0 && page <= totalPages) {
+                currentClientPage = page;
+                renderClients(allClients, currentClientPage);
+            } else if (linkType === 'product' && page > 0 && page <= totalPages) {
+                currentProductPage = page;
+                renderProducts(allProducts, currentProductPage);
+            } else if (linkType === 'factura' && page > 0 && page <= totalPages) {
+                currentFacturaPage = page;
+                renderFacturas(allFacturas, currentFacturaPage);
+            }
+        });
+    }
+
+    // Cargar últimos clientes
+    function loadRecentClients() {
+        $.ajax({
+            url: '/api/clientes?recent=true',
+            method: 'GET',
+            success: function (data) {
+                allClients = data.map(cliente => ({
+                    ...cliente,
+                    facturaCount: cliente.facturaCount || 0
+                }));
+                renderClients(allClients, currentClientPage);
+            },
+            error: function (xhr) {
+                console.error('Error loading recent clients:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudieron cargar los últimos clientes'
+                });
+            }
+        });
+    }
+
+    // Cargar productos más vendidos
+    function loadTopProducts() {
+        $.ajax({
+            url: '/api/productos/top',
+            method: 'GET',
+            success: function (data) {
+                allProducts = data;
+                renderProducts(allProducts, currentProductPage);
+            },
+            error: function (xhr) {
+                console.error('Error loading top products:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudieron cargar los productos más vendidos'
+                });
+            }
+        });
+    }
+
+    // Cargar facturas recientes
+    function loadRecentFacturas() {
+        $.ajax({
+            url: '/api/facturas?recent=true',
+            method: 'GET',
+            success: function (data) {
+                allFacturas = data;
+                renderFacturas(allFacturas, currentFacturaPage);
+            },
+            error: function (xhr) {
+                console.error('Error loading recent invoices:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.error || 'No se pudieron cargar las facturas recientes'
+                });
+            }
+        });
+    }
+
+    // Llamar las funciones al cargar el dashboard
+    loadDashboardSummary();
+    loadRecentClients();
+    loadTopProducts();
+    loadRecentFacturas();
+});

@@ -71,4 +71,7 @@ public class Producto {
         this.unitMeasureId = unitMeasureId;
     }
 
+    public void setActivo(boolean b) {
+
+    }
 }

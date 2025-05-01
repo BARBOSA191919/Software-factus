@@ -548,4 +548,51 @@ public class FacturaController {
                     .body(Map.of("error", "Error inesperado al eliminar la factura: " + e.getMessage()));
         }
     }
+
+
+    // Contar todas las facturas
+    @GetMapping("/count")
+    public ResponseEntity<Long> count() {
+        return ResponseEntity.ok(factusApiClient.count());
+    }
+
+    // Nuevo endpoint para facturas recientes
+    @GetMapping
+    @ResponseBody
+    public ResponseEntity<?> findRecentFacturas(@RequestParam(value = "recent", required = false) Boolean recent) {
+        try {
+            if (Boolean.TRUE.equals(recent)) {
+                List<Factura> recentFacturas = facturaRepository.findTopByOrderByFechaCreacionDesc(5); // Últimas 5 facturas
+                List<Map<String, Object>> simplifiedFacturas = new ArrayList<>();
+
+                for (Factura f : recentFacturas) {
+                    Map<String, Object> facturaMap = new HashMap<>();
+                    facturaMap.put("id", f.getId());
+                    facturaMap.put("numero", f.getNumber());
+                    facturaMap.put("referenceCode", f.getReferenceCode());
+                    facturaMap.put("status", f.getStatus());
+                    facturaMap.put("createdAt", f.getCreatedAt());
+                    facturaMap.put("total", f.getTotal());
+
+                    if (f.getCliente() != null) {
+                        Map<String, Object> clienteMap = new HashMap<>();
+                        clienteMap.put("id", f.getCliente().getId());
+                        clienteMap.put("nombre", f.getCliente().getNombre());
+                        clienteMap.put("correo", f.getCliente().getCorreo());
+                        facturaMap.put("cliente", clienteMap);
+                    }
+
+                    simplifiedFacturas.add(facturaMap);
+                }
+
+                return ResponseEntity.ok(simplifiedFacturas);
+            }
+            return listarFacturas(); // Si no se pasa recent=true, devolver todas las facturas
+        } catch (Exception e) {
+            logger.error("Error al obtener facturas recientes: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener facturas recientes: " + e.getMessage()));
+        }
+    }
+
 }

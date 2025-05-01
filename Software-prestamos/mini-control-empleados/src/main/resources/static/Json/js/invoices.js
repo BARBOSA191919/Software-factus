@@ -1034,7 +1034,7 @@ $(document).ready(function () {
         <td class="item-subtotal">$${subtotal.toFixed(2)}</td>
         <td class="item-tax">$${taxValue.toFixed(2)}</td>
         <td class="item-total">$${total.toFixed(2)}</td>
-        <td><button class="btn btn-sm btn-danger remove-item" data-index="${facturaItems.length - 1}"><i class="fas fa-trash"></i></button></td>
+        <td><button class="btn btn-sm  remove-item" data-index="${facturaItems.length - 1}"><i class="fas fa-trash"></i></button></td>
       </tr>
     `);
         updateFacturaTotals();

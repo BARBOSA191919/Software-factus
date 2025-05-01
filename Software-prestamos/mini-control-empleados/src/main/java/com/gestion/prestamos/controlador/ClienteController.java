@@ -15,14 +15,13 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
+    // Obtener todos los clientes o los recientes si se pasa recent=true
     @GetMapping
-    public List<Cliente> findAll() {
-        return clienteService.findAll();
-    }
-
-    @PostMapping
-    public Cliente create(@RequestBody Cliente cliente) {
-        return clienteService.save(cliente);
+    public ResponseEntity<List<Cliente>> findAll(@RequestParam(value = "recent", required = false) Boolean recent) {
+        if (Boolean.TRUE.equals(recent)) {
+            return ResponseEntity.ok(clienteService.findRecentClientes(5)); // Últimos 5 clientes
+        }
+        return ResponseEntity.ok(clienteService.findAll());
     }
 
     // Obtener un cliente por ID
@@ -33,6 +32,10 @@ public class ClienteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping
+    public Cliente create(@RequestBody Cliente cliente) {
+        return clienteService.save(cliente);
+    }
 
     @PutMapping("/{id}")
     public Cliente update(@PathVariable Long id, @RequestBody Cliente cliente) {
@@ -43,5 +46,11 @@ public class ClienteController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         clienteService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Nuevo endpoint para el conteo total de clientes
+    @GetMapping("/count")
+    public ResponseEntity<Long> count() {
+        return ResponseEntity.ok(clienteService.count());
     }
 }

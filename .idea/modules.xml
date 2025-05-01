@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Software Prestamos factus.iml" filepath="$PROJECT_DIR$/.idea/Software Prestamos factus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Software-prestamos/mini-control-empleados/mini-control-empleados.iml" filepath="$PROJECT_DIR$/Software-prestamos/mini-control-empleados/mini-control-empleados.iml" />
     </modules>
   </component>
 </project>

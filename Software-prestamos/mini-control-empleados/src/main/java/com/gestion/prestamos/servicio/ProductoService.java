@@ -23,9 +23,13 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
+
     public Producto update(Long id, Producto producto) {
-        producto.setId(id);
-        return productoRepository.save(producto);
+        if (productoRepository.existsById(id)) {
+            producto.setId(id);
+            return productoRepository.save(producto);
+        }
+        throw new RuntimeException("Producto no encontrado");
     }
 
     public void delete(Long id) {
@@ -45,11 +49,20 @@ public class ProductoService {
                     producto.setPrice(dto.getPrice());
                     producto.setExcluded(dto.getExcluded());
                     producto.setTaxRate(dto.getTaxRate());
+                    producto.setActivo(true); // Por defecto activo
                     return producto;
                 })
                 .toList();
 
-        // Guardar la lista de productos
         productoRepository.saveAll(productos);
+    }
+
+    // contar productos
+    public long count() {
+        return productoRepository.count();
+    }
+
+    public List<Object[]> findTopProductsWithSalesCount() {
+        return productoRepository.findTopProductsWithSalesCount();
     }
 }

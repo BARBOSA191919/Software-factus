@@ -154,6 +154,7 @@ public class FactusApiClient {
         }
     }
 
+
     public class FacturaMapper {
 
         public static FactusFacturaDTO convertirAFactusDTO(Factura factura) {
@@ -674,7 +675,17 @@ public class FactusApiClient {
         }
     }
 
+    public long count() {
+        return facturaRepository.count();
+    }
 
+    public List<Factura> findRecentFacturas(int limit) {
+        return facturaRepository.findTopByOrderByFechaCreacionDesc(limit);
+    }
+
+    public long countByClienteId(Long clienteId) {
+        return facturaRepository.countByClienteId(clienteId);
+    }
     @Transactional
     public String eliminarFactura(String referenceCode) {
         try {
@@ -730,4 +741,6 @@ public class FactusApiClient {
         }
     }
 }
+
+
 
