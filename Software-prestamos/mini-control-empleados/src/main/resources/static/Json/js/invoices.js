@@ -719,24 +719,37 @@ $(document).ready(function () {
                 $.ajax({
                     url: `/api/facturas/eliminar/${referenceCode}`,
                     method: 'DELETE',
-                    success: function () {
+                    success: function (response) {
                         Swal.fire({
+                            toast:true,
+                            position: 'top-end',
                             icon: 'success',
                             title: 'Éxito',
                             text: 'Factura eliminada correctamente',
-                            confirmButtonColor: '#28a745'
+                            timer:3000,
+                            showConfirmButton: false
                         }).then(() => {
                             loadFacturas();
                         });
                     },
                     error: function (xhr) {
                         Swal.close();
-                        let errorMessage = xhr.responseJSON?.error || `Error ${xhr.status}: ${xhr.statusText}`;
+                        let errorMessage;
+                        if (xhr.status === 409) {
+                            errorMessage = 'No se puede eliminar la factura porque está validada.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'Factura no encontrada.';
+                        } else {
+                            errorMessage = xhr.responseJSON?.error || `Error ${xhr.status}: ${xhr.statusText}`;
+                        }
                         Swal.fire({
+                            toast:true,
+                            position: 'top-end',
                             icon: 'error',
                             title: 'Error',
                             text: errorMessage,
-                            confirmButtonColor: '#3085d6'
+                            timer:2000,
+                            showConfirmButton: false
                         });
                     }
                 });

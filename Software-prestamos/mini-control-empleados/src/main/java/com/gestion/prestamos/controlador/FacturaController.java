@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.ParseException;
@@ -240,6 +241,75 @@ public class FacturaController {
         }
     }
 
+   // Endpoint para obtener los datos de una factura por referenceCode
+    @GetMapping("/{referenceCode}")
+    public ResponseEntity<?> obtenerFactura(@PathVariable String referenceCode) {
+        try {
+            logger.info("Obteniendo factura con referenceCode: {}", referenceCode);
+            if (referenceCode == null || referenceCode.isEmpty()) {
+                logger.error("El referenceCode de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El referenceCode de factura no es válido"));
+            }
+
+            Optional<Factura> facturaOpt = facturaRepository.findByReferenceCode(referenceCode);
+            if (!facturaOpt.isPresent()) {
+                logger.warn("Factura con referenceCode {} no encontrada", referenceCode);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada: " + referenceCode));
+            }
+
+            Factura factura = facturaOpt.get();
+            logger.info("Factura encontrada: {}", factura);
+            return ResponseEntity.ok(factura);
+        } catch (Exception e) {
+            logger.error("Error al obtener la factura con referenceCode {}: {}", referenceCode, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error inesperado al obtener la factura: " + e.getMessage()));
+        }
+    }
+
+    // Endpoint para actualizar una factura
+    @PutMapping("/editar/{referenceCode}")
+    @Transactional
+
+    public ResponseEntity<?> editarFactura(@PathVariable String referenceCode, @RequestBody Factura facturaActualizada) {
+        try {
+            logger.info("Iniciando edición para factura con referenceCode: {}", referenceCode);
+            if (referenceCode == null || referenceCode.isEmpty()) {
+                logger.error("El referenceCode de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El referenceCode de factura no es válido"));
+            }
+
+            Optional<Factura> facturaOpt = facturaRepository.findByReferenceCode(referenceCode);
+            if (!facturaOpt.isPresent()) {
+                logger.warn("Factura con referenceCode {} no encontrada", referenceCode);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada: " + referenceCode));
+            }
+
+            Factura factura = facturaOpt.get();
+
+            // Actualizar los campos permitidos
+            factura.setCliente(facturaActualizada.getCliente());
+            factura.setDocumentName(facturaActualizada.getDocumentName());
+            factura.setTotal(facturaActualizada.getTotal());
+            factura.setObservation(facturaActualizada.getObservation());
+            factura.setStatus(facturaActualizada.getStatus());
+
+            // Agrega otros campos que desees permitir editar
+            // Por ejemplo: factura.setStatus(facturaActualizada.getStatus());
+
+            facturaRepository.save(factura);
+            logger.info("Factura con referenceCode {} actualizada correctamente", referenceCode);
+            return ResponseEntity.ok(Map.of("message", "Factura actualizada correctamente", "factura", factura));
+        } catch (Exception e) {
+            logger.error("Error al actualizar la factura con referenceCode {}: {}", referenceCode, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error inesperado al actualizar la factura: " + e.getMessage()));
+        }
+    }
     @GetMapping(value = "/municipios.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> getMunicipios() {
@@ -524,32 +594,6 @@ public class FacturaController {
         }
     }
 
-    @DeleteMapping("/eliminar/{referenceCode}")
-    @ResponseBody
-    public ResponseEntity<?> eliminarFactura(@PathVariable String referenceCode) {
-        try {
-            logger.info("Iniciando eliminación para factura con referenceCode: {}", referenceCode);
-            if (referenceCode == null || referenceCode.isEmpty()) {
-                logger.error("El referenceCode de factura está vacío");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "El referenceCode de factura no es válido"));
-            }
-            logger.info("Eliminando factura con referenceCode: {}", referenceCode);
-            String respuesta = factusApiClient.eliminarFactura(referenceCode);
-            logger.info("Factura eliminada correctamente con referenceCode: {}", referenceCode);
-            return ResponseEntity.ok(Map.of("message", "Factura eliminada correctamente", "respuesta", respuesta));
-        } catch (RuntimeException e) {
-            logger.error("Error al eliminar la factura con referenceCode {}: {}", referenceCode, e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "No se pudo eliminar la factura: " + e.getMessage()));
-        } catch (Exception e) {
-            logger.error("Error inesperado al eliminar la factura con referenceCode {}: {}", referenceCode, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error inesperado al eliminar la factura: " + e.getMessage()));
-        }
-    }
-
-
     // Contar todas las facturas
     @GetMapping("/count")
     public ResponseEntity<Long> count() {
@@ -595,4 +639,32 @@ public class FacturaController {
         }
     }
 
+
+    @DeleteMapping("/eliminar/{referenceCode}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarFactura(@PathVariable String referenceCode) {
+        try {
+            logger.info("Iniciando eliminación para factura con referenceCode: {}", referenceCode);
+            if (referenceCode == null || referenceCode.isEmpty()) {
+                logger.error("El referenceCode de factura está vacío");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "El referenceCode de factura no es válido"));
+            }
+            logger.info("Eliminando factura con referenceCode: {}", referenceCode);
+            String respuesta = factusApiClient.eliminarFactura(referenceCode);
+            logger.info("Factura eliminada correctamente con referenceCode: {}", referenceCode);
+            return ResponseEntity.ok(Map.of("message", "Factura eliminada correctamente", "respuesta", respuesta));
+        } catch (RuntimeException e) {
+            logger.error("Error al eliminar la factura con referenceCode {}: {}", referenceCode, e.getMessage());
+            if (e.getMessage().contains("Factura no encontrada")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada: " + referenceCode));
+            } else if (e.getMessage().contains("está validada")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("error", "No se puede eliminar la factura porque está validada: " + referenceCode));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error inesperado al eliminar la factura: " + e.getMessage()));
+        }
+    }
 }

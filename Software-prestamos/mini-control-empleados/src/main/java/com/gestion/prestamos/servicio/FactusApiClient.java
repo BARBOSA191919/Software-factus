@@ -679,13 +679,6 @@ public class FactusApiClient {
         return facturaRepository.count();
     }
 
-    public List<Factura> findRecentFacturas(int limit) {
-        return facturaRepository.findTopByOrderByFechaCreacionDesc(limit);
-    }
-
-    public long countByClienteId(Long clienteId) {
-        return facturaRepository.countByClienteId(clienteId);
-    }
     @Transactional
     public String eliminarFactura(String referenceCode) {
         try {
@@ -718,10 +711,9 @@ public class FactusApiClient {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                // Actualizar estado en la base de datos local
-                factura.setStatus("ELIMINADA");
-                facturaRepository.save(factura);
-                logger.info("Factura {} eliminada exitosamente en Factus y actualizada localmente", referenceCode);
+                // Eliminar factura de la base de datos local
+                facturaRepository.delete(factura);
+                logger.info("Factura {} eliminada exitosamente en Factus y en la base de datos local", referenceCode);
                 return response.getBody();
             } else {
                 logger.error("Error al eliminar factura: {} - {}", response.getStatusCode(), response.getBody());
@@ -730,7 +722,17 @@ public class FactusApiClient {
         } catch (HttpClientErrorException e) {
             logger.error("Error HTTP al eliminar factura: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new RuntimeException("Factura no encontrada en Factus: " + referenceCode);
+                // Si la factura no existe en Factus, eliminarla localmente
+                Optional<Factura> facturaOpt = facturaRepository.findByReferenceCode(referenceCode);
+                if (facturaOpt.isPresent()) {
+                    facturaRepository.delete(facturaOpt.get());
+                    logger.info("Factura {} no encontrada en Factus, eliminada de la base de datos local", referenceCode);
+                    return "{\"message\": \"Factura no encontrada en Factus, eliminada localmente\"}";
+                }
+                throw new RuntimeException("Factura no encontrada en Factus ni localmente: " + referenceCode);
+            } else if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                // Manejar el caso de factura validada
+                throw new RuntimeException("No se puede eliminar la factura porque está validada: " + referenceCode);
             } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new RuntimeException("Error de autenticación: Token inválido o sin permisos");
             }

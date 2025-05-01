@@ -245,10 +245,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (clients.length === 0) {
             tbody.append(`
-                <tr>
-                    <td colspan="4" class="text-center">No hay clientes recientes</td>
-                </tr>
-            `);
+            <tr>
+                <td colspan="4" class="text-center">No hay clientes recientes</td>
+            </tr>
+        `);
             updatePaginationControls('client', clients.length, page);
             return;
         }
@@ -260,19 +260,21 @@ document.addEventListener('DOMContentLoaded', function () {
         paginatedClients.forEach(cliente => {
             const facturaCount = cliente.facturaCount || 0;
             tbody.append(`
-                <tr>
-                    <td>${cliente.nombre}</td>
-                    <td>${cliente.correo || 'N/A'}</td>
-                    <td>${facturaCount}</td>
-                    <td>
-                        <div class="dropdown">
-                          
-                        </div>
-                    </td>
-                </tr>
-            `);
+            <tr>
+                <td>${cliente.nombre}</td>
+                <td>${cliente.correo || 'N/A'}</td>
+                <td>${facturaCount}</td>
+                <td>
+                    <div class="dropdown">
+                      
+                    </div>
+                </td>
+            </tr>
+        `);
         });
 
+        // Añadir esta línea para actualizar los controles de paginación
+        updatePaginationControls('client', clients.length, page);
     }
 
     // Función para renderizar productos con paginación
