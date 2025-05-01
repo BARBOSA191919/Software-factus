@@ -3,10 +3,12 @@ package com.gestion.prestamos.controlador;
 import com.gestion.prestamos.entidades.Cliente;
 import com.gestion.prestamos.servicio.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -17,11 +19,16 @@ public class ClienteController {
 
     // Obtener todos los clientes o los recientes si se pasa recent=true
     @GetMapping
-    public ResponseEntity<List<Cliente>> findAll(@RequestParam(value = "recent", required = false) Boolean recent) {
-        if (Boolean.TRUE.equals(recent)) {
-            return ResponseEntity.ok(clienteService.findRecentClientes(5)); // Últimos 5 clientes
+    public ResponseEntity<?> findAll(@RequestParam(value = "recent", required = false) Boolean recent) {
+        try {
+            if (Boolean.TRUE.equals(recent)) {
+                return ResponseEntity.ok(clienteService.findRecentClientes(5)); // Últimos 5 clientes con facturaCount
+            }
+            return ResponseEntity.ok(clienteService.findAll());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener clientes: " + e.getMessage()));
         }
-        return ResponseEntity.ok(clienteService.findAll());
     }
 
     // Obtener un cliente por ID
@@ -33,13 +40,13 @@ public class ClienteController {
     }
 
     @PostMapping
-    public Cliente create(@RequestBody Cliente cliente) {
-        return clienteService.save(cliente);
+    public ResponseEntity<Cliente> create(@RequestBody Cliente cliente) {
+        return ResponseEntity.ok(clienteService.save(cliente));
     }
 
     @PutMapping("/{id}")
-    public Cliente update(@PathVariable Long id, @RequestBody Cliente cliente) {
-        return clienteService.update(id, cliente);
+    public ResponseEntity<Cliente> update(@PathVariable Long id, @RequestBody Cliente cliente) {
+        return ResponseEntity.ok(clienteService.update(id, cliente));
     }
 
     @DeleteMapping("/{id}")
@@ -48,7 +55,7 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
-    // Nuevo endpoint para el conteo total de clientes
+    // Contar todos los clientes
     @GetMapping("/count")
     public ResponseEntity<Long> count() {
         return ResponseEntity.ok(clienteService.count());

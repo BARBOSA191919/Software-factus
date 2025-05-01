@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
-    @Query(value = "SELECT c FROM Cliente c ORDER BY c.id DESC")
-    List<Cliente> findTopByOrderByIdDesc(int limit);
+    // Obtener los clientes más recientes con su conteo de facturas
+    @Query("SELECT c, COUNT(f.id) as facturaCount " +
+            "FROM Cliente c " +
+            "LEFT JOIN Factura f ON f.cliente.id = c.id " +
+            "GROUP BY c.id " +
+            "ORDER BY c.id DESC")
+    List<Object[]> findTopByOrderByIdDescWithFacturaCount(int limit);
 }

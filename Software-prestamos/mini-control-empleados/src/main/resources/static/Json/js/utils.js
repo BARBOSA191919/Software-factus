@@ -273,16 +273,6 @@ document.addEventListener('DOMContentLoaded', function () {
             `);
         });
 
-        updatePaginationControls('client', clients.length, page);
-
-        $('.edit-cliente').click(function () {
-            const id = $(this).data('id');
-            editCliente(id);
-        });
-        $('.delete-cliente').click(function () {
-            const id = $(this).data('id');
-            openDeleteModal('cliente', id);
-        });
     }
 
     // Función para renderizar productos con paginación
