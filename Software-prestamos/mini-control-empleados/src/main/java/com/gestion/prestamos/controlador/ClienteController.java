@@ -17,12 +17,11 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
-    // Obtener todos los clientes o los recientes si se pasa recent=true
     @GetMapping
     public ResponseEntity<?> findAll(@RequestParam(value = "recent", required = false) Boolean recent) {
         try {
             if (Boolean.TRUE.equals(recent)) {
-                return ResponseEntity.ok(clienteService.findRecentClientes(5)); // Últimos 5 clientes con facturaCount
+                return ResponseEntity.ok(clienteService.findRecentClientes(5));
             }
             return ResponseEntity.ok(clienteService.findAll());
         } catch (Exception e) {
@@ -31,7 +30,6 @@ public class ClienteController {
         }
     }
 
-    // Obtener un cliente por ID
     @GetMapping("/{id}")
     public ResponseEntity<Cliente> findById(@PathVariable Long id) {
         return clienteService.findById(id)
@@ -50,12 +48,19 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        clienteService.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            clienteService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al eliminar cliente: " + e.getMessage()));
+        }
     }
 
-    // Contar todos los clientes
     @GetMapping("/count")
     public ResponseEntity<Long> count() {
         return ResponseEntity.ok(clienteService.count());

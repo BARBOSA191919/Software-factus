@@ -11,15 +11,6 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "producto_id")
-    private Producto producto;
-
-    @ManyToOne
-    @JoinColumn(name = "factura_id")
-    @JsonBackReference
-    private Factura factura;
-
     private BigDecimal cantidad;
     private BigDecimal precio;
     private BigDecimal porcentajeDescuento;
@@ -27,28 +18,24 @@ public class Item {
     private BigDecimal iva;
     private BigDecimal total;
 
+    @ManyToOne
+    @JoinColumn(name = "producto_id")
+    private Producto producto;
+
+    @ManyToOne
+    @JoinColumn(name = "factura_id")
+    @JsonBackReference(value = "factura-item")
+    private Factura factura;
+
+    public Item() {
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Factura getFactura() {
-        return factura;
-    }
-
-    public void setFactura(Factura factura) {
-        this.factura = factura;
     }
 
     public BigDecimal getCantidad() {
@@ -97,5 +84,21 @@ public class Item {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
+        this.producto = producto;
+    }
+
+    public Factura getFactura() {
+        return factura;
+    }
+
+    public void setFactura(Factura factura) {
+        this.factura = factura;
     }
 }

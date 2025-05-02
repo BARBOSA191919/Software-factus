@@ -92,13 +92,11 @@ $(document).ready(function () {
                 });
             },
             error: function (xhr) {
-                $('#productos-table-body').html(`
-                    <tr>
-                        <td colspan="7" class="text-center text-danger">
-                            Error al cargar productos
-                        </td>
-                    </tr>
-                `);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los productos'
+                });
             }
         });
     }
@@ -224,6 +222,7 @@ $(document).ready(function () {
                         title: 'Éxito',
                         text: 'Producto actualizado correctamente',
                         timer: 2000,
+                        timerProgressBar: true,
                         showConfirmButton: false
                     });
                 },
@@ -251,6 +250,7 @@ $(document).ready(function () {
                         title: 'Éxito',
                         text: 'Producto creado correctamente',
                         timer: 2000,
+                        timerProgressBar: true,
                         showConfirmButton: false
                     });
                 },
@@ -294,40 +294,66 @@ $(document).ready(function () {
         });
     }
 
-    // Delete modal
+
+
     function openDeleteModal(type, id) {
-        $('#delete-type').val(type);
-        $('#delete-id').val(id);
-        $('#confirmDeleteModal').modal('show');
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: type === 'producto'
+                ? 'Eliminar este producto también eliminará todos los ítems asociados en las facturas. Esta acción no se puede deshacer.'
+                : type === 'cliente'
+                    ? 'Eliminar este cliente también eliminará todas sus facturas asociadas. Esta acción no se puede deshacer.'
+                    : 'Eliminar este elemento no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            timerProgressBar: true,
+            timer:6000,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const url = `/api/${type}s/${id}`;
+                $.ajax({
+                    url: url,
+                    method: 'DELETE',
+                    success: function () {
+                        if (type === 'producto') {
+                            loadProductos();
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: 'Producto y ítems asociados eliminados correctamente',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else if (type === 'cliente') {
+                            loadClientes();
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: 'Cliente y facturas asociadas eliminados correctamente',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.error || `Error al eliminar ${type}`
+                        });
+                    }
+                });
+            }
+        });
     }
-
-    $('#confirmar-eliminacion').click(function () {
-        const type = $('#delete-type').val();
-        const id = $('#delete-id').val();
-
-        if (type === 'producto') {
-            $.ajax({
-                url: `/api/productos/${id}`,
-                method: 'DELETE',
-                success: function () {
-                    $('#confirmDeleteModal').modal('hide');
-                    loadProductos();
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Producto eliminado correctamente',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                },
-                error: function (error) {
-                    alert(`Error al eliminar producto: ${error.responseJSON.message}`);
-                }
-            });
-        }
-    });
 
     // Initialize modal
     $('#productoModal').on('show.bs.modal', function (e) {

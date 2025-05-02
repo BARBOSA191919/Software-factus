@@ -101,6 +101,12 @@ public class FactusApiClient {
 
         // Asociar items y guardar localmente
         factura.getItems().forEach(item -> item.setFactura(factura));
+
+        // Asociar tributos también
+        if (factura.getTributos() != null) {
+            factura.getTributos().forEach(tributo -> tributo.setFactura(factura));
+        }
+
         facturaRepository.save(factura);
 
         // Convertir a DTO para Factus
@@ -129,9 +135,46 @@ public class FactusApiClient {
             System.out.println("Respuesta de Factus: " + response.getBody());
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
-                JsonNode rootNode = mapper.readTree(response.getBody());
-                // Cambiar de data.number a data.bill.number
-                String facturaNumber = rootNode.path("data").path("bill").path("number").asText();
+                String responseBody = response.getBody();
+                String facturaNumber;
+
+                try {
+                    // Safe parsing approach to avoid StreamConstraintsException
+                    int numberIndex = responseBody.indexOf("\"number\":\"");
+                    if (numberIndex >= 0) {
+                        int startIndex = numberIndex + 10; // length of "number":"
+                        int endIndex = responseBody.indexOf("\"", startIndex);
+                        if (endIndex > startIndex) {
+                            facturaNumber = responseBody.substring(startIndex, endIndex);
+                        } else {
+                            throw new RuntimeException("No se pudo extraer el número de factura de la respuesta");
+                        }
+                    } else {
+                        // Attempt to find bill.number path
+                        int billNumberIndex = responseBody.indexOf("\"bill\":{");
+                        if (billNumberIndex >= 0) {
+                            int numberStartIndex = responseBody.indexOf("\"number\":\"", billNumberIndex);
+                            if (numberStartIndex >= 0) {
+                                int valueStartIndex = numberStartIndex + 10;
+                                int valueEndIndex = responseBody.indexOf("\"", valueStartIndex);
+                                facturaNumber = responseBody.substring(valueStartIndex, valueEndIndex);
+                            } else {
+                                throw new RuntimeException("No se pudo encontrar el número de factura en la respuesta");
+                            }
+                        } else {
+                            throw new RuntimeException("No se pudo encontrar la sección 'bill' en la respuesta");
+                        }
+                    }
+                } catch (Exception e) {
+                    // Fallback to regex extraction
+                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"number\":\"([^\"]+)\"");
+                    java.util.regex.Matcher matcher = pattern.matcher(responseBody);
+                    if (matcher.find()) {
+                        facturaNumber = matcher.group(1);
+                    } else {
+                        throw new RuntimeException("No se pudo extraer el número de factura mediante regex: " + e.getMessage());
+                    }
+                }
 
                 if (facturaNumber == null || facturaNumber.isEmpty()) {
                     throw new RuntimeException("El número de factura devuelto por Factus es nulo o vacío");
@@ -147,8 +190,6 @@ public class FactusApiClient {
             }
         } catch (HttpClientErrorException e) {
             throw new RuntimeException("Error en la llamada a Factus: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(), e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error al parsear la respuesta de Factus: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error inesperado al crear la factura: " + e.getMessage(), e);
         }

@@ -704,7 +704,9 @@ $(document).ready(function () {
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
+            cancelButtonText: 'Cancelar',
+            timerProgressBar: true,
+            timer:4000,
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
@@ -726,7 +728,8 @@ $(document).ready(function () {
                             icon: 'success',
                             title: 'Éxito',
                             text: 'Factura eliminada correctamente',
-                            timer:3000,
+                            timer:4000,
+                            timerProgressBar: true,
                             showConfirmButton: false
                         }).then(() => {
                             loadFacturas();
@@ -1141,29 +1144,38 @@ $(document).ready(function () {
     }
 
 
-// Save invoice
     $('#guardar-factura').click(function () {
         if (facturaItems.length === 0) {
             Swal.fire({
+                toast: true,
+                position: 'top-end',
                 icon: 'error',
                 title: 'Error',
-                text: 'Debe agregar al menos un producto a la factura'
+                text: 'Debe agregar al menos un producto a la factura',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
             });
             return;
         }
         const clienteId = $('#factura-cliente').val();
         if (!clienteId) {
             Swal.fire({
+                toast: true,
+                position: 'top-end',
                 icon: 'error',
                 title: 'Error',
-                text: 'Debe seleccionar un cliente'
+                text: 'Debe seleccionar un cliente',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
             });
             return;
         }
+
         const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
         const id = $('#factura-id').val();
-        const totalIva = parseFloat($('#factura-iva-total').text().replace('$', ''));
-        const tributes = totalIva > 0 ? [{tribute_id: "01", rate: 19.0, amount: totalIva}] : [];
+        const totalIva = parseFloat($('#factura-iva-total').text().replace('$', '')) || 0;
         const factura = {
             cliente: {
                 id: clienteSeleccionado.id,
@@ -1177,18 +1189,18 @@ $(document).ready(function () {
                 municipioId: parseInt(clienteSeleccionado.municipioId) || null
             },
             formaPago: $('#factura-forma-pago').val(),
-            metodo: $('#factura-metodo-pago').val(),
+            metodo: $('#factura-metodo-pago').val(), // Matches @JsonProperty("metodo")
             createdAt: new Date().toISOString(),
             numberingRangeId: parseInt($('#factura-numbering-range-id').val()) || 128,
             referenceCode: $('#factura-reference-code').val(),
-            subtotal: parseFloat($('#factura-subtotal').text().replace('$', '')),
+            subtotal: parseFloat($('#factura-subtotal').text().replace('$', '')) || 0,
             totalIva: totalIva,
-            totalDescuento: parseFloat($('#factura-descuento-total').text().replace('$', '')),
-            total: parseFloat($('#factura-total').text().replace('$', '')),
+            totalDescuento: parseFloat($('#factura-descuento-total').text().replace('$', '')) || 0,
+            total: parseFloat($('#factura-total').text().replace('$', '')) || 0,
             municipio: parseInt($('#factura-municipio-id').val()) || null,
             fechaVencimiento: $('#factura-due-date').val() || "2025-05-01",
-            linesCount: facturaItems.length,
-            tributes: tributes,
+            // Changed from tributes to tributos to match the entity field name
+            tributos: totalIva > 0 ? [{ tributeId: "01", rate: 19.0, amount: totalIva }] : [],
             items: facturaItems.map(item => ({
                 producto: {
                     id: item.id,
@@ -1207,13 +1219,36 @@ $(document).ready(function () {
                 total: (item.price * item.quantity) - (item.price * item.quantity * (item.discount / 100)) + (item.price * item.quantity * (item.taxRate / 100))
             }))
         };
+
+        console.log('Factura payload:', factura);
+        console.log('Serialized JSON:', JSON.stringify(factura));
+
+        if (!factura.cliente.id || !factura.items.length || !factura.formaPago) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Error',
+                text: 'Faltan datos requeridos en la factura',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
         const url = id ? `/api/facturas/${id}` : '/api/facturas/crear';
         const method = id ? 'PUT' : 'POST';
+
         $.ajax({
             url: url,
             method: method,
             data: JSON.stringify(factura),
             contentType: 'application/json',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json' // Explicitly set Content-Type
+            },
             success: function (response) {
                 $('#facturaModal').modal('hide');
                 loadFacturas();
@@ -1224,19 +1259,27 @@ $(document).ready(function () {
                     title: 'Éxito',
                     text: id ? 'Factura actualizada con éxito' : `Factura creada con código ${factura.referenceCode}`,
                     timer: 3000,
+                    timerProgressBar: true,
                     showConfirmButton: false
                 });
+                if (!id) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { x: 0.5, y: 0.6 }
+                    });
+                }
             },
             error: function (xhr) {
+                console.error('Error response:', xhr.responseJSON);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: `Error al ${id ? 'actualizar' : 'crear'} factura: ${xhr.responseJSON?.error || 'Desconocido'}`
+                    text: `Error al ${id ? 'actualizar' : 'crear'} factura: ${xhr.responseJSON?.error || xhr.statusText}`
                 });
             }
         });
     });
-
 
     // Edit invoice
     function editFactura(id) {

@@ -1,7 +1,11 @@
 package com.gestion.prestamos.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Producto {
@@ -14,6 +18,10 @@ public class Producto {
     private String standardCodeId;
     private Double taxRate;
     private Boolean excluded;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Item> items = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -71,7 +79,17 @@ public class Producto {
         this.unitMeasureId = unitMeasureId;
     }
 
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
     public void setActivo(boolean b) {
+
+
 
     }
 }

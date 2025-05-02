@@ -360,6 +360,7 @@ $(document).ready(function () {
                         title: 'Éxito',
                         text: 'Cliente actualizado correctamente',
                         timer: 2000,
+                        timerProgressBar: true,
                         showConfirmButton: false
                     });
                 },
@@ -387,6 +388,7 @@ $(document).ready(function () {
                         title: 'Éxito',
                         text: 'Cliente creado correctamente',
                         timer: 2000,
+                        timerProgressBar: true,
                         showConfirmButton: false
                     });
                 },
@@ -447,40 +449,51 @@ $(document).ready(function () {
         });
     }
 
-    // Delete modal
+    // Dentro de $(document).ready(function () { ... })
+
     function openDeleteModal(type, id) {
         $('#delete-type').val(type);
         $('#delete-id').val(id);
-        $('#confirmDeleteModal').modal('show');
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Eliminar este cliente también eliminará todas sus facturas asociadas. Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            timer: 6000,
+            timerProgressBar: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/api/clientes/${id}`,
+                    method: 'DELETE',
+                    success: function () {
+                        loadClientes();
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: 'Cliente y facturas asociadas eliminados correctamente',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.error || 'Error al eliminar cliente'
+                        });
+                    }
+                });
+            }
+        });
     }
-
-    $('#confirmar-eliminacion').click(function () {
-        const type = $('#delete-type').val();
-        const id = $('#delete-id').val();
-
-        if (type === 'cliente') {
-            $.ajax({
-                url: `/api/clientes/${id}`,
-                method: 'DELETE',
-                success: function () {
-                    $('#confirmDeleteModal').modal('hide');
-                    loadClientes();
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Cliente eliminado correctamente',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                },
-                error: function (error) {
-                    alert(`Error al eliminar cliente: ${error.responseJSON.message}`);
-                }
-            });
-        }
-    });
 
     // Initialize modal
     $('#clienteModal').on('show.bs.modal', function (e) {
@@ -491,3 +504,4 @@ $(document).ready(function () {
         }
     });
 });
+

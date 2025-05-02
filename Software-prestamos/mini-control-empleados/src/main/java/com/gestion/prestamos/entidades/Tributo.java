@@ -1,5 +1,8 @@
 package com.gestion.prestamos.entidades;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 
@@ -9,13 +12,22 @@ public class Tributo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonProperty("tributeId")
     private String tributeId;
+
+    @JsonProperty("rate")
     private Double rate;
+
+    @JsonProperty("amount")
     private BigDecimal amount;
 
     @ManyToOne
     @JoinColumn(name = "factura_id")
+    @JsonBackReference(value = "factura-tributo")
     private Factura factura;
+
+    public Tributo() {
+    }
 
     public Long getId() {
         return id;

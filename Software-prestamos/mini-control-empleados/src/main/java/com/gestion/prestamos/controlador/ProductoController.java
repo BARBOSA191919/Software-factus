@@ -54,14 +54,6 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.update(id, producto));
     }
 
-    // Eliminar un producto
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        logger.info("Deleting product with id: {}", id);
-        productoService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
     // Obtener un producto por ID
     @GetMapping("/{id}")
     public ResponseEntity<Producto> findById(@PathVariable Long id) {
@@ -110,6 +102,24 @@ public class ProductoController {
             logger.error("Error fetching top products: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al cargar los productos más vendidos: " + e.getMessage()));
+        }
+    }
+
+    // Eliminar un producto
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            logger.info("Deleting product with id: {}", id);
+            productoService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            logger.error("Error deleting product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Unexpected error deleting product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al eliminar producto: " + e.getMessage()));
         }
     }
 }

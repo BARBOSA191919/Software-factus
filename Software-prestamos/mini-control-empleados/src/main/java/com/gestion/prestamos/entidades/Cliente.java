@@ -1,6 +1,11 @@
     package com.gestion.prestamos.entidades;
 
+    import com.fasterxml.jackson.annotation.JsonIgnore;
+    import com.fasterxml.jackson.annotation.JsonProperty;
+
     import javax.persistence.*;
+    import java.util.ArrayList;
+    import java.util.List;
 
     @Entity
     public class Cliente {
@@ -20,12 +25,19 @@
         @Column(name = "aplicaiva")
         private String aplicaIVA;
         private String legalOrganizationId;
+        @Column(name = "tribute_id")
+        @JsonProperty("tributeId")
         private String tributeId;
 
         private String company;
         private String tradeName;
         private String verificationDigit;
         private String idOrg;
+
+        @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+        @JsonIgnore // Evita serializar facturas
+        private List<Factura> facturas = new ArrayList<>();
+
 
         public Long getId() {
             return id;
@@ -161,5 +173,13 @@
 
         public void setMunicipioId(Integer municipioId) {
             this.municipioId = municipioId;
+        }
+
+        public List<Factura> getFacturas() {
+            return facturas;
+        }
+
+        public void setFacturas(List<Factura> facturas) {
+            this.facturas = facturas;
         }
     }

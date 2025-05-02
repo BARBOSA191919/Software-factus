@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,11 @@ public class ClienteService {
         throw new RuntimeException("Cliente no encontrado");
     }
 
+    @Transactional
     public void delete(Long id) {
-        logger.info("Deleting client with id: {}", id);
+        if (!clienteRepository.existsById(id)) {
+            throw new RuntimeException("Cliente no encontrado");
+        }
         clienteRepository.deleteById(id);
     }
 

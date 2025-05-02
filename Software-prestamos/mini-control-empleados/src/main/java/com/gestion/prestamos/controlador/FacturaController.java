@@ -1,6 +1,8 @@
 package com.gestion.prestamos.controlador;
 
 import com.gestion.prestamos.entidades.Factura;
+import com.gestion.prestamos.entidades.Item;
+import com.gestion.prestamos.entidades.Tributo;
 import com.gestion.prestamos.repositorios.FacturaRepository;
 import com.gestion.prestamos.servicio.FactusApiClient;
 import org.slf4j.Logger;
@@ -17,8 +19,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,12 +36,17 @@ import java.util.stream.Collectors;
 public class FacturaController {
 
     @Autowired
-    private FactusApiClient factusApiClient;
+    private final FactusApiClient factusApiClient;
     @Autowired
     private FacturaRepository facturaRepository;
 
+    public FacturaController(FactusApiClient factusApiClient) {
+        this.factusApiClient = factusApiClient;
+    }
+
     // Define el logger
     private static final Logger logger = LoggerFactory.getLogger(FacturaController.class);
+    private JEditorPane request;
 
     @GetMapping("/listar")
     @ResponseBody
@@ -111,32 +122,35 @@ public class FacturaController {
         return "/Facturas/Dashboard";
     }
 
-    @PostMapping("/crear")
+    @PostMapping(value = "/crear", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> crearFactura(@RequestBody Factura factura) {
+    public ResponseEntity<?> crearFactura(@RequestBody Factura factura, HttpServletRequest request) {
+        logger.info("Received Content-Type: {}", request.getContentType());
+        logger.info("Factura payload: {}", factura);
         try {
             if (factura == null) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("error", "La factura no puede ser nula"));
             }
-
             factusApiClient.eliminarTodasLasFacturasPendientes();
             String respuestaFactus = factusApiClient.crearFacturaEnFactus(factura);
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Factura creada exitosamente");
             response.put("id", factura.getId());
-            response.put("referenceCode", factura.getNumber());
+            response.put("referenceCode", factura.getReferenceCode());
             response.put("respuestaFactus", respuestaFactus);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Invalid argument: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            logger.error("Runtime error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "Error al crear la factura: " + e.getMessage()));
         }
     }
+
 
     @GetMapping("/{id}")
     @ResponseBody
@@ -272,7 +286,6 @@ public class FacturaController {
     // Endpoint para actualizar una factura
     @PutMapping("/editar/{referenceCode}")
     @Transactional
-
     public ResponseEntity<?> editarFactura(@PathVariable String referenceCode, @RequestBody Factura facturaActualizada) {
         try {
             logger.info("Iniciando edición para factura con referenceCode: {}", referenceCode);
@@ -291,25 +304,75 @@ public class FacturaController {
 
             Factura factura = facturaOpt.get();
 
-            // Actualizar los campos permitidos
+            // Validar estado para evitar edición de facturas validadas
+            if ("CREADA".equals(factura.getStatus())) {
+                logger.warn("Intento de editar factura validada con referenceCode: {}", referenceCode);
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("error", "No se puede editar la factura porque está validada: " + referenceCode));
+            }
+
+            // Actualizar campos principales
             factura.setCliente(facturaActualizada.getCliente());
             factura.setDocumentName(facturaActualizada.getDocumentName());
-            factura.setTotal(facturaActualizada.getTotal());
+            factura.setFormaPago(facturaActualizada.getFormaPago());
+            factura.setMetodoPago(facturaActualizada.getMetodoPago());
             factura.setObservation(facturaActualizada.getObservation());
-            factura.setStatus(facturaActualizada.getStatus());
+            factura.setCreatedAt(facturaActualizada.getCreatedAt());
+            factura.setFechaVencimiento(facturaActualizada.getFechaVencimiento());
+            factura.setMunicipio(facturaActualizada.getMunicipio());
+            factura.setInc(facturaActualizada.getInc());
 
-            // Agrega otros campos que desees permitir editar
-            // Por ejemplo: factura.setStatus(facturaActualizada.getStatus());
+            // Actualizar ítems
+            factura.getItems().clear();
+            for (Item item : facturaActualizada.getItems()) {
+                item.setFactura(factura);
+                factura.getItems().add(item);
+            }
 
+            // Actualizar tributos
+            factura.getTributos().clear();
+            for (Tributo tributo : facturaActualizada.getTributos()) {
+                tributo.setFactura(factura);
+                factura.getTributos().add(tributo);
+            }
+
+            // Recalcular totales
+            BigDecimal subtotal = BigDecimal.ZERO;
+            BigDecimal totalIva = BigDecimal.ZERO;
+            BigDecimal totalDescuento = BigDecimal.ZERO;
+            BigDecimal total = BigDecimal.ZERO;
+
+            for (Item item : factura.getItems()) {
+                BigDecimal itemSubtotal = item.getPrecio().multiply(item.getCantidad());
+                BigDecimal itemDescuento = itemSubtotal.multiply(item.getPorcentajeDescuento().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                BigDecimal itemIva = itemSubtotal.multiply(item.getIva().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                BigDecimal itemTotal = itemSubtotal.subtract(itemDescuento).add(itemIva);
+
+                subtotal = subtotal.add(itemSubtotal);
+                totalDescuento = totalDescuento.add(itemDescuento);
+                totalIva = totalIva.add(itemIva);
+                total = total.add(itemTotal);
+
+                item.setSubtotal(itemSubtotal);
+                item.setTotal(itemTotal);
+            }
+
+            factura.setSubtotal(subtotal);
+            factura.setTotalIva(totalIva);
+            factura.setTotalDescuento(totalDescuento);
+            factura.setTotal(total);
+
+            // Guardar cambios
             facturaRepository.save(factura);
             logger.info("Factura con referenceCode {} actualizada correctamente", referenceCode);
             return ResponseEntity.ok(Map.of("message", "Factura actualizada correctamente", "factura", factura));
         } catch (Exception e) {
-            logger.error("Error al actualizar la factura con referenceCode {}: {}", referenceCode, e.getMessage());
+            logger.error("Error al actualizar la factura con referenceCode {}: {}", referenceCode, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error inesperado al actualizar la factura: " + e.getMessage()));
         }
     }
+
     @GetMapping(value = "/municipios.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> getMunicipios() {

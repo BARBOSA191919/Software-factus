@@ -22,15 +22,14 @@ public class Factura {
     private String graphicRepresentationName;
     private String formaPago;
     @JsonProperty("metodo")
-    @Column(name = "metodo_pago")
     private String metodoPago;
     private Date createdAt;
-
 
     @Column(name = "municipio")
     private Integer municipio;
 
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "factura-tributo") // Changed the reference value
     private List<Tributo> tributos = new ArrayList<>();
 
     @Column(name = "fecha_vencimiento")
@@ -39,7 +38,6 @@ public class Factura {
 
     @Column(name = "inc")
     private BigDecimal inc;
-
 
     private String document;
     @Column(name = "numbering_range_id")
@@ -54,11 +52,11 @@ public class Factura {
     private BigDecimal total;
 
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value = "factura-item")
     private List<Item> items = new ArrayList<>();
 
     public Factura() {
@@ -70,6 +68,11 @@ public class Factura {
     public void addItem(Item item) {
         items.add(item);
         item.setFactura(this);
+    }
+
+    public void addTributo(Tributo tributo) {
+        tributos.add(tributo);
+        tributo.setFactura(this);
     }
 
     public Long getId() {
@@ -103,7 +106,6 @@ public class Factura {
     public void setNumber(String number) {
         this.number = number;
     }
-
 
     public Integer getMunicipio() {
         return municipio;
@@ -192,7 +194,6 @@ public class Factura {
     public void setTotal(BigDecimal total) {
         this.total = total;
     }
-
 
     public Cliente getCliente() {
         return cliente;
