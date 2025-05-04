@@ -587,13 +587,14 @@
                 <a href="https://app.factus.com.co/login" target="_blank" class="forgot-link">¿Olvidó su contraseña?</a>
             </div>
 
-			<!--boton de google -->
 
-			<button type="submit" class="login-button">
+            <!-- Botón regular de inicio de sesión -->
+            <button type="submit" class="login-button" style="background-color: #4285f4; color: white; border: none; border-radius: 4px; padding: 12px 24px; font-size: 16px; cursor: pointer;">
                 Iniciar Sesión
             </button>
+            
             <div class="google-login" style="margin-top: 20px; text-align: center;">
-                <a href="/oauth2/authorization/google" class="google-btn"
+                <a href="/oauth2/authorization/google" class="google-btn" onclick="openCenteredWindow(this.href); return false;"
                    style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: #333; font-size: 14px; font-weight: 500; transition: all 0.3s ease;">
                     <img src="https://cdn-icons-png.flaticon.com/32/281/281764.png" alt="Google Logo"
                          style="width: 20px; height: 20px; margin-right: 10px;">
@@ -665,6 +666,49 @@
             });
         });
     });
+
+
+    // Función que abre una ventana centrada y maneja la redirección
+    function openCenteredWindow(url) {
+        // Dimensiones de la ventana emergente
+        const width = 600;
+        const height = 800;
+
+        // Calcular la posición para centrar la ventana
+        const left = (screen.width / 2) - (width / 2);
+        const top = (screen.height / 2) - (height / 2);
+
+        // Abrir la ventana emergente centrada
+        const popupWindow = window.open(url, 'loginWindow', `width=${width},height=${height},scrollbars=yes,resizable=yes,left=${left},top=${top}`);
+
+        // Comprobar periódicamente si se ha completado la autenticación
+        const checkWindowStatus = setInterval(function() {
+            try {
+                // Si la ventana está cerrada o ha cambiado de URL (completado el login)
+                if (popupWindow.closed || popupWindow.location.href.includes('/success')) {
+                    clearInterval(checkWindowStatus);
+
+                    // Si la ventana no está cerrada, obtenemos cualquier información necesaria
+                    if (!popupWindow.closed) {
+                        // Podríamos obtener algún token o información del usuario si es necesario
+                        // const authData = popupWindow.someData;
+
+                        // Cerrar la ventana emergente
+                        popupWindow.close();
+                    }
+
+                    // Recargar la página principal o redirigir según sea necesario
+                    window.location.reload();
+                }
+            } catch(e) {
+                // Si hay un error de acceso (por ejemplo, redirección a otro dominio)
+                // No hacemos nada, simplemente esperamos
+            }
+        }, 500);
+
+        // Prevenir el comportamiento por defecto del enlace
+        return false;
+    }
 </script>
 
 </body>
