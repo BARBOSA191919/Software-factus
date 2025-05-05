@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Autenticación Exitosa</title>
+</head>
+<body>
+<script>
+    // Verificar si la ventana tiene un opener (es una ventana emergente)
+    if (window.opener) {
+        // Enviar mensaje a la ventana principal
+        window.opener.postMessage({
+            googleAuthSuccess: true,
+            redirectUrl: '/api/facturas/crear'
+        }, window.location.origin);
+
+        // Cerrar la ventana emergente
+        window.close();
+    } else {
+        // Si no es una ventana emergente, redirigir directamente
+        window.location.href = '/api/facturas/crear';
+    }
+</script>
+</body>
+</html>

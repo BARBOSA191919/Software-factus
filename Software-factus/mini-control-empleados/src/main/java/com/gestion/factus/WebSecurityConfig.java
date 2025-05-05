@@ -38,14 +38,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.headers().frameOptions().sameOrigin();
         http
                 .authorizeRequests()
-                .antMatchers("/", "/login").permitAll()
-                .antMatchers("/api/productos/**").authenticated()
-                .antMatchers("/api/clientes/**").authenticated()
-                .antMatchers("/facturas/**").authenticated()
-                .antMatchers("/api/facturas/**").authenticated()
-                .antMatchers("/", "/login", "/css/**", "/js/**").permitAll()
-                .antMatchers("/id/*").authenticated()
-
+                .antMatchers("/", "/login", "/css/**", "/js/**", "/oauth2/success").permitAll()
+                .antMatchers("/api/productos/**", "/api/clientes/**", "/facturas/**", "/api/facturas/**", "/id/*").authenticated()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -55,14 +49,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .oauth2Login()
                 .loginPage("/login")
-                .defaultSuccessUrl("/api/facturas/crear", true)
+                .defaultSuccessUrl("/oauth2/success", true) // Redirige a /oauth2/success
                 .and()
                 .logout()
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
                 .and()
-                .csrf().disable();
-        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-
+                .csrf().disable(); // Considera habilitar CSRF en producción
     }
 }

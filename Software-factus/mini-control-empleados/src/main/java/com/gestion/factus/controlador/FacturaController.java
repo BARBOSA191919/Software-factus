@@ -216,44 +216,6 @@ public class FacturaController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarFacturaRest(@PathVariable Long id, @RequestBody Map<String, Object> facturaData) {
-        try {
-            // Find existing factura
-            Optional<Factura> facturaOptional = facturaRepository.findById(id);
-            if (!facturaOptional.isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Factura factura = facturaOptional.get();
-
-
-            // Set date from JSON "fecha" field if present
-            if (facturaData.containsKey("fecha") && facturaData.get("fecha") != null) {
-                String fechaStr = (String) facturaData.get("fecha");
-                if (!fechaStr.isEmpty()) {
-                    try {
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        Date fecha = format.parse(fechaStr);
-                        factura.setCreatedAt(fecha); // Update createdAt with the fecha value
-                    } catch (ParseException e) {
-                        // Handle date parsing error
-                        return ResponseEntity.badRequest().body("Formato de fecha inválido");
-                    }
-                }
-            }
-
-            // ... update other fields ...
-
-            String respuesta = factusApiClient.actualizarFacturaEnFactus(id, factura);
-            return ResponseEntity.ok(respuesta);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al actualizar la factura: " + e.getMessage());
-        }
-    }
-
    // Endpoint para obtener los datos de una factura por referenceCode
     @GetMapping("/{referenceCode}")
     public ResponseEntity<?> obtenerFactura(@PathVariable String referenceCode) {
@@ -303,27 +265,37 @@ public class FacturaController {
 
             Factura factura = facturaOpt.get();
 
-            // Validar estado para evitar edición de facturas validadas
+            // Validar estado
             if ("CREADA".equals(factura.getStatus())) {
                 logger.warn("Intento de editar factura validada con referenceCode: {}", referenceCode);
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(Map.of("error", "No se puede editar la factura porque está validada: " + referenceCode));
             }
 
+            // Validar datos de entrada
+            if (facturaActualizada.getCliente() == null || facturaActualizada.getItems().isEmpty()) {
+                logger.error("Faltan datos requeridos: cliente o ítems");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "La factura debe tener un cliente y al menos un ítem"));
+            }
+
             // Actualizar campos principales
             factura.setCliente(facturaActualizada.getCliente());
-            factura.setDocumentName(facturaActualizada.getDocumentName());
             factura.setFormaPago(facturaActualizada.getFormaPago());
             factura.setMetodoPago(facturaActualizada.getMetodoPago());
-            factura.setObservation(facturaActualizada.getObservation());
             factura.setCreatedAt(facturaActualizada.getCreatedAt());
             factura.setFechaVencimiento(facturaActualizada.getFechaVencimiento());
             factura.setMunicipio(facturaActualizada.getMunicipio());
-            factura.setInc(facturaActualizada.getInc());
+            factura.setNumberingRangeId(facturaActualizada.getNumberingRangeId());
 
             // Actualizar ítems
             factura.getItems().clear();
             for (Item item : facturaActualizada.getItems()) {
+                if (item.getProducto() == null || item.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
+                    logger.error("Ítem inválido: producto nulo o cantidad no válida");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "Ítem inválido: debe tener un producto y una cantidad válida"));
+                }
                 item.setFactura(factura);
                 factura.getItems().add(item);
             }
@@ -353,6 +325,7 @@ public class FacturaController {
                 total = total.add(itemTotal);
 
                 item.setSubtotal(itemSubtotal);
+                item.setIva(itemIva);
                 item.setTotal(itemTotal);
             }
 
@@ -363,8 +336,16 @@ public class FacturaController {
 
             // Guardar cambios
             facturaRepository.save(factura);
-            logger.info("Factura con referenceCode {} actualizada correctamente", referenceCode);
-            return ResponseEntity.ok(Map.of("message", "Factura actualizada correctamente", "factura", factura));
+
+            // Opcional: Actualizar en Factus
+            String respuestaFactus = factusApiClient.actualizarFacturaEnFactus(factura.getId(), factura);
+            logger.info("Factura con referenceCode {} actualizada correctamente. Respuesta Factus: {}", referenceCode, respuestaFactus);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Factura actualizada correctamente",
+                    "factura", factura,
+                    "respuestaFactus", respuestaFactus
+            ));
         } catch (Exception e) {
             logger.error("Error al actualizar la factura con referenceCode {}: {}", referenceCode, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
