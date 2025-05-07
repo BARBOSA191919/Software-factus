@@ -77,43 +77,43 @@ http://localhost:8080/login
 
 1. Login:
 
-![Image](https://github.com/user-attachments/assets/5f6402ee-00ee-4471-8459-a63748a4c841)
+!(https://github.com/user-attachments/assets/5f6402ee-00ee-4471-8459-a63748a4c841)
 
 2. Interfaz de Google :
 
-![Image](https://github.com/user-attachments/assets/73bf6692-58c5-42fd-82cc-5f55091b481a)
+!(https://github.com/user-attachments/assets/73bf6692-58c5-42fd-82cc-5f55091b481a)
 
 3.Panel oscuro principal :
 
-![Image](https://github.com/user-attachments/assets/5a78a391-650c-4c27-aea7-ef42cd42adce)
+!(https://github.com/user-attachments/assets/5a78a391-650c-4c27-aea7-ef42cd42adce)
 
 4. panel oscuro de productos:
 
-![Image](https://github.com/user-attachments/assets/6b6a34fd-7e8a-4a8b-927e-b2adb113dd22)
+!(https://github.com/user-attachments/assets/6b6a34fd-7e8a-4a8b-927e-b2adb113dd22)
 
 5. Panel oscuro de clientes:
 
-![Image](https://github.com/user-attachments/assets/1e71dd77-f0bd-4bf0-9940-85b971beb9b7)
+!(https://github.com/user-attachments/assets/1e71dd77-f0bd-4bf0-9940-85b971beb9b7)
 
 6. Panel oscuro de facturas:
 
-![Image](https://github.com/user-attachments/assets/c109a606-07a3-49c1-966e-a630fb87e0c7)
+!(https://github.com/user-attachments/assets/c109a606-07a3-49c1-966e-a630fb87e0c7)
 
 7. Modal de producto: 
 
-![Image](https://github.com/user-attachments/assets/ff085d30-1f3e-48c3-a83d-0f71d04c4873)
+!(https://github.com/user-attachments/assets/ff085d30-1f3e-48c3-a83d-0f71d04c4873)
 
 8. Modal de cliente: 
 
-![Image](https://github.com/user-attachments/assets/aad9891a-52bd-4210-8ce6-6ba8bba3f7fd)
+!(https://github.com/user-attachments/assets/aad9891a-52bd-4210-8ce6-6ba8bba3f7fd)
 
 9. Modal de factura: 
 
-![Image](https://github.com/user-attachments/assets/5fbceec5-51e3-44c6-9e77-7b5f3a51bccf)
+!(https://github.com/user-attachments/assets/5fbceec5-51e3-44c6-9e77-7b5f3a51bccf)
 
 10. Creación de factura
 
-![Image](https://github.com/user-attachments/assets/d368c676-99ff-4416-b280-cc468722c472)
+!(https://github.com/user-attachments/assets/d368c676-99ff-4416-b280-cc468722c472)
 
 🔒 Licencia
 Este proyecto está protegido por una licencia propietaria. Todos los derechos reservados © 2025 BARBOSA191919.
