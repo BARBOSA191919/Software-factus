@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     padding: 12px 20px;
-    color: #e2e8f0;
+    color: #4b5563; /* Neutral color for light mode */
     font-weight: 500;
     border-radius: 8px;
     margin: 4px 10px;
@@ -11,14 +11,29 @@
     position: relative;
 }
 
+.dark .nav-link {
+    color: #d1d5db; /* Light color for dark mode */
+}
+
 .nav-link i {
     margin-right: 10px;
     font-size: 1.2rem;
+    color: #4b5563; /* Neutral icon color for light mode */
+    transition: color 0.3s ease;
+}
+
+.dark .nav-link i {
+    color: #d1d5db; /* Light icon color for dark mode */
 }
 
 .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background-color: #f1f5f9; /* Light hover background */
+    color: #2d3748; /* Darker text on hover */
+}
+
+.dark .nav-link:hover {
+    background-color: #334155; /* Dark hover background */
+    color: #ffffff; /* White text on hover */
 }
 
 .nav-link::before {
@@ -28,8 +43,12 @@
     bottom: 0;
     height: 2px;
     width: 0;
-    background-color: white;
+    background-color: #2563eb; /* Blue underline for light mode */
     transition: width 0.3s ease;
+}
+
+.dark .nav-link::before {
+    background-color: #60a5fa; /* Lighter blue for dark mode */
 }
 
 .nav-link:hover::before {
@@ -37,14 +56,23 @@
 }
 
 .nav-link.active::before {
-    background-color: #1e3a8a;
+    background-color: #1e3a8a; /* Dark blue for active state */
     width: 100%;
 }
 
+.dark .nav-link.active::before {
+    background-color: #3b82f6; /* Lighter blue for active state in dark mode */
+}
+
 .nav-link.active {
-    background-color: #ffffff;
-    color: #27282b;
+    background-color: #f1f5f9; /* Light background for active state */
+    color: #1e3a8a; /* Dark blue text */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark .nav-link.active {
+    background-color: #334155; /* Dark background for active state */
+    color: #3b82f6; /* Light blue text */
 }
 
 /* User Info */
@@ -53,12 +81,23 @@
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
-    border: 2px solid #ffffff;
+    border: 2px solid #ffffff; /* White border for light mode */
+    transition: border-color 0.5s ease;
+}
+
+.dark .user-info img {
+    border: 2px solid #1e293b; /* Dark border for dark mode */
 }
 
 .user-info span {
     font-weight: 500;
     font-size: 1rem;
+    color: #2d3748; /* Dark text for light mode */
+    transition: color 0.5s ease;
+}
+
+.dark .user-info span {
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 /* Logout Form */
@@ -73,10 +112,16 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    background: #dc2626; /* Red background for light mode */
     transition: background-color 0.2s ease;
+}
+
+.dark #logoutForm .btn-danger {
+    background: #b91c1c; /* Darker red for dark mode */
 }
 
 #logoutForm .btn-danger i {
     margin-right: 10px;
     font-size: 1.2rem;
+    color: #ffffff; /* White icon */
 }

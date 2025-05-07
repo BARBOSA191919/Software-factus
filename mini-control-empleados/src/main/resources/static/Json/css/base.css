@@ -1,0 +1,62 @@
+/* General Reset and Base Styles */
+body {
+    font-family: 'Monospace', 'Inter', -apple-system, BlinkMacSystemFont, 'Poppins', Roboto, sans-serif;
+    letter-spacing: 0.2px;
+    transition: background-color 0.5s ease;
+    background-color: #f0f4f8;
+}
+
+.dark body {
+    background-color: rgb(32, 37, 48);
+}
+
+html, body {
+    background-color: white;
+    transition: all 0.5s ease;
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6, .factus-footer h3 {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    width: 100%;
+}
+
+/* Utility Classes */
+.text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Content Container */
+.container-fluid {
+    padding: 0;
+}
+
+.content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+    position: relative;
+    transition: margin-left 0.3s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+        padding: 16px;
+    }
+}

@@ -13,6 +13,7 @@ $(document).ready(function () {
         $('.content-section').hide();
         $('#clientes-content').show();
         loadClientes(); // Load client table
+
     });
 
     // Load municipalities

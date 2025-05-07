@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,7 +147,6 @@ public class FacturaController {
                     .body(Collections.singletonMap("error", "Error al crear la factura: " + e.getMessage()));
         }
     }
-
 
     @GetMapping("/{id}")
     @ResponseBody
@@ -279,6 +276,20 @@ public class FacturaController {
                         .body(Map.of("error", "La factura debe tener un cliente y al menos un ítem"));
             }
 
+            // Validar productos
+            for (Item item : facturaActualizada.getItems()) {
+                if (item.getProducto() == null || item.getProducto().getId() == null) {
+                    logger.error("Producto inválido en ítem");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "Ítem inválido: el producto debe tener un ID válido"));
+                }
+                if (item.getProducto().getTaxRate() == null) {
+                    logger.error("Tasa de IVA inválida en producto ID: {}", item.getProducto().getId());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "El producto debe tener una tasa de IVA válida"));
+                }
+            }
+
             // Actualizar campos principales
             factura.setCliente(facturaActualizada.getCliente());
             factura.setFormaPago(facturaActualizada.getFormaPago());
@@ -291,11 +302,6 @@ public class FacturaController {
             // Actualizar ítems
             factura.getItems().clear();
             for (Item item : facturaActualizada.getItems()) {
-                if (item.getProducto() == null || item.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
-                    logger.error("Ítem inválido: producto nulo o cantidad no válida");
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("error", "Ítem inválido: debe tener un producto y una cantidad válida"));
-                }
                 item.setFactura(factura);
                 factura.getItems().add(item);
             }
@@ -315,8 +321,11 @@ public class FacturaController {
 
             for (Item item : factura.getItems()) {
                 BigDecimal itemSubtotal = item.getPrecio().multiply(item.getCantidad());
-                BigDecimal itemDescuento = itemSubtotal.multiply(item.getPorcentajeDescuento().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
-                BigDecimal itemIva = itemSubtotal.multiply(item.getIva().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                BigDecimal itemDescuento = itemSubtotal.multiply(
+                        item.getPorcentajeDescuento().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                BigDecimal taxRate = new BigDecimal(item.getProducto().getTaxRate());
+                BigDecimal itemIva = itemSubtotal.multiply(
+                        taxRate.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
                 BigDecimal itemTotal = itemSubtotal.subtract(itemDescuento).add(itemIva);
 
                 subtotal = subtotal.add(itemSubtotal);
@@ -455,99 +464,66 @@ public class FacturaController {
     @ResponseBody
     public ResponseEntity<?> verFactura(@PathVariable Long id) {
         try {
-            // Primero obtener la factura de tu base de datos local
             Optional<Factura> facturaOpt = facturaRepository.findById(id);
             if (!facturaOpt.isPresent()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Factura no encontrada");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Factura no encontrada"));
             }
 
             Factura factura = facturaOpt.get();
+            Map<String, Object> facturaMap = new HashMap<>();
+            facturaMap.put("id", factura.getId());
+            facturaMap.put("numero", factura.getNumber());
+            facturaMap.put("referenceCode", factura.getReferenceCode());
+            facturaMap.put("formaPago", factura.getFormaPago());
+            facturaMap.put("metodoPago", factura.getMetodoPago());
+            facturaMap.put("documentName", factura.getDocumentName());
+            facturaMap.put("graphicRepresentationName", factura.getGraphicRepresentationName());
+            facturaMap.put("status", factura.getStatus());
+            facturaMap.put("createdAt", factura.getCreatedAt());
+            facturaMap.put("subtotal", factura.getSubtotal());
+            facturaMap.put("totalIva", factura.getTotalIva());
+            facturaMap.put("totalDescuento", factura.getTotalDescuento());
+            facturaMap.put("total", factura.getTotal());
+            facturaMap.put("municipio", factura.getMunicipio());
+            facturaMap.put("fechaVencimiento", factura.getFechaVencimiento());
+            facturaMap.put("inc", factura.getInc());
 
-            // Verificar si la factura ya ha sido procesada en Factus
-            if (factura.getStatus() != null && factura.getStatus().equals("CREADA")) {
-                try {
-                    // Si la factura está ya creada en Factus, intenta obtener los detalles
-                    Map<String, Object> facturaDetalle = factusApiClient.obtenerDetalleFactura(id);
-
-                    // Asegúrate de incluir referenceCode y formaPago, incluso si no vienen de Factus
-                    facturaDetalle.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
-                    facturaDetalle.put("formaPago", factura.getFormaPago());
-                    facturaDetalle.put("metodoPago", factura.getMetodoPago());
-
-                    // Agregar los ítems de la factura local al detalle
-                    facturaDetalle.put("items", factura.getItems().stream().map(item -> {
-                        Map<String, Object> itemMap = new HashMap<>();
-                        itemMap.put("id", item.getId());
-                        itemMap.put("producto", item.getProducto().getName());
-                        itemMap.put("cantidad", item.getCantidad());
-                        itemMap.put("precio", item.getPrecio());
-                        itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
-                        itemMap.put("subtotal", item.getSubtotal());
-                        itemMap.put("iva", item.getIva());
-                        itemMap.put("total", item.getTotal());
-                        return itemMap;
-                    }).collect(Collectors.toList()));
-
-                    return ResponseEntity.ok(facturaDetalle);
-                } catch (Exception e) {
-                    // Si hay error al obtener la factura de Factus, devuelve información básica con ítems locales
-                    Map<String, Object> facturaBasica = new HashMap<>();
-                    facturaBasica.put("id", factura.getId());
-                    facturaBasica.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
-                    facturaBasica.put("documentName", factura.getDocumentName());
-                    facturaBasica.put("status", factura.getStatus());
-                    facturaBasica.put("createdAt", factura.getCreatedAt());
-                    facturaBasica.put("formaPago", factura.getFormaPago());
-                    facturaBasica.put("metodoPago", factura.getMetodoPago());
-                    facturaBasica.put("items", factura.getItems().stream().map(item -> {
-                        Map<String, Object> itemMap = new HashMap<>();
-                        itemMap.put("id", item.getId());
-                        itemMap.put("producto", item.getProducto().getName());
-                        itemMap.put("cantidad", item.getCantidad());
-                        itemMap.put("precio", item.getPrecio());
-                        itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
-                        itemMap.put("subtotal", item.getSubtotal());
-                        itemMap.put("iva", item.getIva());
-                        itemMap.put("total", item.getTotal());
-                        return itemMap;
-                    }).collect(Collectors.toList()));
-                    facturaBasica.put("error", "No se pudo obtener detalle completo de Factus: " + e.getMessage());
-
-                    return ResponseEntity.ok(facturaBasica);
-                }
-            } else {
-                // Si la factura no ha sido procesada en Factus, devuelve información básica con ítems locales
-                Map<String, Object> facturaBasica = new HashMap<>();
-                facturaBasica.put("id", factura.getId());
-                facturaBasica.put("referenceCode", factura.getReferenceCode() != null ? factura.getReferenceCode() : factura.getNumber());
-                facturaBasica.put("documentName", factura.getDocumentName());
-                facturaBasica.put("status", factura.getStatus() != null ? factura.getStatus() : "PENDIENTE");
-                facturaBasica.put("createdAt", factura.getCreatedAt());
-                facturaBasica.put("formaPago", factura.getFormaPago());
-                facturaBasica.put("metodoPago", factura.getMetodoPago());
-                facturaBasica.put("items", factura.getItems().stream().map(item -> {
-                    Map<String, Object> itemMap = new HashMap<>();
-                    itemMap.put("id", item.getId());
-                    itemMap.put("producto", item.getProducto().getName());
-                    itemMap.put("cantidad", item.getCantidad());
-                    itemMap.put("precio", item.getPrecio());
-                    itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
-                    itemMap.put("subtotal", item.getSubtotal());
-                    itemMap.put("iva", item.getIva());
-                    itemMap.put("total", item.getTotal());
-                    return itemMap;
-                }).collect(Collectors.toList()));
-                facturaBasica.put("mensaje", "Esta factura aún no ha sido procesada en el sistema Factus");
-
-                return ResponseEntity.ok(facturaBasica);
+            if (factura.getCliente() != null) {
+                Map<String, Object> clienteMap = new HashMap<>();
+                clienteMap.put("id", factura.getCliente().getId());
+                clienteMap.put("nombre", factura.getCliente().getNombre());
+                clienteMap.put("identificacion", factura.getCliente().getIdentificacion());
+                clienteMap.put("correo", factura.getCliente().getCorreo());
+                clienteMap.put("direccion", factura.getCliente().getDireccion());
+                clienteMap.put("municipioId", factura.getCliente().getMunicipioId());
+                facturaMap.put("cliente", clienteMap);
             }
+
+            facturaMap.put("items", factura.getItems().stream().map(item -> {
+                Map<String, Object> itemMap = new HashMap<>();
+                itemMap.put("id", item.getId());
+                itemMap.put("productoId", item.getProducto().getId()); // Agregar productoId
+                itemMap.put("producto", item.getProducto().getName());
+                itemMap.put("cantidad", item.getCantidad());
+                itemMap.put("precio", item.getPrecio());
+                itemMap.put("taxRate", item.getProducto().getTaxRate()); // Agregar taxRate
+                itemMap.put("porcentajeDescuento", item.getPorcentajeDescuento());
+                itemMap.put("subtotal", item.getSubtotal());
+                itemMap.put("iva", item.getIva());
+                itemMap.put("total", item.getTotal());
+                return itemMap;
+            }).collect(Collectors.toList()));
+
+            facturaMap.put("tributos", factura.getTributos().stream()
+                    .map(t -> Map.of("tributeId", t.getTributeId(), "rate", t.getRate(), "amount", t.getAmount()))
+                    .collect(Collectors.toList()));
+
+            return ResponseEntity.ok(facturaMap);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error al obtener la factura: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            logger.error("Error al obtener factura {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener la factura: " + e.getMessage()));
         }
     }
 
@@ -605,7 +581,6 @@ public class FacturaController {
         }
     }
 
-
     @GetMapping("/factura-download/{number}")
     public ResponseEntity<?> descargarFacturaPdf(@PathVariable String number) {
         try {
@@ -637,13 +612,11 @@ public class FacturaController {
         }
     }
 
-    // Contar todas las facturas
     @GetMapping("/count")
     public ResponseEntity<Long> count() {
         return ResponseEntity.ok(factusApiClient.count());
     }
 
-    // Nuevo endpoint para facturas recientes
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> findRecentFacturas(@RequestParam(value = "recent", required = false) Boolean recent) {
@@ -681,7 +654,6 @@ public class FacturaController {
                     .body(Map.of("error", "Error al obtener facturas recientes: " + e.getMessage()));
         }
     }
-
 
     @DeleteMapping("/eliminar/{referenceCode}")
     @ResponseBody

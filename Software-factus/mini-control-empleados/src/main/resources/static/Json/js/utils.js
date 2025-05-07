@@ -1,10 +1,9 @@
-/* ------------------Glassmorphism Sidebar------------------ */
 const GlassmorphismSidenav = document.getElementById("GlassmorphismSidenav");
 const GlassmorphismPname = document.getElementById("GlassmorphismPname");
 const GlassmorphismTogglericon = document.getElementById("GlassmorphismTogglericon");
 const GlassmorphismMenuText = document.querySelectorAll(".GlassmorphismMenuText");
 const themeText = document.getElementById("theme-text");
-const themeIcon = document.getElementById("theme-icon");
+const themeIcon = document.querySelector("#theme-toggle svg"); // Apuntamos al SVG dentro del botón
 
 let GlassmorphismisCollapsed = false;
 let isDarkMode = false;
@@ -32,24 +31,30 @@ function GlassmorphismToggle() {
     }
 }
 
-// Dark mode toggle function
 function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     document.documentElement.classList.toggle('dark');
 
-    if (isDarkMode) {
-        themeText.textContent = "Dark Mode";
-        themeIcon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-white">
+    if (themeText && themeIcon) {
+        if (isDarkMode) {
+            themeText.textContent = "Dark Mode";
+            themeIcon.innerHTML = `
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>`;
+            `;
+        } else {
+            themeText.textContent = "Light Mode";
+            themeIcon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 16.5V19.5m8.25-7.5h2.25m-16.5 0H3.75m14.835-6.585l-1.59-1.59M6.915 18.915l-1.59-1.59m0-10.65l1.59-1.59m10.65 10.65l1.59-1.59M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+            `;
+        }
     } else {
-        themeText.textContent = "Light Mode";
-        themeIcon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-800">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.485-8.485h1M3.515 12H2.5m15.364-6.364l.707.707M5.636 18.364l.707.707m12.02 0l-.707.707M5.636 5.636l-.707.707M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" />
-            </svg>`;
+        console.warn("Elementos theme-text o theme-icon no encontrados en el DOM.");
     }
+
+    // Forzar reinicialización de Select2
+    $('.select2').each(function () {
+        $(this).select2('destroy').select2();
+    });
 }
 
 // Confetti function
@@ -225,12 +230,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Variables para la paginación de clientes
     let currentClientPage = 1;
-    const clientsPerPage = 8;
+    const clientsPerPage = 7;
     let allClients = [];
 
     // Variables para la paginación de productos
     let currentProductPage = 1;
-    const productsPerPage = 8;
+    const productsPerPage = 9;
     let allProducts = [];
 
     // Variables para la paginación de facturas

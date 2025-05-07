@@ -37,12 +37,11 @@
     <link rel="stylesheet" th:href="@{/Json/css/components.css}">
     <link rel="stylesheet" th:href="@{/Json/css/navigation.css}">
     <link rel="stylesheet" th:href="@{/Json/css/clients.css}">
+    <link rel="stylesheet" th:href="@{/Json/css/products.css}">
     <link rel="stylesheet" th:href="@{/Json/css/invoices.css}">
-
 </head>
 
 <body>
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-2  position-fixed  top-0 h-100" style="z-index: 1000;">
@@ -82,12 +81,12 @@
                 </button>
 
                 <!-- Menus -->
-                <div class="flex-1 flex flex-col px-8 overflow-scroll scrollbar-hide">
+                <div class="flex-1 flex flex-col px-6 overflow-scroll scrollbar-hide">
                     <p class="text-xs font-semibold text-gray-600 mb-4 dark:text-dark-600">Menú</p>
 
                     <div class="space-y-12  ">
                         <a href="#" id="dashboard-link"
-                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
+                           class="flex items-center space-x-2  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
                                  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -181,7 +180,7 @@
             <div id="dashboard-content" class="content-section p-4">
                 <!-- Header del Dashboard -->
                 <div class="d-flex justify-content-between align-items-center mb-6">
-                    <h2 class="font-montserrat fw-bold fs-3">
+                    <h2 class="font-montserrat fw-bold fs-3 ">
                         <i class="fas fa-chart-line me-4 text-primary"></i>Dashboard
                     </h2>
                 </div>
@@ -194,7 +193,7 @@
                                 <div class="d-flex justify-content-between mb-3">
                                     <div>
                                         <h5 class="card-title text-primary fw-bold mb-1">Clientes</h5>
-                                        <p class="text-muted small mb-0">Total de clientes registrados</p>
+                                        <p class="text-gray small mb-0 ">Total de clientes registrados</p>
                                     </div>
                                     <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
                                         <i class="fas fa-users fa-lg text-primary"></i>
@@ -211,7 +210,7 @@
                                 <div class="d-flex justify-content-between mb-3">
                                     <div>
                                         <h5 class="card-title text-success fw-bold mb-1">Productos</h5>
-                                        <p class="text-muted small mb-0">Total de productos activos</p>
+                                        <p class="text-gray small mb-0">Total de productos activos</p>
                                     </div>
                                     <div class="rounded-circle bg-success bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
                                         <i class="fas fa-box fa-lg text-success"></i>
@@ -227,7 +226,7 @@
                                 <div class="d-flex justify-content-between mb-3">
                                     <div>
                                         <h5 class="card-title text-info fw-bold mb-1">Facturas</h5>
-                                        <p class="text-muted small mb-0">Total de facturas emitidas</p>
+                                        <p class="text-gray small mb-0">Total de facturas emitidas</p>
                                     </div>
                                     <div class="rounded-circle bg-info bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
                                         <i class="fas fa-file-invoice-dollar fa-lg text-info"></i>
@@ -244,7 +243,7 @@
                     <!-- Productos más vendidos -->
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-0 py-3">
+                            <div class="card-header  border-0 py-3">
                                 <h5 class="card-title mb-0 fw-bold  ">  <i class="fas fa-box fa-lg text-success  me-2"></i>Productos Más Vendidos</h5>
                             </div>
                             <div class="card-body p-0">
@@ -262,9 +261,8 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="card-footer bg-white border-0 py-3">
-                                <div id="product-pagination" class="mb-3"></div>
-                                <a href="#" class="btn btn-light btn-sm w-100" id="ver-todos-productos">Ver todos los productos</a>
+                            <div class="card-footer  border-0 py-3">
+                                <div id="product-pagination" class="mb-2"></div>
                             </div>
                         </div>
                     </div>
@@ -272,35 +270,34 @@
                     <!-- Últimos clientes -->
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-0 py-3">
+                            <div class="card-header  border-0 py-3">
                                 <h5 class="card-title mb-0 fw-bold">    <i class="fas fa-users fa-lg text-primary me-2"></i>Últimos Clientes</h5>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0" id="ultimos-clientes">
-                                        <thead class="table-light">
+                                    <table class="table table-hover mb-0 custom-recent-clients-table" id="ultimos-clientes">                                        <thead class="table-light">
                                         <tr>
                                             <th scope="col">Cliente</th>
                                             <th scope="col">Email</th>
                                             <th scope="col">Facturas</th>
+                                            <th scope="col"></th>
+
                                         </tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
-                            <div class="card-footer bg-white border-0 py-3">
+                            <div class="card-footer  border-0 py-3">
                                 <div id="client-pagination" class="mb-3"></div>
-                                <a href="#" class="btn btn-light btn-sm w-100" id="ver-todos-clientes">Ver todos los clientes</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-
         <!-- Sección productos -->
-            <div id="productos-content" class="content-section" style="display:none;">
+            <div id="productos-content" class="content-section">
                 <div class="header-section mb-6">
                     <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"> <i class="bi bi-boxes me-2 text-primary"></i>Gestión de
                         Productos</h2>
@@ -323,7 +320,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover custom-products-table">
                         <thead class="table-dark">
                         <tr>
                             <th scope="col">ID</th>
@@ -344,7 +341,7 @@
             </div>
 
             <!-- Sección clientes -->
-            <div id="clientes-content" class="content-section" style="display:none;">
+            <div id="clientes-content" class="content-section" >
                 <div class="header-section mb-6">
                     <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"><i class="bi bi-person-check me-2 text-primary"></i>Gestión de Clientes</h2>
                     <div class="flex justify-end">
@@ -365,34 +362,33 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Tipo de cliente</th>
-                            <th>Identificación</th>
-                            <th>Teléfono</th>
-                            <th>Correo</th>
-                            <th>Id legal</th>
-                            <th>Id tributo</th>
-                            <th>Iva</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody id="clientes-table-body">
-                        <!-- Se llenará con JavaScript -->
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table id="clientes-table" class="table table-striped table-hover custom-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Identificación</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Org Legal</th>
+                                <th>Tributo</th>
+                                <th>IVA</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="clientes-table-body"></tbody>
+                        </table>
+                    </div>
                     <nav aria-label="Client pagination">
                         <ul class="pagination justify-content-center" id="clientes-pagination"></ul>
                     </nav>
-                </div>
+
             </div>
 
             <!-- Sección Facturas -->
-            <div id="facturas-content" class="content-section" style="display:none;">
+            <div id="facturas-content" class="content-section" >
                 <div class="header-section mb-6">
                     <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Gestión de Facturas</h2>
                     <div class="flex justify-end">
@@ -415,7 +411,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover custom-invoices-table">
                         <thead class="table-dark">
                         <tr>
                             <th>Número</th>
@@ -838,8 +834,8 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped mb-0">
-                                            <thead class="table-dark">
+                                        <table class="table table-sm table-striped mb-0 custom-invoice-items-table" id="factura-items-table">
+                                            <thead>
                                             <tr>
                                                 <th class="small">Producto</th>
                                                 <th class="small">Unidad</th>
@@ -909,6 +905,8 @@
                 <button type="button" class="btn btn-info btn-sm text-white" id="guardar-factura"><i
                         class="fas fa-save"></i> Guardar Factura
                 </button>
+                <button type="button" class="btn btn-primary btn-sm" id="editar-factura" style="display: none;">
+                    <i class="fas fa-edit"></i> Editar Factura</button>
             </div>
         </div>
     </div>
@@ -930,7 +928,7 @@
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" class="form-control" id="buscar-producto"
-                               placeholder="Buscar por nombre o código">
+                               placeholder="Buscar por nombre o código ">
                     </div>
                 </div>
                 <div class="table-responsive">

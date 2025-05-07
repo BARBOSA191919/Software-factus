@@ -19,6 +19,13 @@
     border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.dark #facturaModal .modal-content {
+    background-color: #1e293b; /* Dark background for dark mode */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Stronger shadow for dark mode */
 }
 
 #facturaModal .modal-header {
@@ -30,36 +37,73 @@
 }
 
 #facturaModal .modal-footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #eaeaea;
+    background-color: #f8f9fa; /* Light footer background */
+    border-top: 1px solid #eaeaea; /* Light border */
     border-bottom-left-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.dark #facturaModal .modal-footer {
+    background-color: #2d3748; /* Dark footer background */
+    border-top: 1px solid #4b5563; /* Dark border */
 }
 
 #facturaModal .card {
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-    border: 1px solid #eaeaea;
+    border: 1px solid #eaeaea; /* Light border */
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.dark #facturaModal .card {
+    border: 1px solid #4b5563; /* Dark border */
+    background-color: #1e293b; /* Dark background for dark mode */
 }
 
 #facturaModal .card-header {
     font-weight: 600;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid #eaeaea; /* Light border */
+    background-color: #f8f9fa; /* Light header background */
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.dark #facturaModal .card-header {
+    border-bottom: 1px solid #4b5563; /* Dark border */
+    background-color: #2d3748; /* Dark header background */
 }
 
 #facturaModal .card-header.bg-light {
     background: linear-gradient(to right, #f8f9fa, #ffffff);
 }
 
+.dark #facturaModal .card-header.bg-light {
+    background: linear-gradient(to right, #2d3748, #1e293b); /* Dark gradient for dark mode */
+}
+
 #facturaModal .card-header.bg-dark {
     background: linear-gradient(to right, var(--primary-color), var(--dark-color));
 }
 
+.dark #facturaModal .card-header.bg-dark {
+    background: linear-gradient(to right, #1e40af, #1e293b); /* Adjusted for dark mode */
+}
+
 #facturaModal .form-control-sm,
 #facturaModal .form-select-sm {
-    border: 1px solid #ced4da;
+    border: 1px solid #ced4da; /* Light border */
     border-radius: var(--border-radius);
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    background-color: #ffffff; /* White background for light mode */
+    color: #2d3748; /* Dark text for light mode */
+}
+
+.dark #facturaModal .form-control-sm,
+.dark #facturaModal .form-select-sm {
+    border: 1px solid #4b5563; /* Dark border */
+    background-color: #2d3748; /* Dark background for dark mode */
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 #facturaModal .form-control-sm:focus,
@@ -69,13 +113,22 @@
 }
 
 #facturaModal .form-control-sm:read-only {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa; /* Light read-only background */
     cursor: not-allowed;
+}
+
+.dark #facturaModal .form-control-sm:read-only {
+    background-color: #2d3748; /* Dark read-only background */
 }
 
 #facturaModal .form-label {
     color: var(--text-color);
     font-weight: 500;
+    transition: color 0.5s ease;
+}
+
+.dark #facturaModal .form-label {
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 #facturaModal .fas {
@@ -90,10 +143,20 @@
 
 #facturaModal .table {
     margin-bottom: 0;
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease;
+}
+
+.dark #facturaModal .table {
+    background-color: #1e293b; /* Dark background for dark mode */
 }
 
 #facturaModal .table-dark {
     background: var(--primary-color);
+}
+
+.dark #facturaModal .table-dark {
+    background: #1e40af; /* Lighter primary color for dark mode */
 }
 
 #facturaModal .table th {
@@ -101,11 +164,60 @@
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.5px;
+    color: white;
+}
+
+#facturaModal .table td {
+    color: #2d3748; /* Dark text for light mode */
+    transition: color 0.5s ease;
+}
+
+.dark #facturaModal .table td {
+    color: #d1d5db; /* Light text for dark mode */
+}
+
+#facturaModal .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(236, 240, 241, 0.5); /* Light striped background */
+}
+
+.dark #facturaModal .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(45, 55, 72, 0.5); /* Dark striped background */
 }
 
 #facturaModal .table-responsive {
     border-radius: var(--border-radius);
     overflow: hidden;
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light track */
+    border-radius: 10px;
+}
+
+.dark #facturaModal .table-responsive::-webkit-scrollbar-track {
+    background: #2d3748; /* Dark track */
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-thumb {
+    background: #bdc3c7; /* Light thumb */
+    border-radius: 10px;
+}
+
+.dark #facturaModal .table-responsive::-webkit-scrollbar-thumb {
+    background: #4b5563; /* Dark thumb */
+}
+
+#facturaModal .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #95a5a6;
+}
+
+.dark #facturaModal .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* Lighter hover for dark mode */
 }
 
 #facturaModal .btn-sm {
@@ -142,6 +254,15 @@
 #facturaModal #factura-total {
     font-family: 'Roboto Mono', monospace, sans-serif;
     text-align: right;
+    color: var(--text-color);
+    transition: color 0.5s ease;
+}
+
+.dark #facturaModal #factura-subtotal,
+.dark #facturaModal #factura-iva-total,
+.dark #facturaModal #factura-descuento-total,
+.dark #facturaModal #factura-total {
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 #facturaModal #factura-total {
@@ -156,6 +277,15 @@
 #facturaModal #cliente-municipios {
     font-weight: 400;
     color: var(--text-color);
+    transition: color 0.5s ease;
+}
+
+.dark #facturaModal #cliente-nombres,
+.dark #facturaModal #cliente-correos,
+.dark #facturaModal #cliente-telefonos,
+.dark #facturaModal #cliente-direcciones,
+.dark #facturaModal #cliente-municipios {
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 #facturaModal #factura-status {
@@ -173,8 +303,8 @@
     border-top: 1px dashed rgba(0, 0, 0, 0.1);
 }
 
-#facturaModal .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(236, 240, 241, 0.5);
+.dark #facturaModal .summary-card hr {
+    border-top: 1px dashed rgba(255, 255, 255, 0.1); /* Light dashed line for dark mode */
 }
 
 #facturaModal .btn-eliminar-item {
@@ -198,25 +328,6 @@
     transform: translateY(0);
 }
 
-#facturaModal .table-responsive::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-#facturaModal .table-responsive::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-#facturaModal .table-responsive::-webkit-scrollbar-thumb {
-    background: #bdc3c7;
-    border-radius: 10px;
-}
-
-#facturaModal .table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #95a5a6;
-}
-
 @media (max-width: 992px) {
     #facturaModal .modal-dialog {
         max-width: 95%;
@@ -228,6 +339,12 @@
     font-family: Arial, sans-serif;
     max-width: 95%;
     padding: 1rem;
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .swal2-popup {
+    background-color: #1e293b; /* Dark background for dark mode */
 }
 
 .swal-invoice-modal .invoice-container {
@@ -238,10 +355,22 @@
 .swal-invoice-modal .card {
     border-radius: 6px;
     margin-bottom: 10px;
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .card {
+    background-color: #2d3748; /* Dark background for dark mode */
 }
 
 .swal-invoice-modal .card-header {
     padding: 6px 12px;
+    background-color: #f8f9fa; /* Light header background */
+    transition: background-color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .card-header {
+    background-color: #1e293b; /* Dark header background */
 }
 
 .swal-invoice-modal .card-body {
@@ -251,12 +380,25 @@
 .swal-invoice-modal .table {
     margin-bottom: 0;
     font-size: 12px;
+    background-color: #ffffff; /* White background for light mode */
+    transition: background-color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .table {
+    background-color: #1e293b; /* Dark background for dark mode */
 }
 
 .swal-invoice-modal .table th,
 .swal-invoice-modal .table td {
     padding: 6px 8px;
     vertical-align: middle;
+    color: #2d3748; /* Dark text for light mode */
+    transition: color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .table th,
+.dark .swal-invoice-modal .table td {
+    color: #d1d5db; /* Light text for dark mode */
 }
 
 .swal-invoice-modal .row {
@@ -271,8 +413,13 @@
 .swal-invoice-modal .invoice-footer {
     margin-top: 10px;
     padding-top: 5px;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #dee2e6; /* Light border */
     font-size: 11px;
+    transition: border-color 0.5s ease;
+}
+
+.dark .swal-invoice-modal .invoice-footer {
+    border-top: 1px solid #4b5563; /* Dark border */
 }
 
 .swal-invoice-modal .swal2-actions {
@@ -302,3 +449,294 @@
 .swal-invoice-modal .mb-1 {
     margin-bottom: 3px !important;
 }
+/* Estilos para la tabla personalizada de facturas */
+.custom-invoices-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-invoices-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-invoices-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-invoices-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-invoices-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-invoices-table td, .custom-invoices-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-invoices-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-invoices-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-invoices-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-invoices-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#facturas-content .table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#facturas-content .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #facturas-content .table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #facturas-content .table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-dark to match custom styles */
+.custom-invoices-table.table-dark thead th,
+html.dark .custom-invoices-table.table-dark thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Estilos para la tabla personalizada de facturas */
+.custom-invoices-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-invoices-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-invoices-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-invoices-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-invoices-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-invoices-table td, .custom-invoices-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-invoices-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-invoices-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-invoices-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-invoices-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#facturas-content .table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#facturas-content .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #facturas-content .table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #facturas-content .table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-dark to match custom styles */
+.custom-invoices-table.table-dark thead th,
+html.dark .custom-invoices-table.table-dark thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Estilos para la tabla personalizada de ítems de factura */
+.custom-invoice-items-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-invoice-items-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 4px;
+    text-align: left;
+    font-size: 0.875rem; /* Match small class */
+}
+
+.custom-invoice-items-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-invoice-items-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-invoice-items-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-invoice-items-table td, .custom-invoice-items-table th {
+    padding: 4px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.875rem; /* Match small class */
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-invoice-items-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-invoice-items-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-invoice-items-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-invoice-items-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#factura-items-table.table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#factura-items-table.table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #factura-items-table.table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #factura-items-table.table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-dark to match custom styles */
+.custom-invoice-items-table.table-dark thead th,
+html.dark .custom-invoice-items-table.table-dark thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Estilos para los inputs en modo claro */
+.custom-invoice-items-table .item-cantidad,
+.custom-invoice-items-table .item-descuento {
+    background-color: #ffffff;
+    color: #2d3748;
+    border-color: #ced4da;
+}
+
+/* Estilos para los inputs en modo oscuro */
+html.dark .custom-invoice-items-table .item-cantidad,
+html.dark .custom-invoice-items-table .item-descuento {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+}
+
+html.dark .custom-invoice-items-table .item-cantidad:focus,
+html.dark .custom-invoice-items-table .item-descuento:focus {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.25);
+}
+
+
+#factura-observation::placeholder {
+    color: gray;
+    opacity: 1;
+}
+
+

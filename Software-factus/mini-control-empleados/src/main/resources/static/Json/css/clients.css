@@ -1,17 +1,295 @@
-/* Clientes-Specific Styles */
-#clienteModal .modal-dialog {
-    max-width: 700px;
-    width: 90%;
-    margin: 1.75rem auto;
+/* Estilos para la tabla personalizada */
+.custom-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
 }
 
-#clienteModal .modal-body {
-    padding: 1.75rem;
+.custom-table thead th {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 12px;
+    text-align: left;
 }
 
-#clienteModal .modal-content {
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+.custom-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.custom-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.custom-table td, .custom-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-table {
+    color: #d1d5db;
+}
+
+html.dark .custom-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .custom-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2);
+}
+
+html.dark .custom-table thead th {
+    background-color: #1e40af;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#clientes-content .table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+}
+
+#clientes-content .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #clientes-content .table {
+    --bs-table-color: #d1d5db;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+}
+
+html.dark #clientes-content .table thead th {
+    background-color: #1e40af;
+}
+
+/* Estilos para la tabla personalizada de productos más vendidos */
+.custom-top-products-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-top-products-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-top-products-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-top-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-top-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-top-products-table td, .custom-top-products-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-top-products-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-top-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-top-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-top-products-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#productos-mas-vendidos.table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#productos-mas-vendidos.table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #productos-mas-vendidos.table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #productos-mas-vendidos.table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-light to match custom styles */
+.custom-top-products-table.table-light thead th,
+html.dark .custom-top-products-table.table-light thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Estilos para la card completa en modo claro */
+.top-products-card {
+    background-color: #ffffff;
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.top-products-card .card-header,
+.top-products-card .card-body,
+.top-products-card .card-footer {
+    background-color: #ffffff;
+    color: #2d3748;
+}
+
+/* Estilos para la card completa en modo oscuro */
+html.dark .top-products-card {
+    background-color: #1e293b;
+    color: #d1d5db;
+}
+
+html.dark .top-products-card .card-header,
+html.dark .top-products-card .card-body,
+html.dark .top-products-card .card-footer {
+    background-color: #1e293b;
+    color: #d1d5db;
+    border-color: #374151; /* Slightly lighter border for contrast */
+}
+
+/* Icon color in dark mode */
+html.dark .top-products-card .card-title .text-success {
+    color: #34d399 !important; /* Lighter green for better visibility in dark mode */
+}
+
+/* Button in card footer */
+.top-products-card .btn {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border-color: #e5e7eb;
+}
+
+html.dark .top-products-card .btn {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #374151;
+}
+
+html.dark .top-products-card .btn:hover {
+    background-color: #4b5563;
+    color: #d1d5db;
+    border-color: #4b5563;
+}
+
+/* Estilos para la tabla personalizada de últimos clientes */
+.custom-recent-clients-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-recent-clients-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-recent-clients-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-recent-clients-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-recent-clients-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-recent-clients-table td, .custom-recent-clients-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-recent-clients-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-recent-clients-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-recent-clients-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-recent-clients-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#ultimos-clientes.table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#ultimos-clientes.table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #ultimos-clientes.table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #ultimos-clientes.table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-light to match custom styles */
+.custom-recent-clients-table.table-light thead th,
+html.dark .custom-recent-clients-table.table-light thead th {
+    background-color: #1e40af !important;
+    color: white !important;
 }

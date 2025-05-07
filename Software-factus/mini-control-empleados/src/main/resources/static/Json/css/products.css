@@ -1,0 +1,401 @@
+/* Estilos para la tabla personalizada de productos */
+.custom-products-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-products-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-products-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-products-table td, .custom-products-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-products-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-products-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#productos-content .table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#productos-content .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #productos-content .table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #productos-content .table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-dark to match custom styles */
+.custom-products-table.table-dark thead th,
+html.dark .custom-products-table.table-dark thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+/* Estilos para la tabla personalizada de productos más vendidos */
+.custom-top-products-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-top-products-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.custom-top-products-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-top-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-top-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-top-products-table td, .custom-top-products-table th {
+    padding: 12px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-top-products-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-top-products-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-top-products-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-top-products-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#productos-mas-vendidos.table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#productos-mas-vendidos.table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #productos-mas-vendidos.table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #productos-mas-vendidos.table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-light to match custom styles */
+.custom-top-products-table.table-light thead th,
+html.dark .custom-top-products-table.table-light thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Card and card components in dark mode */
+html.dark .card.dark\:bg-dark-800 {
+    background-color: #1e293b;
+    color: #d1d5db;
+}
+
+html.dark .card-header.dark\:bg-dark-800,
+html.dark .card-body.dark\:bg-dark-800,
+html.dark .card-footer.dark\:bg-dark-800 {
+    background-color: #1e293b;
+    color: #d1d5db;
+}
+
+html.dark .btn.dark\:bg-dark-700 {
+    background-color: #374151;
+    border-color: #374151;
+}
+
+html.dark .btn.dark\:bg-dark-700:hover {
+    background-color: #4b5563;
+    border-color: #4b5563;
+}
+
+/* Estilos para la tabla personalizada de selección de productos */
+.custom-select-product-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #ffffff; /* Light mode background */
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-select-product-table thead th {
+    background-color: #1e3a8a; /* Light mode header */
+    color: white;
+    padding: 8px;
+    text-align: left;
+}
+
+.custom-select-product-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.custom-select-product-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02); /* Light mode striped */
+}
+
+.custom-select-product-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Light mode hover */
+}
+
+.custom-select-product-table td, .custom-select-product-table th {
+    padding: 8px;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilos para modo oscuro */
+html.dark .custom-select-product-table {
+    background-color: #1e293b; /* Dark mode background */
+    color: #d1d5db;
+}
+
+html.dark .custom-select-product-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Dark mode striped */
+}
+
+html.dark .custom-select-product-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.2); /* Dark mode hover */
+}
+
+html.dark .custom-select-product-table thead th {
+    background-color: #1e40af; /* Dark mode header */
+    color: white;
+}
+
+/* Sobrescribir estilos de Bootstrap para la tabla específica */
+#seleccionarProductoModal .table {
+    --bs-table-bg: #ffffff; /* Light mode */
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.1);
+    --bs-table-color: #2d3748;
+}
+
+#seleccionarProductoModal .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+/* Modo oscuro */
+html.dark #seleccionarProductoModal .table {
+    --bs-table-bg: #1e293b; /* Dark mode */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(0, 123, 255, 0.2);
+    --bs-table-color: #d1d5db;
+}
+
+html.dark #seleccionarProductoModal .table thead th {
+    background-color: #1e40af;
+    color: white;
+}
+
+/* Override Bootstrap's table-dark to match custom styles */
+.custom-select-product-table.table-dark thead th,
+html.dark .custom-select-product-table.table-dark thead th {
+    background-color: #1e40af !important;
+    color: white !important;
+}
+
+/* Estilos para el modal en modo claro */
+.select-product-modal {
+    background-color: #ffffff;
+    color: #2d3748;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.select-product-modal .modal-header {
+    background-color: #0d6efd; /* bg-primary */
+    color: white;
+}
+
+.select-product-modal .modal-body,
+.select-product-modal .modal-footer {
+    background-color: #ffffff;
+    color: #2d3748;
+}
+
+/* Estilos para el modal en modo oscuro */
+html.dark .select-product-modal {
+    background-color: #1e293b;
+    color: #d1d5db;
+}
+
+html.dark .select-product-modal .modal-header {
+    background-color: #1e40af; /* Darker shade of primary for dark mode */
+    color: white;
+}
+
+html.dark .select-product-modal .modal-body,
+html.dark .select-product-modal .modal-footer {
+    background-color: #1e293b;
+    color: #d1d5db;
+}
+
+/* Estilos para el botón de cerrar en modo oscuro */
+html.dark .select-product-modal .btn-close-white {
+    filter: invert(1); /* Make the close button white in dark mode */
+}
+
+/* Estilos para el input de búsqueda */
+.select-product-modal .input-group-text {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+html.dark .select-product-modal .input-group-text {
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+.select-product-modal .form-control {
+    background-color: #ffffff;
+    color: #2d3748;
+    border-color: #ced4da;
+}
+
+html.dark .select-product-modal .form-control {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+}
+
+html.dark .select-product-modal .form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* Estilos para el botón del footer */
+.select-product-modal .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+html.dark .select-product-modal .btn-secondary {
+    background-color: #4b5563;
+    color: #d1d5db;
+    border-color: #4b5563;
+}
+
+html.dark .select-product-modal .btn-secondary:hover {
+    background-color: #6b7280;
+    color: #d1d5db;
+    border-color: #6b7280;
+}
+
+/* Estilos para la paginación */
+.select-product-modal .pagination .page-link {
+    background-color: #ffffff;
+    color: #0d6efd;
+    border-color: #dee2e6;
+}
+
+html.dark .select-product-modal .pagination .page-link {
+    background-color: #374151;
+    color: #60a5fa;
+    border-color: #4b5563;
+}
+
+html.dark .select-product-modal .pagination .page-link:hover {
+    background-color: #4b5563;
+    color: #93c5fd;
+    border-color: #6b7280;
+}
+
+html.dark .select-product-modal .pagination .page-item.active .page-link {
+    background-color: #1e40af;
+    color: white;
+    border-color: #1e40af;
+}
+
+html.dark .select-product-modal .pagination .page-item.disabled .page-link {
+    background-color: #2d3748;
+    color: #6b7280;
+    border-color: #4b5563;
+}
+
+#buscar-producto::placeholder {
+    color: gray;
+    opacity: 1; /* Asegura que no se vea muy tenue */
+}

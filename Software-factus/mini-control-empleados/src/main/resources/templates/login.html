@@ -602,8 +602,8 @@
                 </a>
             </div>
 
-			<!--Redes sociales -->
-			<div class="extra-options">
+            <!--Redes sociales -->
+            <div class="extra-options">
                 ¿Necesita ayuda? <a href="https://www.factus.com.co/" target="_blank">Contacte a soporte</a>
                 <div class="social-links">
                     <a href="https://www.facebook.com/factusfacturacion" target="_blank" title="Facebook">
@@ -668,42 +668,31 @@
     });
 
 
-    // Función para iniciar la autenticación con Google
     function initiateGoogleLogin(url) {
-        // Dimensiones de la ventana emergente
         const width = 500;
         const height = 600;
         const left = (screen.width / 2) - (width / 2);
         const top = (screen.height / 2) - (height / 2);
 
-        // Abrir ventana emergente
         const popupWindow = window.open(url, 'googleLoginWindow',
             `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
-        // Función para manejar mensajes recibidos de la ventana emergente
         function handleMessage(event) {
-            // Verificar origen del mensaje por seguridad
             if (event.origin !== window.location.origin) return;
 
-            // Si recibimos un mensaje de autenticación exitosa
             if (event.data && event.data.googleAuthSuccess) {
-                // Limpiar el listener de eventos
                 window.removeEventListener('message', handleMessage);
 
-                // Cerrar la ventana emergente si aún está abierta
                 if (popupWindow && !popupWindow.closed) {
                     popupWindow.close();
                 }
 
-                // Redirigir la ventana principal a la página protegida
                 window.location.href = event.data.redirectUrl || '/api/facturas/crear';
             }
         }
 
-        // Agregar listener para mensajes de la ventana emergente
         window.addEventListener('message', handleMessage);
 
-        // Comprobar si la ventana se cierra manualmente
         const checkClosed = setInterval(() => {
             if (popupWindow && popupWindow.closed) {
                 clearInterval(checkClosed);
@@ -714,7 +703,6 @@
         return false;
     }
 
-    // Asignar la función al botón de Google
     document.addEventListener('DOMContentLoaded', function() {
         const googleBtn = document.querySelector('.google-btn');
         if (googleBtn) {

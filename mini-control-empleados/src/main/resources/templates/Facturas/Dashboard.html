@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- principal  -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Facturación</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Fuentes de google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Icono de halltec -->
+    <link rel="shortcut icon" href="https://i.ibb.co/r21Tj1nF/icon-halltec.png" type="image/x-icon">
+
+    <!-- Ajax CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Alertas Sweetalert y selector js -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+
+    <!-- Talwind css y libreria gsap.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!--Rutas de estilos css-->
+    <link rel="stylesheet" th:href="@{/Json/css/base.css}">
+    <link rel="stylesheet" th:href="@{/Json/css/components.css}">
+    <link rel="stylesheet" th:href="@{/Json/css/navigation.css}">
+    <link rel="stylesheet" th:href="@{/Json/css/clients.css}">
+    <link rel="stylesheet" th:href="@{/Json/css/invoices.css}">
+
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2  position-fixed  top-0 h-100" style="z-index: 1000;">
+
+            <!-- Sidebar -->
+            <div id="GlassmorphismSidenav"
+                 class="w-52 h-full bg-gray-500/10 backdrop-blur-md border border-gray-400 flex flex-col transition-all duration-700 relative dark:bg-gray-800/10 dark:border-gray-700 ">
+                <!-- Header -->
+                <div class="flex items-center justify-between px-8 py-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                            <img th:if="${userPicture != null && !userPicture.isEmpty()}" th:src="${userPicture}"
+                                 alt="Foto de perfil" class="w-full h-full rounded-full object-cover"/>
+                            <img th:unless="${userPicture != null && !userPicture.isEmpty()}"
+                                 src="https://cdn-icons-png.flaticon.com/128/4526/4526169.png" alt="Avatar default"
+                                 class="w-6 h-6 rounded-full inline"/>
+
+                        </div>
+                        <div id="GlassmorphismPname" class="text-sm font-medium text-gray-900 dark:text-dark">
+                            <span class="block text-shadow-md  text-gray-600  dark:text-dark-600">Bienvenido</span>
+                            <p th:text=" ${userName != null} ? ${userName} : 'Usuario'">Usuario</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggle Icon -->
+                <button id="toggler"
+                        class="w-8 h-8 rounded-full bg-gradient-to-r from-transparent to-white flex items-center justify-center absolute top-6 -right-4 shadow-md dark:bg-gray-600"
+                        onclick="GlassmorphismToggle()">
+                    <div id="GlassmorphismTogglericon" class="flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    </div>
+                </button>
+
+                <!-- Menus -->
+                <div class="flex-1 flex flex-col px-8 overflow-scroll scrollbar-hide">
+                    <p class="text-xs font-semibold text-gray-600 mb-4 dark:text-dark-600">Menú</p>
+
+                    <div class="space-y-12  ">
+                        <a href="#" id="dashboard-link"
+                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+                            </svg>
+                            <p class="text-shadow-md font-medium text-gray-600 dark:text-dark GlassmorphismMenuText">
+                                Dashboard</p>
+                        </a>
+
+                        <a href="#" id="productos-link"
+                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878M6 6.878A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122"/>
+                            </svg>
+                            <p class="text-shadow-md font-medium text-gray-600 dark:text-dark GlassmorphismMenuText">
+                                Productos</p>
+                        </a>
+
+                        <a href="#" id="clientes-link"
+                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+                            </svg>
+                            <p class="text-shadow-md font-medium text-gray-600 dark:text-dark GlassmorphismMenuText">
+                                Clientes</p>
+                        </a>
+
+                        <a href="#" id="facturas-link"
+                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21.75 9v.906a2.25 2.25 0 0 1-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 0 0 1.183 1.981l6.478 3.488m8.839 2.51-4.66-2.51m0 0-1.023-.55a2.25 2.25 0 0 0-2.134 0l-1.022.55m0 0-4.661 2.51m16.5 1.615a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V8.844a2.25 2.25 0 0 1 1.183-1.981l7.5-4.039a2.25 2.25 0 0 1 2.134 0l7.5 4.039a2.25 2.25 0 0 1 1.183 1.98V19.5Z"/>
+                            </svg>
+                            <p class="text-shadow-md font-semiboldm text-gray-600 dark:text-dark-400 GlassmorphismMenuText">
+                                Facturas</p>
+                        </a>
+                        <!-- Confetti Button -->
+                        <a href="#" id="confetti-link"
+                           class="flex items-center space-x-3  rounded-lg hover:bg-white hover:shadow-md cursor-pointer dark:hover:bg-white-700"
+                           onclick="launchConfetti()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-black dark:text-white"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+                            </svg>
+                            <p class="text-shadow-md font-medium text-gray-600 dark:text-dark-400 GlassmorphismMenuText">
+                                Confetti 🎉</p>
+                        </a>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-600 mt-4 mb-4 dark:text-dark-400">Modo</p>
+                    <div class="space-y-3">
+                        <!-- Theme Toggle and Logout -->
+                        <div class="px-1 py-1 mt-auto flex flex-col items-center">
+                            <!-- Theme Toggle -->
+                            <button id="theme-toggle"
+                                    class="w-31 flex items-center space-x-4 p-1 rounded-lg bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 transition-all duration-300"
+                                    onclick="toggleDarkMode()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                     class="size-6 text-gray-800 dark:text-white">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M12 3v2.25m0 16.5V19.5m8.25-7.5h2.25m-16.5 0H3.75m14.835-6.585l-1.59-1.59M6.915 18.915l-1.59-1.59m0-10.65l1.59-1.59m10.65 10.65l1.59-1.59M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                                </svg>
+                                <span id="theme-text"
+                                      class="text-sm font-medium text-gray-800 dark:text-white GlassmorphismMenuText">Light Mode</span>
+                            </button>
+
+                            <!-- Logout -->
+                            <form id="logoutForm" class="mt-2 w-full flex justify-center" th:action="@{/logout}" method="post">
+                                <button type="button" onclick="confirmLogout()"
+                                        class="w-32 flex items-center space-x-4 p-1 rounded-lg bg-red-600 hover:bg-red-700 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                         class="size-6 text-white">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m6 0l-3-3m0 0l-3 3m3-3H15"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-white GlassmorphismMenuText">Log Out</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10 ms-auto content">
+            <div id="dashboard-content" class="content-section p-4">
+                <!-- Header del Dashboard -->
+                <div class="d-flex justify-content-between align-items-center mb-6">
+                    <h2 class="font-montserrat fw-bold fs-3">
+                        <i class="fas fa-chart-line me-4 text-primary"></i>Dashboard
+                    </h2>
+                </div>
+
+                <!-- Tarjetas de resumen -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 clickable-card" data-section="clientes">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title text-primary fw-bold mb-1">Clientes</h5>
+                                        <p class="text-muted small mb-0">Total de clientes registrados</p>
+                                    </div>
+                                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-users fa-lg text-primary"></i>
+                                    </div>
+                                </div>
+                                <h3 class="display-6 fw-bold mb-0" id="total-clientes">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 clickable-card" data-section="productos">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title text-success fw-bold mb-1">Productos</h5>
+                                        <p class="text-muted small mb-0">Total de productos activos</p>
+                                    </div>
+                                    <div class="rounded-circle bg-success bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-box fa-lg text-success"></i>
+                                    </div>
+                                </div>
+                                <h3 class="display-6 fw-bold mb-0" id="total-productos">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 clickable-card" data-section="facturas">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title text-info fw-bold mb-1">Facturas</h5>
+                                        <p class="text-muted small mb-0">Total de facturas emitidas</p>
+                                    </div>
+                                    <div class="rounded-circle bg-info bg-opacity-10 p-3 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-invoice-dollar fa-lg text-info"></i>
+                                    </div>
+                                </div>
+                                <h3 class="display-6 fw-bold mb-0" id="total-facturas">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Productos más vendidos y Últimos clientes -->
+                <div class="row">
+                    <!-- Productos más vendidos -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-0 py-3">
+                                <h5 class="card-title mb-0 fw-bold  ">  <i class="fas fa-box fa-lg text-success  me-2"></i>Productos Más Vendidos</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" id="productos-mas-vendidos">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col">Precio</th>
+                                            <th scope="col">Ventas</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 py-3">
+                                <div id="product-pagination" class="mb-3"></div>
+                                <a href="#" class="btn btn-light btn-sm w-100" id="ver-todos-productos">Ver todos los productos</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Últimos clientes -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-0 py-3">
+                                <h5 class="card-title mb-0 fw-bold">    <i class="fas fa-users fa-lg text-primary me-2"></i>Últimos Clientes</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" id="ultimos-clientes">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Cliente</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Facturas</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 py-3">
+                                <div id="client-pagination" class="mb-3"></div>
+                                <a href="#" class="btn btn-light btn-sm w-100" id="ver-todos-clientes">Ver todos los clientes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        <!-- Sección productos -->
+            <div id="productos-content" class="content-section" style="display:none;">
+                <div class="header-section mb-6">
+                    <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"> <i class="bi bi-boxes me-2 text-primary"></i>Gestión de
+                        Productos</h2>
+                    <div class="flex justify-end">
+                        <div class="relative">
+                            <button class="animated-gradient-border-button px-6 py-2 rounded-full text-white dark:text-gray-300 text-shadow-md border-[4px] border-transparent cursor-pointer font-semibold flex items-center gap-2"
+                                    data-bs-toggle="modal" data-bs-target="#productoModal">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resto del contenido de productos (búsqueda, tabla, etc.) -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="buscar-productos"
+                               placeholder="Buscar producto por nombre o ID...">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Unidad Medida</th>
+                            <th scope="col">Tasa IVA</th>
+                            <th scope="col">Código Estándar</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="productos-table-body"></tbody>
+                    </table>
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination justify-content-center" id="productos-pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sección clientes -->
+            <div id="clientes-content" class="content-section" style="display:none;">
+                <div class="header-section mb-6">
+                    <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"><i class="bi bi-person-check me-2 text-primary"></i>Gestión de Clientes</h2>
+                    <div class="flex justify-end">
+                        <div class="relative">
+                            <button class="animated-gradient-border-button px-6 py-2 rounded-full text-white dark:text-gray-300 text-shadow-md border-[4px] border-transparent cursor-pointer font-semibold flex items-center gap-2"
+                                    data-bs-toggle="modal" data-bs-target="#clienteModal">
+                                <i class="fas fa-plus"></i> Nuevo Cliente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Campo de búsqueda -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="buscar-clientes"
+                               placeholder="Buscar cliente por nombre o identificación">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo de cliente</th>
+                            <th>Identificación</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Id legal</th>
+                            <th>Id tributo</th>
+                            <th>Iva</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="clientes-table-body">
+                        <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                    <nav aria-label="Client pagination">
+                        <ul class="pagination justify-content-center" id="clientes-pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sección Facturas -->
+            <div id="facturas-content" class="content-section" style="display:none;">
+                <div class="header-section mb-6">
+                    <h2 class="text-center text-2xl font-bold text-gray-800 dark:text-dark-200"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Gestión de Facturas</h2>
+                    <div class="flex justify-end">
+                        <div class="relative">
+                            <button class="animated-gradient-border-button px-6 py-2 rounded-full text-white dark:text-gray-300 text-shadow-md border-[4px] border-transparent cursor-pointer font-semibold flex items-center gap-2"
+                                    data-bs-toggle="modal" data-bs-target="#facturaModal">
+                                <i class="fas fa-plus"></i> Nueva Factura
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campo de búsqueda -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="buscar-facturas"
+                               placeholder="Buscar factura por número o cliente...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Número</th>
+                            <th>Cliente</th>
+                            <th>ID</th>
+                            <th>Pago</th>
+                            <th>Metodo</th>
+                            <th>Creación factura</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="facturas-table-body">
+                        <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                    <nav aria-label="Invoice pagination">
+                        <ul class="pagination justify-content-center" id="facturas-pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Producto actualizado con los nuevos campos -->
+<div class="modal fade" id="productoModal" tabindex="-1" aria-labelledby="productoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="productoModalLabel"><i class="fas fa-box"></i> Nuevo Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="producto-form">
+                    <input type="hidden" id="producto-id">
+                    <input type="hidden" id="producto-standardCodeId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="producto-nombre" class="form-label">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                    <input type="text" class="form-control" id="producto-nombre" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="producto-precio" class="form-label">Precio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                    <input type="number" step="0.01" class="form-control" id="producto-precio" required>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="producto-excluido">
+                                <label class="form-check-label" for="producto-excluido">Excluido de impuestos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="producto-medida" class="form-label">Unidad de Medida</label>
+                                <select class="form-select" id="producto-medida" required>
+                                    <option value="70">Unidad</option>
+                                    <option value="414">Kilogramo</option>
+                                    <option value="449">Litro</option>
+                                    <option value="512">Metro</option>
+                                    <option value="874">Galon</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="producto-tasa-iva" class="form-label">Tasa IVA (%)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-percent"></i></span>
+                                    <input type="number" step="0.01" class="form-control" id="producto-tasa-iva"
+                                           value="19">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Los campos de Código Estándar y Unidad de Medida se generarán automáticamente.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="guardar-producto">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cliente Actualizado -->
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="clienteModalLabel"><i class="fas fa-user"></i> Nuevo Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cliente-form">
+                    <input type="hidden" id="cliente-id">
+                    <input type="hidden" id="cliente-legalOrganizationId">
+                    <input type="hidden" id="cliente-tributeId">
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="cliente-tipo" class="form-label"><i class="fas fa-id-badge"></i> Tipo
+                                Cliente</label>
+                            <select class="form-select" id="cliente-tipo" required>
+                                <option value="Persona Natural">Persona Natural</option>
+                                <option value="Persona Jurídica">Persona Jurídica</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cliente-tipo-identificacion" class="form-label"><i class="fas fa-id-card"></i>
+                                Tipo Identificación</label>
+                            <select class="form-select" id="cliente-tipo-identificacion" required>
+                                <option value="Registro civil">Registro civil</option>
+                                <option value="Tarjeta de identidad">Tarjeta de identidada</option>
+                                <option value="Cédula ciudadanía">Cédula de Ciudadanía</option>
+                                <option value="Cédula de extranjería">Cédula de extranjería</option>
+                                <option value="NIT">NIT</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                                <option value="Documento de identificación extranjero">Documento de identificación
+                                    extranjero
+                                </option>
+                                <option value="PEP">PEP</option>
+                                <option value="NIT otro país">NIT otro país</option>
+                                <option value="NUIP *">NUIP *</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cliente-identificacion" class="form-label"><i class="fas fa-fingerprint"></i>
+                                Identificación</label>
+                            <input type="text" class="form-control" id="cliente-identificacion" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="cliente-nombre" class="form-label"><i class="fas fa-user-tag"></i>
+                                Nombre</label>
+                            <input type="text" class="form-control" id="cliente-nombre" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cliente-telefono" class="form-label"><i class="fas fa-phone"></i>
+                                Teléfono</label>
+                            <input type="text" class="form-control" id="cliente-telefono">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cliente-correo" class="form-label"><i class="fas fa-envelope"></i>
+                                Correo</label>
+                            <input type="email" class="form-control" id="cliente-correo">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="cliente-municipio" class="form-label"><i class="fas fa-city"></i>
+                                Municipio</label>
+                            <input type="text" class="form-control" id="cliente-municipio" list="municipios-list"
+                                   placeholder="Buscar municipio o departamento..." required>
+                            <datalist id="municipios-list"></datalist>
+                            <input type="hidden" id="cliente-municipio-id" name="municipio">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="cliente-direccion" class="form-label"><i class="fas fa-map-marker-alt"></i>
+                                Dirección</label>
+                            <input type="text" class="form-control" id="cliente-direccion">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cliente-aplica-iva" class="form-label"><i class="fas fa-receipt"></i> Aplica IVA</label>
+                            <select class="form-select" id="cliente-aplica-iva" required>
+                                <option value="Sí">Sí</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Campos específicos para Persona Jurídica -->
+                    <div id="campos-juridica" style="display: none;">
+                        <hr>
+                        <center><h6 class="mb-3"><i class="bi bi-info-circle"></i> Información Comercial </h6></center>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="cliente-company" class="form-label"><i class="fas fa-building"></i> Razón
+                                    Social</label>
+                                <input type="text" class="form-control" id="cliente-company">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cliente-tradeName" class="form-label"><i class="fas fa-store"></i> Nombre
+                                    Comercial</label>
+                                <input type="text" class="form-control" id="cliente-tradeName">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cliente-verificationDigit" class="form-label"><i
+                                        class="fas fa-check-circle"></i> Dígito de Verificación</label>
+                                <input type="text" class="form-control" id="cliente-verificationDigit" maxlength="1">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Información sobre campos automáticos -->
+                    <div class="alert alert-info mt-3">
+                        <small><i class="fas fa-info-circle"></i> Los campos de ID Organización Legal y ID Tributo se
+                            generarán automáticamente según el tipo de cliente.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="guardar-cliente"><i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Factura Electrónica Profesional -->
+<div class="modal fade" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title" id="facturaModalLabel"><i class="fas fa-file-invoice-dollar"></i> Nueva Factura
+                    Electrónica</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-2">
+                <form id="factura-form">
+                    <!-- Campos ocultos -->
+                    <input type="hidden" id="factura-id">
+                    <input type="hidden" id="factura-document" value="Factura electrónica de venta">
+                    <input type="hidden" id="factura-numbering-range-id">
+                    <input type="hidden" id="factura-reference-code">
+                    <input type="hidden" id="factura-municipio-id">
+                    <input type="hidden" id="factura-due-date">
+
+                    <div class="row g-2">
+                        <!-- Fila 1: Datos principales del cliente -->
+                        <div class="col-md-8">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 small"><i class="fas fa-user-check"></i> Información del Cliente
+                                    </h6>
+                                    <div class="badge bg-primary" id="factura-status">PENDIENTE</div>
+                                </div>
+                                <div class="card-body py-3 px-2">
+                                    <div class="row g-1">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-cliente" class="form-label small mb-0"><i
+                                                        class="fas fa-user-circle"></i> Cliente</label>
+                                                <select class="form-select form-select-sm" id="factura-cliente"
+                                                        name="factura-cliente" required>
+                                                    <option value="">Buscar cliente por nombre o identificación</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-identification" class="form-label small mb-0"><i
+                                                        class="fas fa-id-card"></i> Identificación</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       id="factura-identification" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-1 mt-1">
+                                        <div class="col-md-4">
+                                            <p class="mb-0 small"><i class="fas fa-user"></i> <strong>Nombre:</strong>
+                                                <span id="cliente-nombres">-</span></p>
+                                            <p class="mb-0 small"><i class="fas fa-tag"></i> <strong>Tipo:</strong>
+                                                <span id="cliente-tipos">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="mb-0 small"><i class="fas fa-envelope"></i>
+                                                <strong>Correo:</strong> <span id="cliente-correos">-</span></p>
+                                            <p class="mb-0 small"><i class="fas fa-phone"></i>
+                                                <strong>Teléfono:</strong> <span id="cliente-telefonos">-</span></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="mb-0 small"><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong>
+                                                <span id="cliente-direcciones">-</span></p>
+                                            <p class="mb-0 small"><i class="fas fa-city"></i>
+                                                <strong>Municipio:</strong> <span id="cliente-municipios">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 1 (derecha): Datos de la factura -->
+                        <div class="col-md-4">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2">
+                                    <h6 class="mb-0 small"><i class="fas fa-file-alt"></i> Datos del Documento</h6>
+                                </div>
+                                <div class="card-body py-1 px-2">
+                                    <div class="row g-1">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-fecha" class="form-label small mb-0"><i
+                                                        class="fas fa-calendar-alt"></i> Fecha</label>
+                                                <input type="date" class="form-control form-control-sm"
+                                                       id="factura-fecha" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-document-name" class="form-label small mb-0"><i
+                                                        class="fas fa-file"></i> Nombre</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       id="factura-document-name" value="Factus">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-1">
+                                        <div class="col-12">
+                                            <p class="mb-0 small"><i class="fas fa-hashtag"></i>
+                                                <strong>Número:</strong> <span id="factura-numero"
+                                                                               class="badge bg-secondary">-</span></p>
+                                            <p class="mb-0 small"><i class="fas fa-barcode"></i> <strong>Código
+                                                Ref:</strong> <span id="factura-reference-code-display"
+                                                                    class="small text-muted">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2: enlace de pago -->
+                        <div class="col-md-6">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2">
+                                    <h6 class="mb-0 small"><i class="fas fa-credit-card"></i> Condiciones de Pago</h6>
+                                </div>
+                                <div class="card-body py-1 px-2">
+                                    <div class="row g-1">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-forma-pago" class="form-label small mb-0"><i
+                                                        class="fas fa-money-check"></i> Forma de Pago</label>
+                                                <select class="form-select form-select-sm" id="factura-forma-pago"
+                                                        required>
+                                                    <option value="Contado">Contado</option>
+                                                    <option value="Crédito">Crédito</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-metodo-pago" class="form-label small mb-0"><i
+                                                        class="fas fa-credit-card"></i> Método de Pago</label>
+                                                <select class="form-select form-select-sm" id="factura-metodo-pago"
+                                                        required>
+                                                    <option value="Efectivo">Efectivo</option>
+                                                    <option value="Cheque">Cheque</option>
+                                                    <option value="Transferencia">Transferencia</option>
+                                                    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+                                                    <option value="Tarjeta Débito">Tarjeta Débito</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--  Campos adicionales -->
+                        <div class="col-md-6">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2">
+                                    <h6 class="mb-0 small"><i class="fas fa-info-circle"></i> Información Adicional</h6>
+                                </div>
+                                <div class="card-body py-1 px-2">
+                                    <div class="row g-1">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-api-client-name" class="form-label small mb-0"><i
+                                                        class="fas fa-user-tag"></i> API Cliente</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       id="factura-api-client-name" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-1">
+                                                <label for="factura-graphic-representation"
+                                                       class="form-label small mb-0"><i class="fas fa-file-image"></i>
+                                                    Representación</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       id="factura-graphic-representation" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 3: Productos con tabla compacta -->
+                        <div class="col-md-8">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 small"><i class="fas fa-shopping-cart"></i> Productos</h6>
+                                    <button type="button" class="btn btn-success btn-sm py-0" id="agregar-item">
+                                        <i class="fas fa-plus"></i> Agregar Producto
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped mb-0">
+                                            <thead class="table-dark">
+                                            <tr>
+                                                <th class="small">Producto</th>
+                                                <th class="small">Unidad</th>
+                                                <th class="small">Precio</th>
+                                                <th class="small">Descu%</th>
+                                                <th class="small">Subtotal</th>
+                                                <th class="small">IVA</th>
+                                                <th class="small">Total</th>
+                                                <th class="small text-center">Del</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="factura-items"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer py-1 px-2 text-muted">
+                                    <small><i class="fas fa-info-circle"></i> Líneas: <span
+                                            id="factura-lines-count">0</span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 3  Observación y Resumen -->
+                        <div class="col-md-4">
+                            <div class="card mb-2">
+                                <div class="card-header py-1 px-2">
+                                    <h6 class="mb-0 small"><i class="fas fa-comment"></i> Observación</h6>
+                                </div>
+                                <div class="card-body py-1 px-2">
+                                    <textarea class="form-control form-control-sm" id="factura-observation" rows="2"
+                                              placeholder="Cliente capacitado"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="card summary-card">
+                                <div class="card-header bg-dark text-white py-1 px-2">
+                                    <h6 class="mb-0 small"><i class="fas fa-calculator"></i> Resumen</h6>
+                                </div>
+                                <div class="card-body py-1 px-2">
+                                    <div class="d-flex justify-content-between mb-0">
+                                        <span class="small">Subtotal:</span>
+                                        <span id="factura-subtotal" class="small">$0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-0">
+                                        <span class="small">IVA:</span>
+                                        <span id="factura-iva-total" class="small">$0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-0">
+                                        <span class="small">Descuento:</span>
+                                        <span id="factura-descuento-total" class="small">$0.00</span>
+                                    </div>
+                                    <hr class="my-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="small">TOTAL:</strong>
+                                        <strong id="factura-total" class="small">$0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
+                        class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-info btn-sm text-white" id="guardar-factura"><i
+                        class="fas fa-save"></i> Guardar Factura
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Selección de Productos -->
+<div class="modal fade" id="seleccionarProductoModal" tabindex="-1" aria-labelledby="seleccionarProductoModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="seleccionarProductoModalLabel"><i class="fas fa-boxes"></i> Seleccionar
+                    Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-container mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="buscar-producto"
+                               placeholder="Buscar por nombre o código">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>IVA %</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody id="seleccionar-producto-body"></tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span id="productos-total">0 productos</span>
+                    <nav>
+                        <ul class="pagination pagination-sm" id="producto-pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i>
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
+                <input type="hidden" id="delete-type">
+                <input type="hidden" id="delete-id">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmar-eliminacion">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts jqery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Scripts Boostrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts Selector js y conffetti-->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+
+<!-- Rutas de scripts -->
+<script th:src="@{/Json/js/utils.js}"> </script>
+<script th:src="@{/Json/js/clients.js}"> </script>
+<script th:src="@{/Json/js/products.js}"> </script>
+<script th:src="@{/Json/js/invoices.js}"> </script>
+
+

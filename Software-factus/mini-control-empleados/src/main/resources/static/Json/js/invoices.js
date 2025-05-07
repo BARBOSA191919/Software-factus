@@ -706,7 +706,7 @@ $(document).ready(function () {
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
             timerProgressBar: true,
-            timer:4000,
+            timer: 4000,
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
@@ -723,12 +723,12 @@ $(document).ready(function () {
                     method: 'DELETE',
                     success: function (response) {
                         Swal.fire({
-                            toast:true,
+                            toast: true,
                             position: 'top-end',
                             icon: 'success',
                             title: 'Éxito',
                             text: 'Factura eliminada correctamente',
-                            timer:4000,
+                            timer: 4000,
                             timerProgressBar: true,
                             showConfirmButton: false
                         }).then(() => {
@@ -746,12 +746,12 @@ $(document).ready(function () {
                             errorMessage = xhr.responseJSON?.error || `Error ${xhr.status}: ${xhr.statusText}`;
                         }
                         Swal.fire({
-                            toast:true,
+                            toast: true,
                             position: 'top-end',
                             icon: 'error',
                             title: 'Error',
                             text: errorMessage,
-                            timer:2000,
+                            timer: 2000,
                             showConfirmButton: false
                         });
                     }
@@ -933,6 +933,9 @@ $(document).ready(function () {
         if (!clienteId) {
             clearClienteInfo();
             $('#factura-municipio-id').val('');
+            $('#factura-reference-code').val(''); // Limpiar al deseleccionar cliente
+            $('#factura-reference-code-display').text('');
+            $('#factura-numero').val('');
             return;
         }
 
@@ -949,10 +952,15 @@ $(document).ready(function () {
             $('#factura-api-client-name').val(clienteSeleccionado.nombre || '');
             $('#factura-graphic-representation').val('PDF');
             $('#factura-municipio-id').val(clienteSeleccionado.municipioId || '');
+
+            // Generar referenceCode y número automáticamente al seleccionar cliente
             generateAutoFields();
         } else {
             clearClienteInfo();
             $('#factura-municipio-id').val('');
+            $('#factura-reference-code').val('');
+            $('#factura-reference-code-display').text('');
+            $('#factura-numero').val('');
         }
     }
 
@@ -961,12 +969,14 @@ $(document).ready(function () {
         $('#factura-identification, #factura-api-client-name, #factura-graphic-representation').val('');
     }
 
-// Generate automatic fields (reference code, numbering range)
     function generateAutoFields() {
         const referenceCode = "REF-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+        const numero = "FACT-" + Date.now(); // Generar número de factura automáticamente
         $('#factura-reference-code').val(referenceCode);
-        const numberingRangeId = Math.floor(Math.random() * 10000) + 1;
-        $('#factura-numbering-range-id').val(numberingRangeId);
+        $('#factura-reference-code-display').text(referenceCode);
+        $('#factura-numero').val(numero);
+        $('#factura-numero-display').text(numero); // Mostrar el número en el modal
+
         const formaPago = $('#factura-forma-pago').val();
         const today = new Date();
         let dueDate = today;
@@ -981,13 +991,16 @@ $(document).ready(function () {
         $('#factura-due-date').val(`${yyyy}-${mm}-${dd}`);
     }
 
-    // Initialize invoice modal
 // Initialize invoice modal
     $('#facturaModal').on('show.bs.modal', function (e) {
         if (!$(e.relatedTarget).hasClass('edit-factura')) {
             $('#facturaModalLabel').text('Nueva Factura');
             $('#factura-form').trigger('reset');
             $('#factura-id').val('');
+            $('#factura-reference-code').val('');
+            $('#factura-reference-code-display').text('');
+            $('#factura-numero').val('');
+            $('#factura-numero-display').text(''); // Limpiar el número visible
             $('#factura-items').empty();
             facturaItems = [];
             itemCount = 0;
@@ -1024,7 +1037,6 @@ $(document).ready(function () {
         $('#seleccionarProductoModal').modal('hide');
         $('#facturaModal').modal('show');
     });
-
 
     function addItemToFactura(id, name, price, taxRate) {
         const item = {
@@ -1112,34 +1124,40 @@ $(document).ready(function () {
 
     function renderFacturaItems() {
         const itemsContainer = $('#factura-items');
-        console.log('Rendering facturaItems:', facturaItems); // Debug
-        if (!itemsContainer.length) {
-            console.error('Selector #factura-items no encontrado');
-            return;
-        }
         itemsContainer.empty();
 
-        facturaItems.forEach(item => {
+        facturaItems.forEach((item, index) => {
             itemsContainer.append(`
             <tr data-id="${item.id}">
                 <td>${item.producto || 'N/A'}</td>
                 <td>
-                    <input type="number" class="form-control item-cantidad" value="${item.cantidad || 1}" min="1" style="width: 80px;">
+                    <input type="number" class="form-control item-cantidad" data-index="${index}" value="${item.cantidad || 1}" min="1" style="width: 40px;">
                 </td>
                 <td>${formatCurrency(item.precio || 0)}</td>
                 <td>
-                    <input type="number" class="form-control item-descuento" value="${item.porcentajeDescuento || 0}" min="0" max="100"  style="width: 80px;">
+                    <input type="number" class="form-control item-descuento" data-index="${index}" value="${item.porcentajeDescuento || 0}" min="0" max="100" style="width: 80px;">
                 </td>
-                <td>${formatCurrency(item.subtotal || 0)}</td>
-                <td>${formatCurrency(item.iva || 0)}</td>
-                <td>${formatCurrency(item.total || 0)}</td>
+                <td class="item-subtotal">${formatCurrency(item.subtotal || 0)}</td>
+                <td class="item-iva">${formatCurrency(item.iva || 0)}</td>
+                <td class="item-total">${formatCurrency(item.total || 0)}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
+                    <button class="btn btn-sm btn-danger remove-item" data-index="${index}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
             </tr>
         `);
+        });
+
+        // Asignar eventos para actualizar cálculos
+        $('.item-cantidad, .item-descuento').off('change').on('change', function () {
+            const index = $(this).data('index');
+            updateItemCalculations(index);
+        });
+
+        $('.remove-item').off('click').on('click', function () {
+            const index = $(this).data('index');
+            removeFacturaItem(index);
         });
     }
 
@@ -1158,6 +1176,7 @@ $(document).ready(function () {
             });
             return;
         }
+
         const clienteId = $('#factura-cliente').val();
         if (!clienteId) {
             Swal.fire({
@@ -1175,7 +1194,9 @@ $(document).ready(function () {
 
         const clienteSeleccionado = clientesList.find(c => c.id == clienteId);
         const id = $('#factura-id').val();
+        const referenceCode = $('#factura-reference-code').val();
         const totalIva = parseFloat($('#factura-iva-total').text().replace('$', '')) || 0;
+
         const factura = {
             cliente: {
                 id: clienteSeleccionado.id,
@@ -1189,7 +1210,7 @@ $(document).ready(function () {
                 municipioId: parseInt(clienteSeleccionado.municipioId) || null
             },
             formaPago: $('#factura-forma-pago').val(),
-            metodo: $('#factura-metodo-pago').val(), // Matches @JsonProperty("metodo")
+            metodo: $('#factura-metodo-pago').val(),
             createdAt: new Date().toISOString(),
             numberingRangeId: parseInt($('#factura-numbering-range-id').val()) || 128,
             referenceCode: $('#factura-reference-code').val(),
@@ -1220,9 +1241,6 @@ $(document).ready(function () {
             }))
         };
 
-        console.log('Factura payload:', factura);
-        console.log('Serialized JSON:', JSON.stringify(factura));
-
         if (!factura.cliente.id || !factura.items.length || !factura.formaPago) {
             Swal.fire({
                 toast: true,
@@ -1237,8 +1255,18 @@ $(document).ready(function () {
             return;
         }
 
-        const url = id ? `/api/facturas/${id}` : '/api/facturas/crear';
+        const url = id ? `/api/facturas/editar/${referenceCode}` : '/api/facturas/crear';
         const method = id ? 'PUT' : 'POST';
+
+        // Mostrar mensaje de "Se está creando la factura"
+        Swal.fire({
+            title: id ? 'Actualizando factura' : 'Creando factura',
+            text: 'Espere por favor...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         $.ajax({
             url: url,
@@ -1247,9 +1275,10 @@ $(document).ready(function () {
             contentType: 'application/json',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json' // Explicitly set Content-Type
+                'Content-Type': 'application/json'
             },
             success: function (response) {
+                Swal.close(); // Cerrar el mensaje de carga
                 $('#facturaModal').modal('hide');
                 loadFacturas();
                 Swal.fire({
@@ -1262,83 +1291,92 @@ $(document).ready(function () {
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
-                if (!id) {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { x: 0.5, y: 0.6 }
-                    });
-                }
             },
             error: function (xhr) {
+                Swal.close(); // Cerrar el mensaje de carga en caso de error
                 console.error('Error response:', xhr.responseJSON);
+                let errorMessage = xhr.responseJSON?.error || xhr.statusText;
+                if (xhr.status === 409) {
+                    errorMessage = 'No se puede editar la factura porque está validada.';
+                }
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: `Error al ${id ? 'actualizar' : 'crear'} factura: ${xhr.responseJSON?.error || xhr.statusText}`
+                    text: `Error al ${id ? 'actualizar' : 'crear'} factura: ${errorMessage}`,
+                    confirmButtonColor: '#3085d6'
                 });
             }
         });
     });
 
-    // Edit invoice
     function editFactura(id) {
         $.ajax({
             url: `/api/facturas/ver/${id}`,
             method: 'GET',
             success: function (factura) {
+                console.log('Factura cargada para edición:', factura);
+
                 $('#facturaModalLabel').text('Editar Factura');
                 $('#factura-id').val(factura.id);
-                $('#factura-numero').text(factura.numero);
                 $('#factura-reference-code').val(factura.referenceCode);
-                $('#factura-reference-code-display').text(factura.referenceCode);
-                $('#factura-numbering-range-id').val(factura.numberingRangeId);
-                $('#factura-fecha').val(factura.fecha);
-                $('#factura-due-date').val(factura.dueDate);
-                $('#factura-forma-pago').val(factura.formaPago);
-                $('#factura-metodo-pago').val(factura.metodoPago);
-                $('#factura-identification').val(factura.identificacion);
-                $('#factura-api-client-name').val(factura.apiClientName);
-                $('#factura-graphic-representation').val(factura.graphicRepresentation);
-                $('#factura-municipio-id').val(factura.municipioId);
+                $('#factura-reference-code-display').text(factura.referenceCode || 'N/A');
+                $('#factura-numbering-range-id').val(factura.numberingRangeId || '');
+                $('#factura-fecha').val(factura.createdAt ? new Date(factura.createdAt).toISOString().split('T')[0] : '');
+                $('#factura-due-date').val(factura.fechaVencimiento || '');
+                $('#factura-forma-pago').val(factura.formaPago || 'Contado');
+                $('#factura-metodo-pago').val(factura.metodoPago || 'Efectivo');
+                $('#factura-municipio-id').val(factura.municipio || '');
+                $('#factura-numero').val(factura.numero || '');
+                $('#factura-numero-display').text(factura.numero || 'N/A'); // Mostrar el número en el modal
+                $('#factura-observacion').val(factura.observacion || 'Cliente capacitado');
 
                 loadClientesFactura(function () {
-                    $('#factura-cliente').val(factura.clienteId).trigger('change');
-                    $('#factura-cliente').off('change').on('change', function () {
-                        onClienteSelected();
-                    });
+                    $('#factura-cliente').val(factura.cliente?.id || '').trigger('change');
+                    $('#factura-cliente').off('change').on('change', onClienteSelected);
+                    if (factura.cliente) {
+                        $('#factura-identification').val(factura.cliente.identificacion || '');
+                        $('#factura-api-client-name').val(factura.cliente.nombre || '');
+                    }
                 });
 
-                facturaItems = factura.items.map((item, index) => {
-                    const producto = productosList.find(p => p.id === item.productoId) || {
-                        name: item.producto || 'Desconocido',
-                        price: item.precio,
-                        taxRate: item.taxRate
-                    };
-                    return {
-                        id: index,
-                        productoId: item.productoId,
-                        producto: producto.name,
-                        cantidad: item.cantidad,
-                        precio: parseFloat(item.precio),
-                        taxRate: parseFloat(item.taxRate),
-                        porcentajeDescuento: parseFloat(item.porcentajeDescuento || 0),
-                        iva: (item.cantidad * item.precio * (item.taxRate / 100)),
-                        subtotal: item.cantidad * item.precio,
-                        total: (item.cantidad * item.precio * (1 - (item.porcentajeDescuento || 0) / 100)) + (item.cantidad * item.precio * (item.taxRate / 100))
-                    };
-                });
+                facturaItems = [];
+                if (factura.items && Array.isArray(factura.items)) {
+                    facturaItems = factura.items.map((item, index) => {
+                        console.log('Mapeando ítem:', item);
+                        return {
+                            id: item.id || index,
+                            productoId: item.producto?.id || item.productoId,
+                            producto: item.producto?.name || item.producto || 'Desconocido',
+                            cantidad: parseFloat(item.cantidad) || 1,
+                            precio: parseFloat(item.precio) || 0,
+                            taxRate: parseFloat(item.taxRate || item.producto?.taxRate) || 0,
+                            porcentajeDescuento: parseFloat(item.porcentajeDescuento) || 0,
+                            subtotal: parseFloat(item.subtotal) || 0,
+                            iva: parseFloat(item.iva) || 0,
+                            total: parseFloat(item.total) || 0
+                        };
+                    });
+                } else {
+                    console.warn('No se encontraron ítems en la factura:', factura);
+                }
                 itemCount = facturaItems.length;
+                console.log('facturaItems después de mapeo:', facturaItems);
 
                 renderFacturaItems();
-                updateFacturaTotals();
+
+                $('#factura-subtotal').text(formatCurrency(factura.subtotal || 0));
+                $('#factura-iva-total').text(formatCurrency(factura.totalIva || 0));
+                $('#factura-descuento-total').text(formatCurrency(factura.totalDescuento || 0));
+                $('#factura-total').text(formatCurrency(factura.total || 0));
+
                 $('#facturaModal').modal('show');
             },
             error: function (xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'No se pudo cargar la factura: ' + (xhr.responseJSON?.message || 'Desconocido')
+                    text: 'No se pudo cargar la factura: ' + (xhr.responseJSON?.error || 'Error desconocido'),
+                    confirmButtonColor: '#3085d6'
                 });
             }
         });
@@ -1492,5 +1530,4 @@ $('#agregar-item').click(function () {
     loadProductosSeleccion(currentPage);
     $('#seleccionarProductoModal').modal('show');
 });
-
 
