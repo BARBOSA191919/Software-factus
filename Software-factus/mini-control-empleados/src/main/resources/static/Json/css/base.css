@@ -1029,4 +1029,76 @@
         color: #d1d5db !important;
     }
 
+    .pace .pace-progress {
+        background: #007bff; /* Your specified blue */
+        height: 5px; /* Your specified height */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        border-radius: 0 2px 2px 0; /* Slight rounding on the right */
+    }
+
+    /* Custom Scrollbar for WebKit Browsers (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+        width: 8px; /* Width of the vertical scrollbar */
+        height: 8px; /* Height of the horizontal scrollbar */
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1; /* Light background for the track */
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #007bff; /* Blue color for the scrollbar thumb */
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #0056b3; /* Darker blue on hover */
+    }
+
+    /* Custom Scrollbar for Specific Containers (e.g., Sidebar) */
+    .overflow-scroll::-webkit-scrollbar {
+        width: 6px; /* Thinner scrollbar for sidebar */
+    }
+
+    .overflow-scroll::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1); /* Semi-transparent track to match glassmorphism */
+    }
+
+    .overflow-scroll::-webkit-scrollbar-thumb {
+        background: #007bff; /* Blue thumb for sidebar */
+        border-radius: 10px;
+    }
+
+    .overflow-scroll::-webkit-scrollbar-thumb:hover {
+        background: #0056b3; /* Darker blue on hover */
+    }
+
+    /* Firefox Scrollbar Styling */
+    * {
+        scrollbar-color: #007bff #f1f1f1; /* Thumb color blue, track light gray */
+        scrollbar-width: thin; /* Thin scrollbar for Firefox */
+    }
+
+    /* Optional: Apply to Table Containers */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px; /* Horizontal scrollbar for tables */
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #007bff;
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #0056b3;
+    }
+
 

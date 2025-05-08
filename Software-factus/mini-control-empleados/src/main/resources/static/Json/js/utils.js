@@ -478,3 +478,4 @@ document.addEventListener('DOMContentLoaded', function () {
     loadTopProducts();
     loadRecentFacturas();
 });
+
