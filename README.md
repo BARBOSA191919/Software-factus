@@ -24,19 +24,33 @@
 Software-factus/
 └── mini-control-empleados/
     ├── controlador/       
+
   	→ Controladores Spring MVC
-    ├── entidades/           
+
+    ├── entidades/          
+ 
 	→ Clases de modelo (Cliente, Factura, Producto, etc.)
+
     ├── repositorios/       
+
 	 → Interfaces de acceso a datos con Spring Data JPA
-    ├── servicio/          
+
+    ├── servicio/    
+      
  	 → Lógica de negocio y conexión con Factus API
-    ├── config/            
+
+    ├── config/    
+        
  	 → Configuración de la app, seguridad y conexión
-    ├── static/             
+
+    ├── static/   
+          
 	 → Archivos estáticos (CSS, JS, JSON)
-    ├── templates/           
+
+    ├── templates/     
+      
 	→ Vistas Thymeleaf
+
     └── application.properties
 
 
@@ -72,18 +86,23 @@ Software-factus/
  - cd Software-factus/Software-factus/mini-control-empleados
 
 
+
 2. Configura el archivo application.properties con tus credenciales de Factus y la base de datos:
 
  - Puedes usar H2 o tu propia instancia de MySQL/PostgreSQL.
+
 
 
 3. Compila y ejecuta la aplicación
 
  - ./mvnw spring-boot:run
 
+
+
 4. Accede a la aplicación
 
  - http://localhost:8080/login
+
 
 
 📸 Visualización:
