@@ -32,9 +32,7 @@ public class FactusApiClient {
         this.factusConfig = factusConfig;
     }
 
-    // Define el logger
     private static final Logger logger = LoggerFactory.getLogger(FactusApiClient.class);
-
     @Autowired
     private FacturaRepository facturaRepository;
 
@@ -89,7 +87,6 @@ public class FactusApiClient {
             throw new RuntimeException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
     }
-
 
     @Transactional
     public String crearFacturaEnFactus(Factura factura) {

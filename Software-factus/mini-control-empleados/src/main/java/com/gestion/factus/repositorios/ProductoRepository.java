@@ -11,7 +11,6 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     // Contar todos los productos
     long count();
 
-
     // Obtener los productos más vendidos con su conteo de ventas (máximo 10)
     @Query("SELECT p, COALESCE(SUM(i.cantidad), 0) as salesCount " +
             "FROM Producto p " +

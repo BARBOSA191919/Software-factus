@@ -58,3 +58,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable(); // Considera habilitar CSRF en producción
     }
 }
+
