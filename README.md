@@ -21,9 +21,11 @@
 
 📁 Estructura del Proyecto: 
 
-Software-factus/
+    Software-factus/
 
-└── mini-control-empleados/
+
+    └── mini-control-empleados/
+
 
     ├── controlador/       
 
