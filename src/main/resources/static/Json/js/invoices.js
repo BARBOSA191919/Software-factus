@@ -1281,6 +1281,15 @@ $(document).ready(function () {
                 Swal.close(); // Cerrar el mensaje de carga
                 $('#facturaModal').modal('hide');
                 loadFacturas();
+
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { x: 0.5, y: 0.5 },
+                    colors: ['#ff0000', '#00ff00', '#0000ff'],
+                    zIndex: 9999
+                });
+
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
