@@ -36,8 +36,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.headers().frameOptions().sameOrigin();
         http
+                .headers().frameOptions().sameOrigin()
+                .and()
+                .requiresChannel() // 👈 Esto fuerza HTTPS
+                .anyRequest().requiresSecure()
+                .and()
                 .authorizeRequests()
                 .antMatchers("/", "/login", "/css/**", "/js/**", "/oauth2/success").permitAll()
                 .antMatchers("/api/productos/**", "/api/clientes/**", "/facturas/**", "/api/facturas/**", "/id/*").authenticated()
@@ -50,12 +54,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .oauth2Login()
                 .loginPage("/login")
-                .defaultSuccessUrl("/oauth2/success", true) // Redirige a /oauth2/success
+                .defaultSuccessUrl("/oauth2/success", true)
                 .and()
                 .logout()
                 .logoutSuccessUrl("/login?logout")
-                .permitAll()
-                .and()
-                .csrf().disable(); // Considera habilitar CSRF en producción
+                .permitAll();
     }
+
+
 }
