@@ -19,7 +19,7 @@ $(document).ready(function () {
     // Load municipalities
     async function loadMunicipios(searchTerm = '') {
         try {
-            const response = await fetch('/json/municipios.json');
+            const response = await fetch('/Json/municipios.json');
             if (!response.ok) throw new Error('Error al cargar municipios');
             const data = await response.json();
             municipiosData = data.data;

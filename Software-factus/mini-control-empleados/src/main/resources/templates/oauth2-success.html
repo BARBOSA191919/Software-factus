@@ -5,16 +5,20 @@
 </head>
 <body>
 <script>
+    console.log("✅ oauth2-success cargado");
+
     if (window.opener) {
+        console.log("🔁 Redirigiendo desde popup al dashboard...");
         window.opener.postMessage({
             googleAuthSuccess: true,
-            redirectUrl: '/api/facturas/crear'
+            redirectUrl: '/dashboard'
         }, window.location.origin);
-
         window.close();
     } else {
-        window.location.href = '/api/facturas/crear';
+        console.log("➡️ Redirigiendo directamente al dashboard...");
+        window.location.href = '/dashboard';
     }
 </script>
+
 </body>
 </html>

@@ -99,25 +99,43 @@ public class FacturaController {
     public String mostrarFormularioCreacion(Model model, @AuthenticationPrincipal OAuth2User oAuth2User, Authentication authentication) {
         model.addAttribute("factura", new Factura());
 
+        System.out.println("======= Entrando a /crear =======");
+
         if (oAuth2User != null) {
-            // Caso de OAuth2 (Google)
             String userName = oAuth2User.getAttribute("name");
             String userPicture = oAuth2User.getAttribute("picture");
+            String userEmail = oAuth2User.getAttribute("email");
+
+            // LOGS para verificar qué datos llegan
+            System.out.println("OAuth2 Login detectado");
+            System.out.println("Nombre: " + userName);
+            System.out.println("Foto: " + userPicture);
+            System.out.println("Correo: " + userEmail);
+
             model.addAttribute("userName", userName != null ? userName : "Usuario");
             model.addAttribute("userPicture", userPicture != null ? userPicture : "");
+            model.addAttribute("userEmail", userEmail != null ? userEmail : "");
         } else if (authentication != null) {
-            // Caso de formLogin
-            String userName = authentication.getName(); // Obtiene el nombre de usuario (por ejemplo, "admin")
-            model.addAttribute("userName", userName != null ? userName : "Usuario");
-            model.addAttribute("userPicture", ""); // No hay foto para formLogin
+            System.out.println("Login por formulario detectado");
+
+            String userName = authentication.getName();
+            System.out.println("Usuario: " + userName);
+
+            model.addAttribute("userName", userName);
+            model.addAttribute("userPicture", "");
+            model.addAttribute("userEmail", userName + "@miapp.com");
         } else {
-            // Caso por defecto
+            System.out.println("Usuario anónimo o no autenticado");
+
             model.addAttribute("userName", "Usuario");
             model.addAttribute("userPicture", "");
+            model.addAttribute("userEmail", "");
         }
 
         return "/Facturas/Dashboard";
     }
+
+
 
     @PostMapping(value = "/crear", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

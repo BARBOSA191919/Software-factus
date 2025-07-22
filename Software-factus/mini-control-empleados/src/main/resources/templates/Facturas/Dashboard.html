@@ -54,18 +54,19 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between px-8 py-6">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 overflow-hidden">
                             <img th:if="${userPicture != null && !userPicture.isEmpty()}" th:src="${userPicture}"
                                  alt="Foto de perfil" class="w-full h-full rounded-full object-cover"/>
                             <img th:unless="${userPicture != null && !userPicture.isEmpty()}"
-                                 src="https://cdn-icons-png.flaticon.com/128/4526/4526169.png" alt="Avatar default"
-                                 class="w-6 h-6 rounded-full inline"/>
-
+                                 src="https://cdn-icons-png.flaticon.com/128/4526/4526169.png"
+                                 alt="Avatar default" class="w-6 h-6 rounded-full inline"/>
                         </div>
                         <div id="GlassmorphismPname" class="text-sm font-medium text-gray-900 dark:text-dark">
-                            <span class="block text-shadow-md  text-gray-600  dark:text-dark-600">Bienvenido</span>
-                            <p th:text=" ${userName != null} ? ${userName} : 'Usuario'">Usuario</p>
+                            <span class="block text-shadow-md text-gray-600 dark:text-dark-600">Bienvenido</span>
+                            <p th:text="${userName}">Admin</p>
+                            <p class="text-[8px] text-gray-500 dark:text-gray-400" th:text="${userEmail}">UserFactus@gmail.com</p>
                         </div>
+
                     </div>
                 </div>
 

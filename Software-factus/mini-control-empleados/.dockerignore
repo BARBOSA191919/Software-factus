@@ -1,0 +1,12 @@
+# Ignorar archivos innecesarios para el build
+target/
+.idea/
+*.iml
+*.log
+*.md
+.env
+.git
+.gitignore
+docker-compose.yml
+README.md
+node_modules/

@@ -12,6 +12,7 @@
 
     html, body {
         transition: all 0.5s ease;
+        overflow-x: hidden;
     }
 
     /* Scrollbar Hide Utility */
@@ -53,7 +54,7 @@
     .content {
         margin-left: 250px;
         padding: 30px;
-        min-height: 100vh;
+        min-height: 98vh;
         position: relative;
         transition: margin-left 0.3s ease, background-color 0.5s ease;
     }

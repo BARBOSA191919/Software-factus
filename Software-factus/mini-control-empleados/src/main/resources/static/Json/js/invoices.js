@@ -1220,7 +1220,6 @@ $(document).ready(function () {
             total: parseFloat($('#factura-total').text().replace('$', '')) || 0,
             municipio: parseInt($('#factura-municipio-id').val()) || null,
             fechaVencimiento: $('#factura-due-date').val() || "2025-05-01",
-            // Changed from tributes to tributos to match the entity field name
             tributos: totalIva > 0 ? [{ tributeId: "01", rate: 19.0, amount: totalIva }] : [],
             items: facturaItems.map(item => ({
                 producto: {
@@ -1258,7 +1257,6 @@ $(document).ready(function () {
         const url = id ? `/api/facturas/editar/${referenceCode}` : '/api/facturas/crear';
         const method = id ? 'PUT' : 'POST';
 
-        // Mostrar mensaje de "Se está creando la factura"
         Swal.fire({
             title: id ? 'Actualizando factura' : 'Creando factura',
             text: 'Espere por favor...',
@@ -1278,7 +1276,7 @@ $(document).ready(function () {
                 'Content-Type': 'application/json'
             },
             success: function (response) {
-                Swal.close(); // Cerrar el mensaje de carga
+                Swal.close();
                 $('#facturaModal').modal('hide');
                 loadFacturas();
                 Swal.fire({
@@ -1291,9 +1289,20 @@ $(document).ready(function () {
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
+
+
+                if (!id) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { x: 0.5, y: 0.5 }, // Centro de la página
+                        colors: ['#ff0', '#f00', '#0f0', '#00f'], // Colores vivos
+                        disableForReducedMotion: true
+                    });
+                }
             },
             error: function (xhr) {
-                Swal.close(); // Cerrar el mensaje de carga en caso de error
+                Swal.close();
                 console.error('Error response:', xhr.responseJSON);
                 let errorMessage = xhr.responseJSON?.error || xhr.statusText;
                 if (xhr.status === 409) {

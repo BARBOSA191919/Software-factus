@@ -10,4 +10,5 @@ public class OAuth2Controller {
     public String oauth2Success() {
         return "oauth2-success"; // Devuelve la plantilla oauth2-success.html
     }
+
 }
