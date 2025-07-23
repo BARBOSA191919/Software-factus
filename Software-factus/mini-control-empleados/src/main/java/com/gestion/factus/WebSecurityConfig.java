@@ -35,11 +35,6 @@ public class WebSecurityConfig {
         http
                 .headers().frameOptions().sameOrigin()
                 .and()
-                // Comenta o elimina requiresChannel si Railway maneja HTTPS
-                //.requiresChannel()
-                //.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                //.requiresSecure()
-                //.and()
                 .authorizeRequests()
                 .antMatchers("/", "/login", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                 .antMatchers("/oauth2/**").permitAll()
@@ -53,12 +48,15 @@ public class WebSecurityConfig {
                 .oauth2Login()
                 .loginPage("/login")
                 .defaultSuccessUrl("/dashboard", true)
+                .redirectionEndpoint()
+                .baseUri("/login/oauth2/code/*") // Asegura la ruta base
+                .and()
                 .and()
                 .logout()
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
                 .and()
-                .csrf().disable(); // Habilítalo en producción con token adecuado
+                .csrf().disable(); // Habilítalo en producción
 
         return http.build();
     }
