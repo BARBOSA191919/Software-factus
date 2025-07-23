@@ -135,7 +135,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>com.gestion.empleados.MiniControlEmpleadosApplication</mainClass>
+									<mainClass>com.gestion.factus</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
