@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${producto.name}</td>
                     <td>$${parseFloat(producto.price).toFixed(2)}</td>
                     <td>${producto.salesCount || 0}</td>
-                    <td><span class="badge bg-${producto.excluded ? 'success' : 'danger'}">${producto.excluded ? 'Activo' : 'Inactivo'}</span></td>
+                    <td><span class="badge bg-${producto.excluded ? 'success' : 'success'}">${producto.excluded ? 'Activo' : 'Activo'}</span></td>
                 </tr>
             `);
         });
