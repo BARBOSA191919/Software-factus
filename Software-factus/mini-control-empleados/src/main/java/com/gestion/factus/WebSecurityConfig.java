@@ -47,7 +47,7 @@ public class WebSecurityConfig {
                 .and()
                 .oauth2Login()
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
+                .defaultSuccessUrl("/oauth2/success", true)
                 .redirectionEndpoint()
                 .baseUri("/login/oauth2/code/*") // Asegura la ruta base
                 .and()
