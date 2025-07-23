@@ -49,7 +49,7 @@ public class WebSecurityConfig {
                 .and()
                 .oauth2Login()
                 .loginPage("/login")
-                .defaultSuccessUrl("/oauth2/success", true)
+                .defaultSuccessUrl("/dashboard", true)
                 .and()
                 .logout()
                 .logoutSuccessUrl("/login?logout")
