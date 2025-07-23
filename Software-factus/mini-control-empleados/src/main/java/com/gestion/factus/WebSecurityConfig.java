@@ -9,7 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class WebSecurityConfig {
@@ -20,10 +19,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         return new InMemoryUserDetailsManager(
                 User.withUsername("admin")
-                        .password(passwordEncoder.encode("admin"))
+                        .password(encoder.encode("admin"))
                         .roles("ADMIN")
                         .build()
         );
@@ -33,7 +32,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .headers(headers -> headers.frameOptions().sameOrigin())
-                .requiresChannel(channel -> channel.anyRequest().requiresSecure()) // Fuerza HTTPS
+                .requiresChannel(channel -> channel.anyRequest().requiresSecure()) // fuerza HTTPS si disponible
                 .authorizeHttpRequests(auth -> auth
                         .antMatchers("/", "/login", "/oauth2/**", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
@@ -43,18 +42,15 @@ public class WebSecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-                .oauth2Login(oauth2 -> oauth2
+                .oauth2Login(oauth -> oauth
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .defaultSuccessUrl("/oauth2/success", true)
                 )
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.disable()); // Desactiva CSRF si estás usando APIs
+                .csrf().disable();
 
         return http.build();
     }
