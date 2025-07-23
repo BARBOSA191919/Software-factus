@@ -35,10 +35,11 @@ public class WebSecurityConfig {
         http
                 .headers().frameOptions().sameOrigin()
                 .and()
-                .requiresChannel()
-                .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                .requiresSecure()
-                .and()
+                // Comenta o elimina requiresChannel si Railway maneja HTTPS
+                //.requiresChannel()
+                //.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                //.requiresSecure()
+                //.and()
                 .authorizeRequests()
                 .antMatchers("/", "/login", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                 .antMatchers("/oauth2/**").permitAll()
@@ -46,8 +47,6 @@ public class WebSecurityConfig {
                 .and()
                 .formLogin()
                 .loginPage("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
                 .defaultSuccessUrl("/dashboard", true)
                 .permitAll()
                 .and()
@@ -59,7 +58,7 @@ public class WebSecurityConfig {
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
                 .and()
-                .csrf().disable();
+                .csrf().disable(); // Habilítalo en producción con token adecuado
 
         return http.build();
     }
