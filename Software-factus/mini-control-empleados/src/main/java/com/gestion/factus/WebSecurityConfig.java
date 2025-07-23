@@ -35,15 +35,19 @@ public class WebSecurityConfig {
         http
                 .headers().frameOptions().sameOrigin()
                 .and()
-                .requiresChannel().anyRequest().requiresSecure()
+                .requiresChannel()
+                .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                .requiresSecure()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/login", "/oauth2/**", "/oauth2/success", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
-                .antMatchers("/api/**", "/facturas/**", "/id/**").authenticated()
+                .antMatchers("/", "/login", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                .antMatchers("/oauth2/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
                 .defaultSuccessUrl("/dashboard", true)
                 .permitAll()
                 .and()
@@ -59,5 +63,4 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-
 }
