@@ -3,6 +3,7 @@ package com.gestion.factus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +12,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
 
     @Bean
@@ -29,27 +31,30 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .headers(headers -> headers.frameOptions().sameOrigin())
-                .requiresChannel(channel -> channel.anyRequest().requiresSecure()) // fuerza HTTPS si disponible
-                .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/", "/login", "/oauth2/**", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
-                        .permitAll()
-                )
-                .oauth2Login(oauth -> oauth
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/oauth2/success", true)
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
-                )
+                .headers().frameOptions().sameOrigin()
+                .and()
+                .requiresChannel().anyRequest().requiresSecure()
+                .and()
+                .authorizeRequests()
+                .antMatchers("/", "/login", "/oauth2/**", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                .antMatchers("/api/**", "/facturas/**", "/id/**").authenticated()
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
+                .and()
+                .oauth2Login()
+                .loginPage("/login")
+                .defaultSuccessUrl("/oauth2/success", true)
+                .and()
+                .logout()
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+                .and()
                 .csrf().disable();
 
         return http.build();
