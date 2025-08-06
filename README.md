@@ -1,4 +1,4 @@
-🧾 Software de Facturación Electrónica - Software Factus: 
+🧾 Software de Facturación Electrónica - Software Factus : 
 
  - Sistema de facturación electrónica desarrollado en Java con Spring Boot, diseñado para gestionar clientes, productos y generar facturas válidas ante la DIAN a través de la API de Factus.
 
