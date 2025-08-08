@@ -197,7 +197,8 @@ $(document).ready(function () {
             unitMeasureId: $('#producto-medida').val(),
         };
 
-        if (!producto.name || producto.price <= 0 || !producto.taxRate) {
+        // Validar campos obligatorios
+        if (!producto.name || producto.price <= 0 || isNaN(producto.taxRate)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -206,6 +207,17 @@ $(document).ready(function () {
             return;
         }
 
+        // Validar rango del IVA
+        if (producto.taxRate < 1 || producto.taxRate > 50) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La tasa de IVA debe estar entre 1% y 50%.'
+            });
+            return;
+        }
+
+        // Si existe ID, actualiza; si no, crea
         if (id) {
             $.ajax({
                 url: `/api/productos/${id}`,
@@ -264,6 +276,7 @@ $(document).ready(function () {
             });
         }
     });
+
 
     // Edit product
     function editProducto(id) {

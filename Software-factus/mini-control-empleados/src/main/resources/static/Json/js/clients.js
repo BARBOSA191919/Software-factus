@@ -299,8 +299,41 @@ $(document).ready(function () {
         const id = $('#cliente-id').val();
         const tipoCliente = $('#cliente-tipo').val();
         const tipoIdentificacion = $('#cliente-tipo-identificacion').val();
-        const identificacion = $('#cliente-identificacion').val();
+        const identificacion = $('#cliente-identificacion').val().trim();
+        const telefono = $('#cliente-telefono').val().trim();
+        const correo = $('#cliente-correo').val().trim();
 
+        // 📌 Validaciones básicas
+        const regexIdentificacion = /^[0-9]{5,15}$/; // Solo números, 5 a 15 dígitos
+        const regexTelefono = /^[0-9]{7,15}$/; // Solo números, 7 a 15 dígitos
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato básico email
+
+        if (!$('#cliente-nombre').val().trim()) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'El nombre es obligatorio.' });
+            return;
+        }
+
+        if (!regexIdentificacion.test(identificacion)) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'La identificación debe contener solo números y tener entre 5 y 15 dígitos.' });
+            return;
+        }
+
+        if (!regexTelefono.test(telefono)) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'El teléfono debe contener solo números y tener entre 7 y 15 dígitos.' });
+            return;
+        }
+
+        if (!regexCorreo.test(correo)) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'El correo electrónico no es válido.' });
+            return;
+        }
+
+        if (!$('#cliente-municipio-id').val()) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Debe seleccionar un municipio válido.' });
+            return;
+        }
+
+        // Generar IDs como antes
         let legalOrganizationId;
         if (tipoCliente === 'Persona Jurídica') {
             const companyName = $('#cliente-company').val() || $('#cliente-nombre').val();
@@ -312,15 +345,15 @@ $(document).ready(function () {
         }
 
         const tributePrefix = tipoIdentificacion === 'NIT' ? 'TRIB-NIT' : 'TRIB-CC';
-        const tributeId = `${tributePrefix}-${identificacion.replace(/[^0-9]/g, '').substring(0, 6)}-${Math.floor(Math.random() * 1000)}`;
+        const tributeId = `${tributePrefix}-${identificacion.substring(0, 6)}-${Math.floor(Math.random() * 1000)}`;
 
         const cliente = {
-            nombre: $('#cliente-nombre').val(),
-            tipoCliente: tipoCliente,
-            tipoIdentificacion: tipoIdentificacion,
-            identificacion: identificacion,
-            telefono: $('#cliente-telefono').val(),
-            correo: $('#cliente-correo').val(),
+            nombre: $('#cliente-nombre').val().trim(),
+            tipoCliente,
+            tipoIdentificacion,
+            identificacion,
+            telefono,
+            correo,
             municipio: $('#cliente-municipio').val(),
             municipioId: parseInt($('#cliente-municipio-id').val()) || null,
             direccion: $('#cliente-direccion').val(),
@@ -336,15 +369,7 @@ $(document).ready(function () {
             cliente.idOrg = $('#cliente-idOrg').val();
         }
 
-        if (!cliente.nombre || !cliente.identificacion || !cliente.tipoCliente || !cliente.municipioId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'El nombre, identificación, tipo de cliente y municipio son obligatorios.'
-            });
-            return;
-        }
-
+        // 📌 Guardar con AJAX como antes
         if (id) {
             $.ajax({
                 url: `/api/clientes/${id}`,
@@ -355,22 +380,13 @@ $(document).ready(function () {
                     $('#clienteModal').modal('hide');
                     loadClientes();
                     Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Cliente actualizado correctamente',
-                        timer: 2000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
+                        toast: true, position: 'top-end', icon: 'success',
+                        title: 'Éxito', text: 'Cliente actualizado correctamente',
+                        timer: 2000, showConfirmButton: false
                     });
                 },
                 error: function (xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al actualizar cliente: ' + (xhr.responseJSON?.message || 'Desconocido')
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error al actualizar cliente: ' + (xhr.responseJSON?.message || 'Desconocido') });
                 }
             });
         } else {
@@ -383,26 +399,18 @@ $(document).ready(function () {
                     $('#clienteModal').modal('hide');
                     loadClientes();
                     Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Cliente creado correctamente',
-                        timer: 2000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
+                        toast: true, position: 'top-end', icon: 'success',
+                        title: 'Éxito', text: 'Cliente creado correctamente',
+                        timer: 2000, showConfirmButton: false
                     });
                 },
                 error: function (xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al crear cliente: ' + (xhr.responseJSON?.message || 'Desconocido')
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error al crear cliente: ' + (xhr.responseJSON?.message || 'Desconocido') });
                 }
             });
         }
     });
+
 
     // Edit client
     function editCliente(id) {
