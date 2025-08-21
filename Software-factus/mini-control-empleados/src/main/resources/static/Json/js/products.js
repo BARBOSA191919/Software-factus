@@ -208,11 +208,11 @@ $(document).ready(function () {
         }
 
         // Validar rango del IVA
-        if (producto.taxRate < 1 || producto.taxRate > 50) {
+        if (producto.taxRate < 0 || producto.taxRate > 50) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'La tasa de IVA debe estar entre 1% y 50%.'
+                text: 'La tasa de IVA debe estar entre 0% y 50%.'
             });
             return;
         }
